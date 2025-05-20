@@ -1,220 +1,293 @@
-import React, { useState } from 'react';
-import { Upload, File, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
-
-const RecruitmentAnalysisTool = () => {
-  const [files, setFiles] = useState([]);
-  const [isUploading, setIsUploading] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [status, setStatus] = useState('');
-  const [error, setError] = useState('');
-
-  const allowedFileTypes = ['application/pdf', 'image/jpeg', 'image/png'];
-  const fileTypeNames = {
-    'application/pdf': 'PDF',
-    'image/jpeg': 'JPEG',
-    'image/png': 'PNG'
-  };
-
-  const handleFileChange = (e) => {
-    const selectedFiles = Array.from(e.target.files);
-    
-    // Check if files are of allowed types
-    const validFiles = selectedFiles.filter(file => 
-      allowedFileTypes.includes(file.type)
-    );
-
-    // Show error if some files were invalid
-    if (validFiles.length < selectedFiles.length) {
-      setError('Some files were not added. Only PDF, JPG and PNG formats are supported.');
-      setTimeout(() => setError(''), 5000);
-    }
-
-    setFiles(prevFiles => [...prevFiles, ...validFiles]);
-  };
-
-  const removeFile = (index) => {
-    setFiles(prevFiles => prevFiles.filter((_, i) => i !== index));
-  };
-
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const droppedFiles = Array.from(e.dataTransfer.files);
-      const validFiles = droppedFiles.filter(file => 
-        allowedFileTypes.includes(file.type)
-      );
-
-      if (validFiles.length < droppedFiles.length) {
-        setError('Some files were not added. Only PDF, JPG and PNG formats are supported.');
-        setTimeout(() => setError(''), 5000);
-      }
-
-      setFiles(prevFiles => [...prevFiles, ...validFiles]);
-    }
-  };
-
-  const handleStartWorkflow = async () => {
-    if (files.length === 0) {
-      setError('Please upload at least one file before starting analysis.');
-      setTimeout(() => setError(''), 5000);
-      return;
-    }
-
-    setIsProcessing(true);
-    setStatus('Processing files...');
-
-    try {
-      // In a real application, you would send the files to your n8n backend here
-      // Example implementation:
-      
-      /*
-      const formData = new FormData();
-      files.forEach(file => {
-        formData.append('files', file);
-      });
-
-      const response = await fetch('https://montpro.app.n8n.cloud/webhook-test/recruitment-analysis', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to process files');
-      }
-
-      const data = await response.json();
-      */
-
-      // Simulate a network request
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      setStatus('Analysis complete!');
-      setTimeout(() => {
-        setIsProcessing(false);
-        setStatus('');
-        // Optionally clear files after successful processing
-        // setFiles([]);
-      }, 3000);
-      
-    } catch (err) {
-      setError('An error occurred during analysis: ' + err.message);
-      setIsProcessing(false);
-    }
-  };
-
-  return (
-    <div className="flex flex-col items-center w-full max-w-4xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-2">Recruitment Analysis Tool</h1>
-      <p className="text-gray-600 mb-6">Upload candidate documents for automated analysis</p>
-      
-      {/* File upload area */}
-      <div 
-        className={`w-full border-2 border-dashed rounded-lg p-8 mb-6 text-center cursor-pointer
-          ${isUploading ? 'bg-gray-100 border-gray-400' : 'bg-gray-50 border-gray-300 hover:bg-gray-100 hover:border-blue-500'}
-        `}
-        onDragOver={handleDragOver}
-        onDrop={handleDrop}
-        onClick={() => !isProcessing && document.getElementById('file-input').click()}
-      >
-        <input
-          type="file"
-          id="file-input"
-          multiple
-          accept=".pdf,.jpg,.jpeg,.png"
-          onChange={handleFileChange}
-          className="hidden"
-          disabled={isProcessing}
-        />
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recruitment Analysis Tool</title>
+    <!-- Tailwind CSS from CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .drag-area {
+            border: 2px dashed #cbd5e1;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .drag-area.active {
+            border-color: #3b82f6;
+            background-color: #f0f9ff;
+        }
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid white;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="max-w-4xl mx-auto p-6">
+        <h1 class="text-2xl font-bold mb-2 text-center">Recruitment Analysis Tool</h1>
+        <p class="text-gray-600 mb-6 text-center">Upload candidate documents for automated analysis</p>
         
-        <Upload className="mx-auto h-12 w-12 text-blue-500 mb-4" />
+        <!-- File Upload Area -->
+        <div id="drag-area" class="drag-area bg-gray-50 hover:bg-gray-100 mb-6">
+            <input type="file" id="file-input" multiple accept=".pdf,.jpg,.jpeg,.png" class="hidden">
+            <i class="fas fa-cloud-upload-alt text-blue-500 text-4xl mb-4"></i>
+            <h3 class="text-lg font-medium mb-1">Drag & drop files or click to browse</h3>
+            <p class="text-sm text-gray-500">Supported formats: PDF, JPG, PNG</p>
+        </div>
         
-        <h3 className="text-lg font-medium mb-1">
-          {isUploading ? 'Uploading...' : 'Drag & drop files or click to browse'}
-        </h3>
+        <!-- File List -->
+        <div id="file-list-container" class="mb-6 hidden">
+            <h3 class="font-medium mb-3">Uploaded Documents (<span id="file-count">0</span>)</h3>
+            <div id="file-list" class="space-y-2"></div>
+        </div>
         
-        <p className="text-sm text-gray-500">
-          Supported formats: PDF, JPG, PNG
+        <!-- Error Message -->
+        <div id="error-message" class="p-3 mb-4 bg-red-50 border border-red-200 rounded-lg flex items-center hidden">
+            <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>
+            <p id="error-text" class="text-red-700 text-sm"></p>
+        </div>
+        
+        <!-- Status Message -->
+        <div id="status-message" class="p-3 mb-4 bg-blue-50 border border-blue-200 rounded-lg flex items-center hidden">
+            <div id="status-icon" class="mr-2">
+                <div class="spinner-blue w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+            <p id="status-text" class="text-blue-700 text-sm"></p>
+        </div>
+        
+        <!-- Start Analysis Button -->
+        <button id="start-button" class="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-medium rounded-lg transition-colors" disabled>
+            Start Analysis
+        </button>
+        
+        <p class="text-xs text-gray-500 mt-4 text-center">
+            This tool will analyze your candidate documents and extract relevant information for recruitment purposes.
         </p>
-      </div>
-      
-      {/* File list */}
-      {files.length > 0 && (
-        <div className="w-full mb-6">
-          <h3 className="font-medium mb-3">Uploaded Documents ({files.length})</h3>
-          
-          <div className="space-y-2">
-            {files.map((file, index) => (
-              <div key={index} className="flex items-center justify-between p-3 bg-white border rounded-lg">
-                <div className="flex items-center">
-                  <File className="h-6 w-6 text-blue-500" />
-                  <div className="ml-3">
-                    <p className="font-medium text-sm truncate max-w-xs">{file.name}</p>
-                    <p className="text-xs text-gray-500">
-                      {fileTypeNames[file.type] || 'File'} · {(file.size / 1024).toFixed(0)} KB
-                    </p>
-                  </div>
-                </div>
-                
-                <button 
-                  onClick={() => removeFile(index)}
-                  disabled={isProcessing}
-                  className="text-gray-500 hover:text-red-500 disabled:opacity-50"
-                >
-                  <XCircle className="h-5 w-5" />
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-      
-      {/* Status messages */}
-      {error && (
-        <div className="w-full p-3 mb-4 bg-red-50 border border-red-200 rounded-lg flex items-center">
-          <AlertTriangle className="h-5 w-5 text-red-500 mr-2 flex-shrink-0" />
-          <p className="text-red-700 text-sm">{error}</p>
-        </div>
-      )}
-      
-      {status && (
-        <div className="w-full p-3 mb-4 bg-blue-50 border border-blue-200 rounded-lg flex items-center">
-          {status.includes('complete') ? (
-            <CheckCircle className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
-          ) : (
-            <div className="h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mr-2 flex-shrink-0"></div>
-          )}
-          <p className="text-blue-700 text-sm">{status}</p>
-        </div>
-      )}
-      
-      {/* Start analysis button */}
-      <button
-        onClick={handleStartWorkflow}
-        disabled={isProcessing || files.length === 0}
-        className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-medium rounded-lg transition-colors"
-      >
-        {isProcessing ? (
-          <span className="flex items-center justify-center">
-            <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-            Processing...
-          </span>
-        ) : (
-          'Start Analysis'
-        )}
-      </button>
-      
-      <p className="text-xs text-gray-500 mt-4">
-        This tool will analyze your candidate documents and extract relevant information for recruitment purposes.
-      </p>
     </div>
-  );
-};
 
-export default RecruitmentAnalysisTool;
+    <script>
+        // File handling
+        const fileInput = document.getElementById('file-input');
+        const dragArea = document.getElementById('drag-area');
+        const fileListContainer = document.getElementById('file-list-container');
+        const fileList = document.getElementById('file-list');
+        const fileCount = document.getElementById('file-count');
+        const startButton = document.getElementById('start-button');
+        const errorMessage = document.getElementById('error-message');
+        const errorText = document.getElementById('error-text');
+        const statusMessage = document.getElementById('status-message');
+        const statusText = document.getElementById('status-text');
+        const statusIcon = document.getElementById('status-icon');
+        
+        // File storage
+        let files = [];
+        const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png'];
+        const typeNames = {
+            'application/pdf': 'PDF',
+            'image/jpeg': 'JPEG',
+            'image/png': 'PNG'
+        };
+        
+        // Event listeners
+        dragArea.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', handleFileSelect);
+        
+        // Drag and Drop
+        dragArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dragArea.classList.add('active');
+        });
+        
+        dragArea.addEventListener('dragleave', () => {
+            dragArea.classList.remove('active');
+        });
+        
+        dragArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dragArea.classList.remove('active');
+            
+            if (e.dataTransfer.files.length) {
+                handleFiles(e.dataTransfer.files);
+            }
+        });
+        
+        // Start button
+        startButton.addEventListener('click', startAnalysis);
+        
+        // Functions
+        function handleFileSelect(e) {
+            handleFiles(e.target.files);
+        }
+        
+        function handleFiles(selectedFiles) {
+            const fileArray = Array.from(selectedFiles);
+            
+            // Filter valid files
+            const validFiles = fileArray.filter(file => allowedTypes.includes(file.type));
+            
+            // Show error if any invalid files
+            if (validFiles.length < fileArray.length) {
+                showError('Some files were not added. Only PDF, JPG and PNG formats are supported.');
+            }
+            
+            // Add valid files to our array
+            files = [...files, ...validFiles];
+            
+            // Update UI
+            updateFileList();
+        }
+        
+        function updateFileList() {
+            if (files.length > 0) {
+                fileListContainer.classList.remove('hidden');
+                fileCount.textContent = files.length;
+                startButton.disabled = false;
+                
+                // Clear list and re-render
+                fileList.innerHTML = '';
+                
+                files.forEach((file, index) => {
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'file-item';
+                    
+                    // File info
+                    const fileInfo = document.createElement('div');
+                    fileInfo.className = 'flex items-center';
+                    
+                    // Icon
+                    const icon = document.createElement('i');
+                    icon.className = 'fas fa-file text-blue-500 mr-3';
+                    fileInfo.appendChild(icon);
+                    
+                    // Name and details
+                    const details = document.createElement('div');
+                    details.innerHTML = `
+                        <p class="font-medium text-sm truncate max-w-xs">${file.name}</p>
+                        <p class="text-xs text-gray-500">
+                            ${typeNames[file.type] || 'File'} · ${Math.round(file.size / 1024)} KB
+                        </p>
+                    `;
+                    fileInfo.appendChild(details);
+                    
+                    // Remove button
+                    const removeBtn = document.createElement('button');
+                    removeBtn.innerHTML = '<i class="fas fa-times-circle text-gray-500 hover:text-red-500"></i>';
+                    removeBtn.addEventListener('click', () => removeFile(index));
+                    
+                    fileItem.appendChild(fileInfo);
+                    fileItem.appendChild(removeBtn);
+                    fileList.appendChild(fileItem);
+                });
+            } else {
+                fileListContainer.classList.add('hidden');
+                startButton.disabled = true;
+            }
+        }
+        
+        function removeFile(index) {
+            files = files.filter((_, i) => i !== index);
+            updateFileList();
+        }
+        
+        function showError(message) {
+            errorText.textContent = message;
+            errorMessage.classList.remove('hidden');
+            
+            setTimeout(() => {
+                errorMessage.classList.add('hidden');
+            }, 5000);
+        }
+        
+        function showStatus(message, isComplete = false) {
+            statusText.textContent = message;
+            
+            if (isComplete) {
+                statusIcon.innerHTML = '<i class="fas fa-check-circle text-green-500 text-lg"></i>';
+            } else {
+                statusIcon.innerHTML = '<div class="spinner"></div>';
+            }
+            
+            statusMessage.classList.remove('hidden');
+        }
+        
+        function hideStatus() {
+            statusMessage.classList.add('hidden');
+        }
+        
+        async function startAnalysis() {
+            if (files.length === 0) {
+                showError('Please upload at least one file before starting analysis.');
+                return;
+            }
+            
+            startButton.disabled = true;
+            showStatus('Processing files...');
+            
+            try {
+                // In a real application, send the files to your n8n backend
+                // For example:
+                
+                /
+                const formData = new FormData();
+                files.forEach(file => {
+                    formData.append('files', file);
+                });
+                
+                const response = await fetch('https://montpro.app.n8n.cloud/webhook-test/recruitment-analysis', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to process files');
+                }
+                
+                const data = await response.json();
+                /
+                
+                // Simulate a network request
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                showStatus('Analysis complete!', true);
+                
+                // Reset after completion (optional)
+                setTimeout(() => {
+                    hideStatus();
+                    startButton.disabled = false;
+                    // Uncomment if you want to clear files after processing
+                    // files = [];
+                    // updateFileList();
+                }, 3000);
+                
+            } catch (error) {
+                showError('An error occurred during analysis: ' + error.message);
+                startButton.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
