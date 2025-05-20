@@ -6,6 +6,7 @@
     <title>Recruitment Analysis Tool</title>
     <!-- Tailwind CSS from CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -52,7 +53,7 @@
     <div id="auth-box" class="max-w-sm mx-auto my-8 p-4 rounded bg-white shadow text-center">
         <h2 class="text-xl font-bold mb-2">Sign in to MontPro</h2>
         <input id="email" type="email" class="border p-2 mb-2 w-full" placeholder="Email address" required />
-        <button onclick="signIn()" class="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700" id="magic-btn">
+        <button id="magic-btn" class="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
             Send Magic Link
         </button>
         <div id="auth-msg" class="mt-2 text-sm"></div>
@@ -108,26 +109,12 @@
 
     <!-- JS: Supabase Auth and App Logic -->
     <script>
-    // 1. Supabase Auth Setup
-    const supabaseUrl = 'https://saiwhkhgnsgakvbohwym.supabase.co';        // <-- Replace with your Supabase Project URL
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhaXdoa2hnbnNnYWt2Ym9od3ltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc3MzIxMjIsImV4cCI6MjA2MzMwODEyMn0.4MUgz7sYll0MYV30mwbAAYkLDs2MtPpSykgvWE10KuU';   // <-- Replace with your anon key
+    // Initialize Supabase client FIRST!
+    const supabaseUrl = 'https://saiwhkhgnsgakvbohwym.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhaXdoa2hnbnNnYWt2Ym9od3ltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc3MzIxMjIsImV4cCI6MjA2MzMwODEyMn0.4MUgz7sYll0MYV30mwbAAYkLDs2MtPpSykgvWE10KuU';
     const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-    // Sign in handler
-    async function signIn() {
-        const email = document.getElementById('email').value;
-        if (!email) {
-            document.getElementById('auth-msg').textContent = "Please enter your email.";
-            return;
-        }
-        document.getElementById('auth-msg').textContent = "Sending magic link...";
-        let { error } = await supabase.auth.signInWithOtp({ email });
-        document.getElementById('auth-msg').textContent = error 
-            ? "Error: " + error.message 
-            : "Check your email for the sign-in link.";
-    }
-
-    // Show/hide app after authentication
+    // Show/hide main app
     function showMainApp() {
         document.getElementById('auth-box').style.display = 'none';
         document.getElementById('main-app').style.display = '';
@@ -137,26 +124,46 @@
         document.getElementById('main-app').style.display = 'none';
     }
 
-    // On page load, check if user is logged in
-    supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session) {
-            showMainApp();
-        } else {
-            showAuthBox();
+    // Handle sign in
+    async function signIn() {
+        const email = document.getElementById('email').value;
+        if (!email) {
+            document.getElementById('auth-msg').textContent = "Please enter your email.";
+            return;
         }
-    });
-
-    // Listen for auth state changes (for magic link sign-in)
-    supabase.auth.onAuthStateChange((event, session) => {
-        if (session) {
-            showMainApp();
+        document.getElementById('auth-msg').textContent = "Sending magic link...";
+        try {
+            let { error } = await supabase.auth.signInWithOtp({ email });
+            document.getElementById('auth-msg').textContent = error 
+                ? "Error: " + error.message 
+                : "Check your email for the sign-in link.";
+        } catch (e) {
+            document.getElementById('auth-msg').textContent = "JS Error: " + e.message;
+            console.error(e);
         }
-    });
-    </script>
+    }
 
-    <script>
-    // 2. File Handling and Analysis Logic (unchanged from your original code)
-    document.addEventListener('DOMContentLoaded', function() {
+    // Wire up button click once DOM is ready
+    document.addEventListener("DOMContentLoaded", function() {
+        document.getElementById("magic-btn").onclick = signIn;
+
+        // On page load, check if user is logged in
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (session) {
+                showMainApp();
+            } else {
+                showAuthBox();
+            }
+        });
+
+        // Listen for auth state changes (for magic link sign-in)
+        supabase.auth.onAuthStateChange((event, session) => {
+            if (session) {
+                showMainApp();
+            }
+        });
+
+        // ---- File Handling and Analysis Logic ----
         const fileInput = document.getElementById('file-input');
         const dragArea = document.getElementById('drag-area');
         const fileListContainer = document.getElementById('file-list-container');
