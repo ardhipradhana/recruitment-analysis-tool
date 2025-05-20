@@ -245,7 +245,7 @@
             try {
                 // In a real application, send the files to your backend.
                 // Uncomment and set your endpoint as needed.
-                *
+                
                 const formData = new FormData();
                 files.forEach(file => {
                     formData.append('files', file);
@@ -258,7 +258,7 @@
                     throw new Error('Failed to process files');
                 }
                 const data = await response.json();
-                *
+                
                 // Simulate a network request
                 await new Promise(resolve => setTimeout(resolve, 2000));
                 showStatus('Analysis complete!', true);
