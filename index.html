@@ -47,8 +47,11 @@
 </head>
 <body class="bg-gray-50">
     <div class="max-w-4xl mx-auto p-6">
-        <h1 class="text-2xl font-bold mb-2 text-center">Recruitment Analysis Tool</h1>
-        <p class="text-gray-600 mb-6 text-center">Upload candidate documents for automated analysis</p>
+        <div class="flex items-center mb-2">
+        <img src="MontPro logo with words.png" alt="MontPro Logo" class="h-12 w-auto mr-4" />
+        <h1 class="text-2xl font-bold text-center flex-1">Recruitment Analysis Tool</h1>
+    </div>
+    <p class="text-gray-600 mb-6 text-center">Upload candidate documents for automated analysis</p>
 
         <!-- Hidden File Input OUTSIDE the drag area -->
         <input type="file" id="file-input" multiple accept=".pdf,.jpg,.jpeg,.png" class="hidden">
@@ -266,7 +269,7 @@
 
                 // Simulate a network request (you can remove this in production)
                 await new Promise(resolve => setTimeout(resolve, 2000));
-                showStatus('Analysis complete!', true);
+                showStatus('Analysis started! Please wait a few minutes to complete', true);
                 setTimeout(() => {
                     hideStatus();
                     startButton.disabled = false;
