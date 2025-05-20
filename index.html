@@ -49,10 +49,12 @@
     <div class="max-w-4xl mx-auto p-6">
         <h1 class="text-2xl font-bold mb-2 text-center">Recruitment Analysis Tool</h1>
         <p class="text-gray-600 mb-6 text-center">Upload candidate documents for automated analysis</p>
-        
+
+        <!-- Hidden File Input OUTSIDE the drag area -->
+        <input type="file" id="file-input" multiple accept=".pdf,.jpg,.jpeg,.png" class="hidden">
+
         <!-- File Upload Area -->
         <div id="drag-area" class="drag-area bg-gray-50 hover:bg-gray-100 mb-6" tabindex="0">
-            <input type="file" id="file-input" multiple accept=".pdf,.jpg,.jpeg,.png" class="hidden">
             <i class="fas fa-cloud-upload-alt text-blue-500 text-4xl mb-4"></i>
             <h3 class="text-lg font-medium mb-1">Drag & drop files or click to browse</h3>
             <p class="text-sm text-gray-500">Supported formats: PDF, JPG, PNG</p>
@@ -112,18 +114,22 @@
         };
         
         document.addEventListener('DOMContentLoaded', function() {
-            dragArea.addEventListener('click', function() {
+            // Always trigger file input on dragArea click
+            dragArea.addEventListener('click', function(e) {
+                e.preventDefault();
+                fileInput.value = ''; // allow re-selecting same file
                 fileInput.click();
             });
 
-            // Accessibility: allow 'Enter' or 'Space' to open file input
+            // Accessibility: allow Enter or Space to open file input
             dragArea.addEventListener('keydown', function(e) {
                 if (e.key === 'Enter' || e.key === ' ') {
+                    fileInput.value = '';
                     fileInput.click();
                     e.preventDefault();
                 }
             });
-            
+
             fileInput.addEventListener('change', handleFileSelect);
 
             // Drag and Drop
