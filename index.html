@@ -144,24 +144,32 @@
     }
 
     // Wire up button click once DOM is ready
-    document.addEventListener("DOMContentLoaded", function() {
-        document.getElementById("magic-btn").onclick = signIn;
+    document.addEventListener("DOMContentLoaded", async function() {
+    // 1. Process magic link (if present in URL hash)
+    await supabase.auth.getSession(); // This will process any magic link
 
-        // On page load, check if user is logged in
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            if (session) {
-                showMainApp();
-            } else {
-                showAuthBox();
-            }
-        });
+    // 2. Check if user is already logged in
+    supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session) {
+            showMainApp();
+        } else {
+            showAuthBox();
+        }
+    });
 
-        // Listen for auth state changes (for magic link sign-in)
-        supabase.auth.onAuthStateChange((event, session) => {
-            if (session) {
-                showMainApp();
-            }
-        });
+    // 3. Listen for auth state changes (magic link sign-in, etc)
+    supabase.auth.onAuthStateChange((event, session) => {
+        if (session) {
+            showMainApp();
+        }
+    });
+
+    // 4. Wire up the button after DOM is ready
+    document.getElementById("magic-btn").onclick = signIn;
+
+    // ... (your file upload logic, etc, goes below here)
+});
+
 
         // ---- File Handling and Analysis Logic ----
         const fileInput = document.getElementById('file-input');
