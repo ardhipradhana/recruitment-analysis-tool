@@ -31,14 +31,13 @@
             margin-bottom: 0.5rem;
         }
         .spinner {
-            border: 3px solid rgba(255, 255, 255, 0.3);
+            border: 3px solid #e0e7ef;
             border-radius: 50%;
-            border-top: 3px solid white;
-            width: 16px;
-            height: 16px;
+            border-top: 3px solid #3b82f6;
+            width: 20px;
+            height: 20px;
             animation: spin 1s linear infinite;
             display: inline-block;
-            margin-right: 8px;
         }
         @keyframes spin {
             0% { transform: rotate(0deg); }
@@ -52,7 +51,7 @@
         <p class="text-gray-600 mb-6 text-center">Upload candidate documents for automated analysis</p>
         
         <!-- File Upload Area -->
-        <div id="drag-area" class="drag-area bg-gray-50 hover:bg-gray-100 mb-6">
+        <div id="drag-area" class="drag-area bg-gray-50 hover:bg-gray-100 mb-6" tabindex="0">
             <input type="file" id="file-input" multiple accept=".pdf,.jpg,.jpeg,.png" class="hidden">
             <i class="fas fa-cloud-upload-alt text-blue-500 text-4xl mb-4"></i>
             <h3 class="text-lg font-medium mb-1">Drag & drop files or click to browse</h3>
@@ -74,7 +73,7 @@
         <!-- Status Message -->
         <div id="status-message" class="p-3 mb-4 bg-blue-50 border border-blue-200 rounded-lg flex items-center hidden">
             <div id="status-icon" class="mr-2">
-                <div class="spinner-blue w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                <div class="spinner"></div>
             </div>
             <p id="status-text" class="text-blue-700 text-sm"></p>
         </div>
@@ -112,14 +111,21 @@
             'image/png': 'PNG'
         };
         
-        // Event listeners - Fix for upload click
         document.addEventListener('DOMContentLoaded', function() {
             dragArea.addEventListener('click', function() {
                 fileInput.click();
             });
+
+            // Accessibility: allow 'Enter' or 'Space' to open file input
+            dragArea.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    fileInput.click();
+                    e.preventDefault();
+                }
+            });
             
             fileInput.addEventListener('change', handleFileSelect);
-            
+
             // Drag and Drop
             dragArea.addEventListener('dragover', function(e) {
                 e.preventDefault();
@@ -143,30 +149,25 @@
                 }
             });
             
-            // Start button
             startButton.addEventListener('click', startAnalysis);
         });
         
-        // Functions
         function handleFileSelect(e) {
             handleFiles(e.target.files);
         }
         
         function handleFiles(selectedFiles) {
             const fileArray = Array.from(selectedFiles);
-            
+
             // Filter valid files
             const validFiles = fileArray.filter(file => allowedTypes.includes(file.type));
             
-            // Show error if any invalid files
             if (validFiles.length < fileArray.length) {
                 showError('Some files were not added. Only PDF, JPG and PNG formats are supported.');
             }
-            
-            // Add valid files to our array
+
+            // Add valid files to our array (Note: This allows duplicates)
             files = [...files, ...validFiles];
-            
-            // Update UI
             updateFileList();
         }
         
@@ -175,24 +176,15 @@
                 fileListContainer.classList.remove('hidden');
                 fileCount.textContent = files.length;
                 startButton.disabled = false;
-                
-                // Clear list and re-render
                 fileList.innerHTML = '';
-                
                 files.forEach((file, index) => {
                     const fileItem = document.createElement('div');
                     fileItem.className = 'file-item';
-                    
-                    // File info
                     const fileInfo = document.createElement('div');
                     fileInfo.className = 'flex items-center';
-                    
-                    // Icon
                     const icon = document.createElement('i');
                     icon.className = 'fas fa-file text-blue-500 mr-3';
                     fileInfo.appendChild(icon);
-                    
-                    // Name and details
                     const details = document.createElement('div');
                     details.innerHTML = `
                         <p class="font-medium text-sm truncate max-w-xs">${file.name}</p>
@@ -201,14 +193,11 @@
                         </p>
                     `;
                     fileInfo.appendChild(details);
-                    
-                    // Remove button
                     const removeBtn = document.createElement('button');
                     removeBtn.innerHTML = '<i class="fas fa-times-circle text-gray-500 hover:text-red-500"></i>';
                     removeBtn.addEventListener('click', function() {
                         removeFile(index);
                     });
-                    
                     fileItem.appendChild(fileInfo);
                     fileItem.appendChild(removeBtn);
                     fileList.appendChild(fileItem);
@@ -227,7 +216,6 @@
         function showError(message) {
             errorText.textContent = message;
             errorMessage.classList.remove('hidden');
-            
             setTimeout(() => {
                 errorMessage.classList.add('hidden');
             }, 5000);
@@ -235,13 +223,11 @@
         
         function showStatus(message, isComplete = false) {
             statusText.textContent = message;
-            
             if (isComplete) {
                 statusIcon.innerHTML = '<i class="fas fa-check-circle text-green-500 text-lg"></i>';
             } else {
                 statusIcon.innerHTML = '<div class="spinner"></div>';
             }
-            
             statusMessage.classList.remove('hidden');
         }
         
@@ -254,54 +240,40 @@
                 showError('Please upload at least one file before starting analysis.');
                 return;
             }
-            
             startButton.disabled = true;
             showStatus('Processing files...');
-            
             try {
-                // In a real application, send the files to your n8n backend
-                // For example:
-                
-                /
+                // In a real application, send the files to your backend.
+                // Uncomment and set your endpoint as needed.
+                /*
                 const formData = new FormData();
                 files.forEach(file => {
                     formData.append('files', file);
                 });
-                
                 const response = await fetch('https://montpro.app.n8n.cloud/webhook-test/recruitment-analysis', {
                     method: 'POST',
                     body: formData
                 });
-                
                 if (!response.ok) {
                     throw new Error('Failed to process files');
                 }
-                
                 const data = await response.json();
-                /
-                
+                */
                 // Simulate a network request
                 await new Promise(resolve => setTimeout(resolve, 2000));
-                
                 showStatus('Analysis complete!', true);
-                
-                // Reset after completion (optional)
                 setTimeout(() => {
                     hideStatus();
                     startButton.disabled = false;
-                    // Uncomment if you want to clear files after processing
+                    // Optionally clear files after processing:
                     // files = [];
                     // updateFileList();
                 }, 3000);
-                
             } catch (error) {
                 showError('An error occurred during analysis: ' + error.message);
                 startButton.disabled = false;
             }
         }
-
-        // Debug click functionality
-        console.log('Script loaded. Click handlers attached.');
     </script>
 </body>
 </html>
