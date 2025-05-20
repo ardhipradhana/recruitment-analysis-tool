@@ -101,6 +101,9 @@
         <button id="start-button" class="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-medium rounded-lg transition-colors" disabled>
             Start Analysis
         </button>
+        <button id="logout-btn" class="mt-4 w-full py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded">
+            Log Out
+        </button>
         
         <p class="text-xs text-gray-500 mt-4 text-center">
             This tool will analyze your candidate documents and extract relevant information for recruitment purposes.
@@ -165,6 +168,11 @@
 
         // 3. Wire up the button after DOM is ready
         document.getElementById("magic-btn").onclick = signIn;
+
+        document.getElementById('logout-btn').onclick = async function() {
+            await supabase.auth.signOut();
+            showAuthBox();
+        };
 
         // ---- File Handling and Analysis Logic ----
         const fileInput = document.getElementById('file-input');
