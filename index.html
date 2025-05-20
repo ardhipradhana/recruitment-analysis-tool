@@ -112,31 +112,40 @@
             'image/png': 'PNG'
         };
         
-        // Event listeners
-        dragArea.addEventListener('click', () => fileInput.click());
-        fileInput.addEventListener('change', handleFileSelect);
-        
-        // Drag and Drop
-        dragArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dragArea.classList.add('active');
-        });
-        
-        dragArea.addEventListener('dragleave', () => {
-            dragArea.classList.remove('active');
-        });
-        
-        dragArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dragArea.classList.remove('active');
+        // Event listeners - Fix for upload click
+        document.addEventListener('DOMContentLoaded', function() {
+            dragArea.addEventListener('click', function() {
+                fileInput.click();
+            });
             
-            if (e.dataTransfer.files.length) {
-                handleFiles(e.dataTransfer.files);
-            }
+            fileInput.addEventListener('change', handleFileSelect);
+            
+            // Drag and Drop
+            dragArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dragArea.classList.add('active');
+            });
+            
+            dragArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dragArea.classList.remove('active');
+            });
+            
+            dragArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dragArea.classList.remove('active');
+                
+                if (e.dataTransfer.files.length) {
+                    handleFiles(e.dataTransfer.files);
+                }
+            });
+            
+            // Start button
+            startButton.addEventListener('click', startAnalysis);
         });
-        
-        // Start button
-        startButton.addEventListener('click', startAnalysis);
         
         // Functions
         function handleFileSelect(e) {
@@ -196,7 +205,9 @@
                     // Remove button
                     const removeBtn = document.createElement('button');
                     removeBtn.innerHTML = '<i class="fas fa-times-circle text-gray-500 hover:text-red-500"></i>';
-                    removeBtn.addEventListener('click', () => removeFile(index));
+                    removeBtn.addEventListener('click', function() {
+                        removeFile(index);
+                    });
                     
                     fileItem.appendChild(fileInfo);
                     fileItem.appendChild(removeBtn);
@@ -288,6 +299,9 @@
                 startButton.disabled = false;
             }
         }
+
+        // Debug click functionality
+        console.log('Script loaded. Click handlers attached.');
     </script>
 </body>
 </html>
