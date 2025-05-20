@@ -107,9 +107,8 @@
         </p>
     </div>
 
-    <!-- JS: Supabase Auth and App Logic -->
     <script>
-    // Initialize Supabase client FIRST!
+    // Initialize Supabase client
     const supabaseUrl = 'https://saiwhkhgnsgakvbohwym.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhaXdoa2hnbnNnYWt2Ym9od3ltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc3MzIxMjIsImV4cCI6MjA2MzMwODEyMn0.4MUgz7sYll0MYV30mwbAAYkLDs2MtPpSykgvWE10KuU';
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
@@ -143,33 +142,29 @@
         }
     }
 
-    // Wire up button click once DOM is ready
+    // All logic in one DOMContentLoaded
     document.addEventListener("DOMContentLoaded", async function() {
-    // 1. Process magic link (if present in URL hash)
-    await supabase.auth.getSession(); // This will process any magic link
+        // Process magic link (Supabase will check and set session)
+        await supabase.auth.getSession();
 
-    // 2. Check if user is already logged in
-    supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session) {
-            showMainApp();
-        } else {
-            showAuthBox();
-        }
-    });
+        // 1. Check if user is already logged in
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (session) {
+                showMainApp();
+            } else {
+                showAuthBox();
+            }
+        });
 
-    // 3. Listen for auth state changes (magic link sign-in, etc)
-    supabase.auth.onAuthStateChange((event, session) => {
-        if (session) {
-            showMainApp();
-        }
-    });
+        // 2. Listen for auth state changes (magic link sign-in, etc)
+        supabase.auth.onAuthStateChange((event, session) => {
+            if (session) {
+                showMainApp();
+            }
+        });
 
-    // 4. Wire up the button after DOM is ready
-    document.getElementById("magic-btn").onclick = signIn;
-
-    // ... (your file upload logic, etc, goes below here)
-});
-
+        // 3. Wire up the button after DOM is ready
+        document.getElementById("magic-btn").onclick = signIn;
 
         // ---- File Handling and Analysis Logic ----
         const fileInput = document.getElementById('file-input');
