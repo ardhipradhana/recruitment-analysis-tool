@@ -6,6 +6,7 @@
     <title>Recruitment Analysis Tool</title>
     <!-- Tailwind CSS from CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -46,7 +47,13 @@
     </style>
 </head>
 <body class="bg-gray-50">
-    <div class="max-w-4xl mx-auto p-6">
+    <div id="auth-box" class="max-w-sm mx-auto my-8 p-4 rounded bg-white shadow text-center">
+    <h2 class="text-xl font-bold mb-2">Sign in to MontPro</h2>
+    <input id="email" type="email" class="border p-2 mb-2 w-full" placeholder="Email address" required />
+    <button onclick="signIn()" class="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Send Magic Link</button>
+    <div id="auth-msg" class="mt-2 text-sm"></div>
+</div>
+    <div id="main-app" class="max-w-4xl mx-auto p-6" style="display: none;">
         <div class="flex flex-col items-center mb-2 sm:flex-row sm:items-center">
         <img src="MontPro_logo_with_words-removebg-preview.png" alt="MontPro Logo" class="h-16 w-auto mb-2 sm:mb-0 sm:mr-4" />
         <h1 class="text-2xl font-bold text-center sm:text-left">Recruitment Analysis Tool</h1>
@@ -283,5 +290,45 @@
             }
         }
     </script>
+    <script>
+const supabaseUrl = 'https://saiwhkhgnsgakvbohwym.supabase.co';      // e.g. https://xxx.supabase.co
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhaXdoa2hnbnNnYWt2Ym9od3ltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc3MzIxMjIsImV4cCI6MjA2MzMwODEyMn0.4MUgz7sYll0MYV30mwbAAYkLDs2MtPpSykgvWE10KuU'; // from your Supabase dashboard
+const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+async function signIn() {
+    const email = document.getElementById('email').value;
+    let { error } = await supabase.auth.signInWithOtp({ email });
+    document.getElementById('auth-msg').textContent = error 
+        ? "Error: " + error.message 
+        : "Check your email for the sign-in link.";
+}
+
+// On page load, check if user is logged in
+supabase.auth.getSession().then(({ data: { session } }) => {
+    if (session) {
+        showMainApp();
+    } else {
+        showAuthBox();
+    }
+});
+
+// Listen for auth state changes (magic link sign-in returns here)
+supabase.auth.onAuthStateChange((event, session) => {
+    if (session) {
+        showMainApp();
+    }
+});
+
+function showMainApp() {
+    document.getElementById('auth-box').style.display = 'none';
+    document.getElementById('main-app').style.display = '';
+}
+
+function showAuthBox() {
+    document.getElementById('auth-box').style.display = '';
+    document.getElementById('main-app').style.display = 'none';
+}
+</script>
+
 </body>
 </html>
