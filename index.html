@@ -47,18 +47,24 @@
     </style>
 </head>
 <body class="bg-gray-50">
+
+    <!-- Authentication Box -->
     <div id="auth-box" class="max-w-sm mx-auto my-8 p-4 rounded bg-white shadow text-center">
-    <h2 class="text-xl font-bold mb-2">Sign in to MontPro</h2>
-    <input id="email" type="email" class="border p-2 mb-2 w-full" placeholder="Email address" required />
-    <button onclick="signIn()" class="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Send Magic Link</button>
-    <div id="auth-msg" class="mt-2 text-sm"></div>
-</div>
+        <h2 class="text-xl font-bold mb-2">Sign in to MontPro</h2>
+        <input id="email" type="email" class="border p-2 mb-2 w-full" placeholder="Email address" required />
+        <button onclick="signIn()" class="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700" id="magic-btn">
+            Send Magic Link
+        </button>
+        <div id="auth-msg" class="mt-2 text-sm"></div>
+    </div>
+
+    <!-- Main App (hidden until authenticated) -->
     <div id="main-app" class="max-w-4xl mx-auto p-6" style="display: none;">
         <div class="flex flex-col items-center mb-2 sm:flex-row sm:items-center">
-        <img src="MontPro_logo_with_words-removebg-preview.png" alt="MontPro Logo" class="h-16 w-auto mb-2 sm:mb-0 sm:mr-4" />
-        <h1 class="text-2xl font-bold text-center sm:text-left">Recruitment Analysis Tool</h1>
-    </div>
-    <p class="text-gray-600 mb-6 text-center">Upload candidate documents for automated analysis</p>
+            <img src="MontPro_logo_with_words-removebg-preview.png" alt="MontPro Logo" class="h-16 w-auto mb-2 sm:mb-0 sm:mr-4" />
+            <h1 class="text-2xl font-bold text-center sm:text-left">Recruitment Analysis Tool</h1>
+        </div>
+        <p class="text-gray-600 mb-6 text-center">Upload candidate documents for automated analysis</p>
 
         <!-- Hidden File Input OUTSIDE the drag area -->
         <input type="file" id="file-input" multiple accept=".pdf,.jpg,.jpeg,.png" class="hidden">
@@ -100,8 +106,57 @@
         </p>
     </div>
 
+    <!-- JS: Supabase Auth and App Logic -->
     <script>
-        // File handling
+    // 1. Supabase Auth Setup
+    const supabaseUrl = 'https://saiwhkhgnsgakvbohwym.supabase.co';        // <-- Replace with your Supabase Project URL
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhaXdoa2hnbnNnYWt2Ym9od3ltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc3MzIxMjIsImV4cCI6MjA2MzMwODEyMn0.4MUgz7sYll0MYV30mwbAAYkLDs2MtPpSykgvWE10KuU';   // <-- Replace with your anon key
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+    // Sign in handler
+    async function signIn() {
+        const email = document.getElementById('email').value;
+        if (!email) {
+            document.getElementById('auth-msg').textContent = "Please enter your email.";
+            return;
+        }
+        document.getElementById('auth-msg').textContent = "Sending magic link...";
+        let { error } = await supabase.auth.signInWithOtp({ email });
+        document.getElementById('auth-msg').textContent = error 
+            ? "Error: " + error.message 
+            : "Check your email for the sign-in link.";
+    }
+
+    // Show/hide app after authentication
+    function showMainApp() {
+        document.getElementById('auth-box').style.display = 'none';
+        document.getElementById('main-app').style.display = '';
+    }
+    function showAuthBox() {
+        document.getElementById('auth-box').style.display = '';
+        document.getElementById('main-app').style.display = 'none';
+    }
+
+    // On page load, check if user is logged in
+    supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session) {
+            showMainApp();
+        } else {
+            showAuthBox();
+        }
+    });
+
+    // Listen for auth state changes (for magic link sign-in)
+    supabase.auth.onAuthStateChange((event, session) => {
+        if (session) {
+            showMainApp();
+        }
+    });
+    </script>
+
+    <script>
+    // 2. File Handling and Analysis Logic (unchanged from your original code)
+    document.addEventListener('DOMContentLoaded', function() {
         const fileInput = document.getElementById('file-input');
         const dragArea = document.getElementById('drag-area');
         const fileListContainer = document.getElementById('file-list-container');
@@ -114,7 +169,6 @@
         const statusText = document.getElementById('status-text');
         const statusIcon = document.getElementById('status-icon');
         
-        // File storage
         let files = [];
         const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png'];
         const typeNames = {
@@ -123,66 +177,55 @@
             'image/png': 'PNG'
         };
         
-        document.addEventListener('DOMContentLoaded', function() {
-            // Always trigger file input on dragArea click
-            dragArea.addEventListener('click', function(e) {
-                e.preventDefault();
-                fileInput.value = ''; // allow re-selecting same file
+        dragArea.addEventListener('click', function(e) {
+            e.preventDefault();
+            fileInput.value = '';
+            fileInput.click();
+        });
+
+        dragArea.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                fileInput.value = '';
                 fileInput.click();
-            });
-
-            // Accessibility: allow Enter or Space to open file input
-            dragArea.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    fileInput.value = '';
-                    fileInput.click();
-                    e.preventDefault();
-                }
-            });
-
-            fileInput.addEventListener('change', handleFileSelect);
-
-            // Drag and Drop
-            dragArea.addEventListener('dragover', function(e) {
                 e.preventDefault();
-                e.stopPropagation();
-                dragArea.classList.add('active');
-            });
-            
-            dragArea.addEventListener('dragleave', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                dragArea.classList.remove('active');
-            });
-            
-            dragArea.addEventListener('drop', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                dragArea.classList.remove('active');
-                
-                if (e.dataTransfer.files.length) {
-                    handleFiles(e.dataTransfer.files);
-                }
-            });
-            
-            startButton.addEventListener('click', startAnalysis);
+            }
+        });
+
+        fileInput.addEventListener('change', handleFileSelect);
+
+        dragArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            dragArea.classList.add('active');
         });
         
+        dragArea.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            dragArea.classList.remove('active');
+        });
+        
+        dragArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            dragArea.classList.remove('active');
+            if (e.dataTransfer.files.length) {
+                handleFiles(e.dataTransfer.files);
+            }
+        });
+        
+        startButton.addEventListener('click', startAnalysis);
+
         function handleFileSelect(e) {
             handleFiles(e.target.files);
         }
-        
+
         function handleFiles(selectedFiles) {
             const fileArray = Array.from(selectedFiles);
-
-            // Filter valid files
             const validFiles = fileArray.filter(file => allowedTypes.includes(file.type));
-            
             if (validFiles.length < fileArray.length) {
                 showError('Some files were not added. Only PDF, JPG and PNG formats are supported.');
             }
-
-            // Add valid files to our array (Note: This allows duplicates)
             files = [...files, ...validFiles];
             updateFileList();
         }
@@ -261,26 +304,21 @@
             try {
                 const formData = new FormData();
                 files.forEach(file => {
-                    formData.append('files', file); // This sends each file as a "files" field
+                    formData.append('files', file);
                 });
                 const response = await fetch('https://montpro.app.n8n.cloud/webhook-test/recruitment-analysis', {
-                    method: 'POST', // Must be POST!
+                    method: 'POST',
                     body: formData
-                    // No need to set Content-Type, browser will set it automatically
                 });
                 if (!response.ok) {
                     throw new Error('Failed to process files');
                 }
                 const data = await response.json();
-                // handle data as needed
-
-                // Simulate a network request (you can remove this in production)
                 await new Promise(resolve => setTimeout(resolve, 2000));
                 showStatus('Analysis started! Please wait a few minutes to complete', true);
                 setTimeout(() => {
                     hideStatus();
                     startButton.disabled = false;
-                    // Optionally clear files after processing:
                     // files = [];
                     // updateFileList();
                 }, 3000);
@@ -289,46 +327,7 @@
                 startButton.disabled = false;
             }
         }
+    });
     </script>
-    <script>
-const supabaseUrl = 'https://saiwhkhgnsgakvbohwym.supabase.co';      // e.g. https://xxx.supabase.co
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhaXdoa2hnbnNnYWt2Ym9od3ltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc3MzIxMjIsImV4cCI6MjA2MzMwODEyMn0.4MUgz7sYll0MYV30mwbAAYkLDs2MtPpSykgvWE10KuU'; // from your Supabase dashboard
-const supabase = supabase.createClient(supabaseUrl, supabaseKey);
-
-async function signIn() {
-    const email = document.getElementById('email').value;
-    let { error } = await supabase.auth.signInWithOtp({ email });
-    document.getElementById('auth-msg').textContent = error 
-        ? "Error: " + error.message 
-        : "Check your email for the sign-in link.";
-}
-
-// On page load, check if user is logged in
-supabase.auth.getSession().then(({ data: { session } }) => {
-    if (session) {
-        showMainApp();
-    } else {
-        showAuthBox();
-    }
-});
-
-// Listen for auth state changes (magic link sign-in returns here)
-supabase.auth.onAuthStateChange((event, session) => {
-    if (session) {
-        showMainApp();
-    }
-});
-
-function showMainApp() {
-    document.getElementById('auth-box').style.display = 'none';
-    document.getElementById('main-app').style.display = '';
-}
-
-function showAuthBox() {
-    document.getElementById('auth-box').style.display = '';
-    document.getElementById('main-app').style.display = 'none';
-}
-</script>
-
 </body>
 </html>
