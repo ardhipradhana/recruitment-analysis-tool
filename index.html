@@ -536,25 +536,41 @@ async function startAnalysis() {
         
         // Get the response text first
         const responseText = await response.text();
+        
         console.log("Raw response length:", responseText.length);
-        console.log("Raw response (first 300 chars):", responseText.substring(0, 300));
-        console.log("Raw response (last 300 chars):", responseText.substring(responseText.length - 300));
+        console.log("Response content type:", response.headers.get("content-type"));
+        
+        // For debugging, output character by character of the first 20 chars
+        let charByChar = "First 20 chars (char by char): ";
+        for (let i = 0; i < Math.min(20, responseText.length); i++) {
+            charByChar += "[" + responseText.charCodeAt(i) + ":" + responseText[i] + "] ";
+        }
+        console.log(charByChar);
+        
+        // Show the exact string as JSON
+        console.log("Raw response as literal:", JSON.stringify(responseText));
+        
+        // Try to manually fix common JSON issues
+        let fixedText = responseText.trim();
+        if (fixedText.startsWith(")]}',")) {
+            fixedText = fixedText.substring(5); // Remove Angular security prefix
+        }
         
         // Try to parse as JSON
         let data;
         try {
-            data = JSON.parse(responseText);
-            console.log("Parsed data:", data); // For debugging
+            data = JSON.parse(fixedText);
+            console.log("Parsed data:", data);
+            
+            // Store the analysis results for later use
+            sessionStorage.setItem('analysisResults', JSON.stringify(data));
+            
+            // Show the results UI
+            showAnalysisResults(data);
         } catch (parseError) {
             console.error("JSON parse error:", parseError);
             throw new Error('Failed to parse response as JSON: ' + parseError.message);
         }
-        
-        // Store the analysis results for later use
-        sessionStorage.setItem('analysisResults', JSON.stringify(data));
-        
-        // Show the results UI
-        showAnalysisResults(data);
         
     } catch (error) {
         console.error('Analysis error:', error);
