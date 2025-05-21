@@ -373,7 +373,12 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 let files = [];
-        
+let startButton; // Add this line
+let errorText; // Also add any other DOM elements your functions use
+let errorMessage;
+let statusMessage;
+let statusText;
+let statusIcon;        
 function showMainApp() {
     document.getElementById('auth-box').style.display = 'none';
     document.getElementById('main-app').style.display = '';
@@ -656,12 +661,12 @@ document.addEventListener("DOMContentLoaded", async function() {
     const fileListContainer = document.getElementById('file-list-container');
     const fileList = document.getElementById('file-list');
     const fileCount = document.getElementById('file-count');
-    const startButton = document.getElementById('start-button');
-    const errorMessage = document.getElementById('error-message');
-    const errorText = document.getElementById('error-text');
-    const statusMessage = document.getElementById('status-message');
-    const statusText = document.getElementById('status-text');
-    const statusIcon = document.getElementById('status-icon');
+    startButton = document.getElementById('start-button');
+    errorMessage = document.getElementById('error-message');
+    errorText = document.getElementById('error-text');
+    statusMessage = document.getElementById('status-message');
+    statusText = document.getElementById('status-text');
+    statusIcon = document.getElementById('status-icon');
     const clearAllBtn = document.getElementById('clear-all');
 
     const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png'];
