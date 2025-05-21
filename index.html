@@ -663,12 +663,6 @@ if (data.coreCompetencies) {
     const today = new Date();
     document.getElementById('analysis-date').textContent = today.toLocaleDateString();
     
-    // Set up the "Analyze Another Resume" button
-    document.getElementById('new-analysis-btn').addEventListener('click', function() {
-        document.getElementById('analysis-results').classList.add('hidden');
-        document.getElementById('upload-interface').classList.remove('hidden');
-        startButton.disabled = false;
-    });
 }
 
 function setupDownloadPDF() {
@@ -855,6 +849,24 @@ document.addEventListener("DOMContentLoaded", async function() {
 
 // Add PDF download setup
     setupDownloadPDF();
+
+    // Set up the "Analyze Another Resume" button handler
+document.getElementById('new-analysis-btn').addEventListener('click', function() {
+    // Hide results, show upload interface
+    document.getElementById('analysis-results').classList.add('hidden');
+    document.getElementById('upload-interface').classList.remove('hidden');
+    
+    // Reset files array and update the UI
+    files = [];
+    updateFileList();
+    
+    // Re-enable the start button (though updateFileList should handle this)
+    startButton.disabled = false;
+    
+    // Clear any error or status messages
+    hideError();
+    hideStatus();
+});
 });
     </script>
 </body>
