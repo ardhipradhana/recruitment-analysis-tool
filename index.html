@@ -372,13 +372,24 @@ const supabaseUrl = 'https://saiwhkhgnsgakvbohwym.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhaXdoa2hnbnNnYWt2Ym9od3ltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc3MzIxMjIsImV4cCI6MjA2MzMwODEyMn0.4MUgz7sYll0MYV30mwbAAYkLDs2MtPpSykgvWE10KuU';
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
+// Global variables
 let files = [];
-let startButton; // Add this line
-let errorText; // Also add any other DOM elements your functions use
+let fileInput;
+let dragArea;
+let fileListContainer;
+let fileList;
+let fileCount;
+let startButton;
 let errorMessage;
+let errorText;
 let statusMessage;
 let statusText;
-let statusIcon;        
+let statusIcon;
+let clearAllBtn;
+let allowedTypes;
+let typeNames;
+let typeIcons;
+
 function showMainApp() {
     document.getElementById('auth-box').style.display = 'none';
     document.getElementById('main-app').style.display = '';
@@ -387,7 +398,277 @@ function showAuthBox() {
     document.getElementById('auth-box').style.display = '';
     document.getElementById('main-app').style.display = 'none';
 }
+function showError(message) {
+    errorText.textContent = message;
+    errorMessage.classList.remove('hidden');
+}
 
+function hideError() {
+    errorMessage.classList.add('hidden');
+}
+
+function showStatus(message, isComplete = false) {
+    statusText.textContent = message;
+    if (isComplete) {
+        statusIcon.innerHTML = '<i class="fas fa-check-circle text-green-500 text-lg"></i>';
+        statusMessage.classList.remove('bg-blue-50', 'border-blue-500');
+        statusMessage.classList.add('bg-green-50', 'border-green-500');
+        statusText.classList.remove('text-blue-700');
+        statusText.classList.add('text-green-700');
+    } else {
+        statusIcon.innerHTML = '<div class="spinner"></div>';
+        statusMessage.classList.add('bg-blue-50', 'border-blue-500');
+        statusMessage.classList.remove('bg-green-50', 'border-green-500');
+        statusText.classList.add('text-blue-700');
+        statusText.classList.remove('text-green-700');
+    }
+    statusMessage.classList.remove('hidden');
+}
+
+function hideStatus() {
+    statusMessage.classList.add('hidden');
+}
+
+function formatFileSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+    else return (bytes / 1048576).toFixed(1) + ' MB';
+}
+
+function handleFileSelect(e) {
+    handleFiles(e.target.files);
+}
+
+function handleFiles(selectedFiles) {
+    const fileArray = Array.from(selectedFiles);
+    const validFiles = fileArray.filter(file => allowedTypes.includes(file.type));
+    
+    if (validFiles.length < fileArray.length) {
+        showError('Some files were not added. Only PDF, JPG and PNG formats are supported.');
+    }
+    
+    if (validFiles.length > 0) {
+        hideError();
+        hideStatus();
+    }
+    
+    files = [...files, ...validFiles];
+    updateFileList();
+}
+
+function updateFileList() {
+    if (files.length > 0) {
+        fileListContainer.classList.remove('hidden');
+        fileCount.textContent = files.length;
+        startButton.disabled = false;
+        fileList.innerHTML = '';
+        
+        files.forEach((file, index) => {
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            
+            const fileInfo = document.createElement('div');
+            fileInfo.className = 'flex items-center';
+            
+            const fileTypeIcon = typeIcons[file.type] || 'fa-file';
+            const icon = document.createElement('i');
+            icon.className = `fas ${fileTypeIcon} text-blue-500 mr-3`;
+            fileInfo.appendChild(icon);
+            
+            const details = document.createElement('div');
+            details.innerHTML = `
+                <p class="font-medium text-sm truncate max-w-xs">${file.name}</p>
+                <p class="text-xs text-gray-500">
+                    ${typeNames[file.type] || 'File'} · ${formatFileSize(file.size)}
+                </p>
+            `;
+            fileInfo.appendChild(details);
+            
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'text-gray-500 hover:text-red-500 transition-colors';
+            removeBtn.innerHTML = '<i class="fas fa-times-circle"></i>';
+            removeBtn.addEventListener('click', function() {
+                removeFile(index);
+            });
+            
+            fileItem.appendChild(fileInfo);
+            fileItem.appendChild(removeBtn);
+            fileList.appendChild(fileItem);
+        });
+    } else {
+        fileListContainer.classList.add('hidden');
+        startButton.disabled = true;
+    }
+}
+
+function removeFile(index) {
+    files = files.filter((_, i) => i !== index);
+    updateFileList();
+}
+
+// Analysis functions
+async function startAnalysis() {
+    if (files.length === 0) {
+        showError('Please upload at least one file before starting analysis.');
+        return;
+    }
+    
+    startButton.disabled = true;
+    hideError();
+    showAnalysisLoading(); // Show loading UI
+    
+    try {
+        // Prepare files for upload
+        const formData = new FormData();
+        files.forEach(file => {
+            formData.append('files', file);
+        });
+        
+        // API call to process files (your existing code)
+        const response = await fetch('https://montpro.app.n8n.cloud/webhook-test/recruitment-analysis', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to process files. Server returned status: ' + response.status);
+        }
+        
+        // Parse the response from n8n
+        const data = await response.json();
+        
+        // Store the analysis results for later use
+        sessionStorage.setItem('analysisResults', JSON.stringify(data));
+        
+        // Show the results UI
+        showAnalysisResults(data);
+        
+    } catch (error) {
+        console.error('Analysis error:', error);
+        showError('An error occurred: ' + error.message);
+        startButton.disabled = false;
+        hideAnalysisLoading();
+    }
+}
+
+function showAnalysisLoading() {
+    document.getElementById('upload-interface').classList.add('hidden');
+    document.getElementById('analysis-loading').classList.remove('hidden');
+    
+    // Simulate progress updates
+    let progress = 0;
+    const progressBar = document.getElementById('progress-bar-fill');
+    const percentText = document.getElementById('loading-percent');
+    const stepText = document.getElementById('loading-step');
+    
+    const progressInterval = setInterval(() => {
+        progress += 5;
+        
+        if (progress <= 100) {
+            progressBar.style.width = `${progress}%`;
+            percentText.textContent = `${progress}%`;
+            
+            // Update loading step text based on progress
+            if (progress < 30) {
+                stepText.textContent = 'Extracting qualifications';
+            } else if (progress < 60) {
+                stepText.textContent = 'Analyzing skills and experience';
+            } else if (progress < 90) {
+                stepText.textContent = 'Evaluating candidate fit';
+            } else {
+                stepText.textContent = 'Finalizing results';
+            }
+        } else {
+            clearInterval(progressInterval);
+        }
+    }, 300);
+    
+    // Store interval ID so we can clear it if needed
+    window.progressInterval = progressInterval;
+}
+
+function hideAnalysisLoading() {
+    document.getElementById('analysis-loading').classList.add('hidden');
+    
+    // Clear any running progress interval
+    if (window.progressInterval) {
+        clearInterval(window.progressInterval);
+    }
+}
+
+function showAnalysisResults(data) {
+    hideAnalysisLoading();
+    document.getElementById('analysis-results').classList.remove('hidden');
+    
+    // Update candidate name if available
+    if (data.candidateName) {
+        document.getElementById('candidate-name').textContent = data.candidateName;
+    }
+    
+    // Update score if available
+    if (data.candidateScore) {
+        const scoreValue = parseInt(data.candidateScore);
+        document.getElementById('candidate-score').textContent = `${scoreValue}%`;
+        document.querySelector('.score-circle').style.setProperty('--score-percent', `${scoreValue}%`);
+    }
+    
+    // Update executive summary
+    if (data.executiveSummary) {
+        document.getElementById('executive-summary').innerHTML = `<p>${data.executiveSummary}</p>`;
+    }
+    
+    // Show top skills preview (from coreCompetencies)
+    if (data.coreCompetencies) {
+        const skillsContainer = document.getElementById('core-competencies');
+        skillsContainer.innerHTML = '';
+        
+        // Parse skills - assuming coreCompetencies might be a string or an array
+        let skills = [];
+        if (Array.isArray(data.coreCompetencies)) {
+            skills = data.coreCompetencies;
+        } else if (typeof data.coreCompetencies === 'string') {
+            // Try to extract skills from text by looking for bullet points, commas, etc.
+            skills = data.coreCompetencies.split(/[,•\n]/).map(s => s.trim()).filter(s => s.length > 0);
+        }
+        
+        // Show only top 5 skills
+        const topSkills = skills.slice(0, 5);
+        topSkills.forEach(skill => {
+            const badge = document.createElement('span');
+            badge.className = 'skill-badge';
+            badge.textContent = skill;
+            skillsContainer.appendChild(badge);
+        });
+    }
+    
+    // Update analysis date
+    const today = new Date();
+    document.getElementById('analysis-date').textContent = today.toLocaleDateString();
+    
+    // Set up the "Analyze Another Resume" button
+    document.getElementById('new-analysis-btn').addEventListener('click', function() {
+        document.getElementById('analysis-results').classList.add('hidden');
+        document.getElementById('upload-interface').classList.remove('hidden');
+        startButton.disabled = false;
+    });
+}
+
+function setupDownloadPDF() {
+    const downloadBtn = document.querySelector('#download-pdf-btn');
+    if (downloadBtn) {
+        downloadBtn.addEventListener('click', function() {
+            // Get stored analysis results
+            const analysisData = JSON.parse(sessionStorage.getItem('analysisResults') || '{}');
+            
+            // Generate a simple download or redirect to a PDF generation endpoint
+            window.location.href = `https://montpro.app.n8n.cloud/webhook/generate-pdf?analysisId=${analysisData.analysisId || 'latest'}`;
+            
+            // Alternatively, show a success message
+            showStatus('Your PDF report is being generated and will download shortly.', true);
+            setTimeout(hideStatus, 5000);
+        });
+    }
+}
 async function signIn() {
     const emailEl = document.getElementById('email');
     const authMsg = document.getElementById('auth-msg');
@@ -452,177 +733,6 @@ async function signIn() {
     }
 }
 
-
-    // Add this code to your existing JavaScript section
-
-// 1. Handle the webhook response from n8n
-// This would be added to your startAnalysis function
-async function startAnalysis() {
-    if (files.length === 0) {
-        showError('Please upload at least one file before starting analysis.');
-        return;
-    }
-    
-    startButton.disabled = true;
-    hideError();
-    showAnalysisLoading(); // Show loading UI
-    
-    try {
-        // Prepare files for upload
-        const formData = new FormData();
-        files.forEach(file => {
-            formData.append('files', file);
-        });
-        
-        // API call to process files (your existing code)
-        const response = await fetch('https://montpro.app.n8n.cloud/webhook-test/recruitment-analysis', {
-            method: 'POST',
-            body: formData
-        });
-        
-        if (!response.ok) {
-            throw new Error('Failed to process files. Server returned status: ' + response.status);
-        }
-        
-        // Parse the response from n8n
-        const data = await response.json();
-        
-        // Store the analysis results for later use
-        sessionStorage.setItem('analysisResults', JSON.stringify(data));
-        
-        // Show the results UI
-        showAnalysisResults(data);
-        
-    } catch (error) {
-        console.error('Analysis error:', error);
-        showError('An error occurred: ' + error.message);
-        startButton.disabled = false;
-        hideAnalysisLoading();
-    }
-}
-
-// 2. Show loading UI during analysis
-function showAnalysisLoading() {
-    document.getElementById('upload-interface').classList.add('hidden');
-    document.getElementById('analysis-loading').classList.remove('hidden');
-    
-    // Simulate progress updates
-    let progress = 0;
-    const progressBar = document.getElementById('progress-bar-fill');
-    const percentText = document.getElementById('loading-percent');
-    const stepText = document.getElementById('loading-step');
-    
-    const progressInterval = setInterval(() => {
-        progress += 5;
-        
-        if (progress <= 100) {
-            progressBar.style.width = `${progress}%`;
-            percentText.textContent = `${progress}%`;
-            
-            // Update loading step text based on progress
-            if (progress < 30) {
-                stepText.textContent = 'Extracting qualifications';
-            } else if (progress < 60) {
-                stepText.textContent = 'Analyzing skills and experience';
-            } else if (progress < 90) {
-                stepText.textContent = 'Evaluating candidate fit';
-            } else {
-                stepText.textContent = 'Finalizing results';
-            }
-        } else {
-            clearInterval(progressInterval);
-        }
-    }, 300);
-    
-    // Store interval ID so we can clear it if needed
-    window.progressInterval = progressInterval;
-}
-
-// 3. Hide loading UI
-function hideAnalysisLoading() {
-    document.getElementById('analysis-loading').classList.add('hidden');
-    
-    // Clear any running progress interval
-    if (window.progressInterval) {
-        clearInterval(window.progressInterval);
-    }
-}
-
-// 4. Display analysis results
-function showAnalysisResults(data) {
-    hideAnalysisLoading();
-    document.getElementById('analysis-results').classList.remove('hidden');
-    
-    // Update candidate name if available
-    if (data.candidateName) {
-        document.getElementById('candidate-name').textContent = data.candidateName;
-    }
-    
-    // Update score if available
-    if (data.candidateScore) {
-        const scoreValue = parseInt(data.candidateScore);
-        document.getElementById('candidate-score').textContent = `${scoreValue}%`;
-        document.querySelector('.score-circle').style.setProperty('--score-percent', `${scoreValue}%`);
-    }
-    
-    // Update executive summary
-    if (data.executiveSummary) {
-        document.getElementById('executive-summary').innerHTML = `<p>${data.executiveSummary}</p>`;
-    }
-    
-    // Show top skills preview (from coreCompetencies)
-    if (data.coreCompetencies) {
-        const skillsContainer = document.getElementById('core-competencies');
-        skillsContainer.innerHTML = '';
-        
-        // Parse skills - assuming coreCompetencies might be a string or an array
-        let skills = [];
-        if (Array.isArray(data.coreCompetencies)) {
-            skills = data.coreCompetencies;
-        } else if (typeof data.coreCompetencies === 'string') {
-            // Try to extract skills from text by looking for bullet points, commas, etc.
-            skills = data.coreCompetencies.split(/[,•\n]/).map(s => s.trim()).filter(s => s.length > 0);
-        }
-        
-        // Show only top 5 skills
-        const topSkills = skills.slice(0, 5);
-        topSkills.forEach(skill => {
-            const badge = document.createElement('span');
-            badge.className = 'skill-badge';
-            badge.textContent = skill;
-            skillsContainer.appendChild(badge);
-        });
-    }
-    
-    // Update analysis date
-    const today = new Date();
-    document.getElementById('analysis-date').textContent = today.toLocaleDateString();
-    
-    // Set up the "Analyze Another Resume" button
-    document.getElementById('new-analysis-btn').addEventListener('click', function() {
-        document.getElementById('analysis-results').classList.add('hidden');
-        document.getElementById('upload-interface').classList.remove('hidden');
-        startButton.disabled = false;
-    });
-}
-
-// 5. Add a function to download PDF report
-function setupDownloadPDF() {
-    const downloadBtn = document.querySelector('#download-pdf-btn');
-    if (downloadBtn) {
-        downloadBtn.addEventListener('click', function() {
-            // Get stored analysis results
-            const analysisData = JSON.parse(sessionStorage.getItem('analysisResults') || '{}');
-            
-            // Generate a simple download or redirect to a PDF generation endpoint
-            window.location.href = `https://montpro.app.n8n.cloud/webhook/generate-pdf?analysisId=${analysisData.analysisId || 'latest'}`;
-            
-            // Alternatively, show a success message
-            showStatus('Your PDF report is being generated and will download shortly.', true);
-            setTimeout(hideStatus, 5000);
-        });
-    }
-}
 document.addEventListener("DOMContentLoaded", async function() {
     // 1. Process magic link
     await supabase.auth.getSession();
@@ -656,27 +766,27 @@ document.addEventListener("DOMContentLoaded", async function() {
     };
 
     // ---- File Handling and Analysis Logic ----
-    const fileInput = document.getElementById('file-input');
-    const dragArea = document.getElementById('drag-area');
-    const fileListContainer = document.getElementById('file-list-container');
-    const fileList = document.getElementById('file-list');
-    const fileCount = document.getElementById('file-count');
+    fileInput = document.getElementById('file-input');
+    dragArea = document.getElementById('drag-area');
+    fileListContainer = document.getElementById('file-list-container');
+    fileList = document.getElementById('file-list');
+    fileCount = document.getElementById('file-count');
     startButton = document.getElementById('start-button');
     errorMessage = document.getElementById('error-message');
     errorText = document.getElementById('error-text');
     statusMessage = document.getElementById('status-message');
     statusText = document.getElementById('status-text');
     statusIcon = document.getElementById('status-icon');
-    const clearAllBtn = document.getElementById('clear-all');
+    clearAllBtn = document.getElementById('clear-all');
 
-    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png'];
-    const typeNames = {
+    allowedTypes = ['application/pdf', 'image/jpeg', 'image/png'];
+    typeNames = {
         'application/pdf': 'PDF',
         'image/jpeg': 'JPEG',
         'image/png': 'PNG'
     };
     
-    const typeIcons = {
+    typeIcons = {
         'application/pdf': 'fa-file-pdf',
         'image/jpeg': 'fa-file-image',
         'image/png': 'fa-file-image'
@@ -725,113 +835,6 @@ document.addEventListener("DOMContentLoaded", async function() {
         updateFileList();
     });
 
-    function handleFileSelect(e) {
-        handleFiles(e.target.files);
-    }
-
-    function handleFiles(selectedFiles) {
-        const fileArray = Array.from(selectedFiles);
-        const validFiles = fileArray.filter(file => allowedTypes.includes(file.type));
-        
-        if (validFiles.length < fileArray.length) {
-            showError('Some files were not added. Only PDF, JPG and PNG formats are supported.');
-        }
-        
-        if (validFiles.length > 0) {
-            hideError();
-            hideStatus();
-        }
-        
-        files = [...files, ...validFiles];
-        updateFileList();
-    }
-
-    function updateFileList() {
-        if (files.length > 0) {
-            fileListContainer.classList.remove('hidden');
-            fileCount.textContent = files.length;
-            startButton.disabled = false;
-            fileList.innerHTML = '';
-            
-            files.forEach((file, index) => {
-                const fileItem = document.createElement('div');
-                fileItem.className = 'file-item';
-                
-                const fileInfo = document.createElement('div');
-                fileInfo.className = 'flex items-center';
-                
-                const fileTypeIcon = typeIcons[file.type] || 'fa-file';
-                const icon = document.createElement('i');
-                icon.className = `fas ${fileTypeIcon} text-blue-500 mr-3`;
-                fileInfo.appendChild(icon);
-                
-                const details = document.createElement('div');
-                details.innerHTML = `
-                    <p class="font-medium text-sm truncate max-w-xs">${file.name}</p>
-                    <p class="text-xs text-gray-500">
-                        ${typeNames[file.type] || 'File'} · ${formatFileSize(file.size)}
-                    </p>
-                `;
-                fileInfo.appendChild(details);
-                
-                const removeBtn = document.createElement('button');
-                removeBtn.className = 'text-gray-500 hover:text-red-500 transition-colors';
-                removeBtn.innerHTML = '<i class="fas fa-times-circle"></i>';
-                removeBtn.addEventListener('click', function() {
-                    removeFile(index);
-                });
-                
-                fileItem.appendChild(fileInfo);
-                fileItem.appendChild(removeBtn);
-                fileList.appendChild(fileItem);
-            });
-        } else {
-            fileListContainer.classList.add('hidden');
-            startButton.disabled = true;
-        }
-    }
-    
-    function formatFileSize(bytes) {
-        if (bytes < 1024) return bytes + ' B';
-        else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-        else return (bytes / 1048576).toFixed(1) + ' MB';
-    }
-
-    function removeFile(index) {
-        files = files.filter((_, i) => i !== index);
-        updateFileList();
-    }
-
-    function showError(message) {
-        errorText.textContent = message;
-        errorMessage.classList.remove('hidden');
-    }
-    
-    function hideError() {
-        errorMessage.classList.add('hidden');
-    }
-
-    function showStatus(message, isComplete = false) {
-        statusText.textContent = message;
-        if (isComplete) {
-            statusIcon.innerHTML = '<i class="fas fa-check-circle text-green-500 text-lg"></i>';
-            statusMessage.classList.remove('bg-blue-50', 'border-blue-500');
-            statusMessage.classList.add('bg-green-50', 'border-green-500');
-            statusText.classList.remove('text-blue-700');
-            statusText.classList.add('text-green-700');
-        } else {
-            statusIcon.innerHTML = '<div class="spinner"></div>';
-            statusMessage.classList.add('bg-blue-50', 'border-blue-500');
-            statusMessage.classList.remove('bg-green-50', 'border-green-500');
-            statusText.classList.add('text-blue-700');
-            statusText.classList.remove('text-green-700');
-        }
-        statusMessage.classList.remove('hidden');
-    }
-
-    function hideStatus() {
-        statusMessage.classList.add('hidden');
-    }
 // Add PDF download setup
     setupDownloadPDF();
 });
