@@ -372,6 +372,8 @@ const supabaseUrl = 'https://saiwhkhgnsgakvbohwym.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhaXdoa2hnbnNnYWt2Ym9od3ltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc3MzIxMjIsImV4cCI6MjA2MzMwODEyMn0.4MUgz7sYll0MYV30mwbAAYkLDs2MtPpSykgvWE10KuU';
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
+let files = [];
+        
 function showMainApp() {
     document.getElementById('auth-box').style.display = 'none';
     document.getElementById('main-app').style.display = '';
@@ -662,7 +664,6 @@ document.addEventListener("DOMContentLoaded", async function() {
     const statusIcon = document.getElementById('status-icon');
     const clearAllBtn = document.getElementById('clear-all');
 
-    let files = [];
     const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png'];
     const typeNames = {
         'application/pdf': 'PDF',
