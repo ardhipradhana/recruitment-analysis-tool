@@ -536,7 +536,9 @@ async function startAnalysis() {
         
         // Get the response text first
         const responseText = await response.text();
-        console.log("Raw response:", responseText); // For debugging
+        console.log("Raw response length:", responseText.length);
+        console.log("Raw response (first 300 chars):", responseText.substring(0, 300));
+        console.log("Raw response (last 300 chars):", responseText.substring(responseText.length - 300));
         
         // Try to parse as JSON
         let data;
