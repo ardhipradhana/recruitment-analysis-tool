@@ -354,6 +354,7 @@
                 <li>Batch upload via Google Drive for efficient processing</li>
                 <li>Flexible output formats (Google Docs, Slides, Sheets, PDF)</li>
                 <li>Personalized report templates to match your brand</li>
+                <li>Match candidates against your specific job requirements</li>
             </ul>
         </div>
         <div class="mt-4 md:mt-0 flex-shrink-0 text-center">
@@ -623,7 +624,7 @@ function showAnalysisResults(data) {
     // Update score if available
     if (data.candidateScore) {
         const scoreValue = parseInt(data.candidateScore);
-        document.getElementById('candidate-score').textContent = `${scoreValue}%`;
+        document.getElementById('candidate-score').textContent = `${scoreValue}`;
         document.querySelector('.score-circle').style.setProperty('--score-percent', `${scoreValue}%`);
     }
     
