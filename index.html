@@ -536,29 +536,31 @@ async function startAnalysis() {
         
         // Get the response text first
         let data;
+
 try {
-    data = await response.json(); // cleaner & more reliable
-    console.log("Parsed data:", data);
+  const contentType = response.headers.get("content-type");
+  const raw = await response.text();
 
-    // Store the analysis results for later use
-    sessionStorage.setItem('analysisResults', JSON.stringify(data));
+  if (!raw || raw.trim().length === 0) {
+    throw new Error("Empty response from server");
+  }
 
-    // Show the results UI
-    showAnalysisResults(data);
+  if (contentType && contentType.includes("application/json")) {
+    data = JSON.parse(raw);
+  } else {
+    throw new Error("Invalid content-type or response format");
+  }
+
+  console.log("Parsed data:", data);
+
+  // Save + show
+  sessionStorage.setItem('analysisResults', JSON.stringify(data));
+  showAnalysisResults(data);
 } catch (err) {
-    console.error("Failed to parse JSON:", err);
-    showError("An error occurred: Invalid JSON response from server.");
-    startButton.disabled = false;
-    hideAnalysisLoading();
-}
-
-        
-    } catch (error) {
-        console.error('Analysis error:', error);
-        showError('An error occurred: ' + error.message);
-        startButton.disabled = false;
-        hideAnalysisLoading();
-    }
+  console.error("Failed to handle JSON:", err);
+  showError("An error occurred while handling the response. Please try again.");
+  startButton.disabled = false;
+  hideAnalysisLoading();
 }
 
 function showAnalysisLoading() {
