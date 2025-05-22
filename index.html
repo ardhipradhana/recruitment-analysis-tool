@@ -688,10 +688,20 @@ let typeIcons;
 function showMainApp() {
     document.getElementById('auth-box').style.display = 'none';
     document.getElementById('main-app').style.display = '';
+    // Hide the animated background when logged in
+    const animatedBg = document.querySelector('.animated-background');
+    if (animatedBg) {
+        animatedBg.style.display = 'none';
+    }
 }
 function showAuthBox() {
     document.getElementById('auth-box').style.display = '';
     document.getElementById('main-app').style.display = 'none';
+    // Show the animated background when back to login
+    const animatedBg = document.querySelector('.animated-background');
+    if (animatedBg) {
+        animatedBg.style.display = '';
+    }
 }
 function showError(message) {
     errorText.textContent = message;
