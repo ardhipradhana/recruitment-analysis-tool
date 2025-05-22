@@ -263,6 +263,154 @@
     position: relative;
     z-index: 10;
 }
+/* Multiple Candidates Layout */
+.candidates-overview {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+.candidates-sidebar {
+    position: sticky;
+    top: 20px;
+}
+
+.candidate-summary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.candidate-grid {
+    display: grid;
+    gap: 12px;
+}
+
+.candidate-mini-card {
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.candidate-mini-card:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+    transform: translateY(-2px);
+}
+
+.candidate-mini-card.active {
+    border-color: #3b82f6;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+.candidate-mini-card.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: #3b82f6;
+    border-radius: 0 4px 4px 0;
+}
+
+.mini-card-header {
+    display: flex;
+    justify-content: between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.mini-card-info h4 {
+    font-weight: 600;
+    font-size: 14px;
+    color: #1f2937;
+    margin: 0 0 2px 0;
+}
+
+.mini-card-info p {
+    font-size: 12px;
+    color: #6b7280;
+    margin: 0;
+}
+
+.mini-score-ring {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: conic-gradient(#10b981 0%, #10b981 var(--score), #e5e7eb var(--score), #e5e7eb 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.mini-score-ring::before {
+    content: '';
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: white;
+    position: absolute;
+}
+
+.mini-score-text {
+    position: relative;
+    z-index: 1;
+    font-weight: bold;
+    font-size: 11px;
+    color: #059669;
+}
+
+.mini-skills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.mini-skill-tag {
+    background: #f1f5f9;
+    color: #475569;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 500;
+}
+
+.candidate-detail-view {
+    flex: 1;
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+    .candidates-overview {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .candidates-sidebar {
+        position: static;
+        order: 2;
+    }
+    
+    .candidate-detail-view {
+        order: 1;
+    }
+    
+    .candidate-grid {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+}
 </style>
     </style>
 </head>
@@ -577,85 +725,118 @@
     </div>
 </div>
 
-<!-- 2. Add a simplified results section -->
+<!-- Replace your existing analysis-results div with this -->
 <div id="analysis-results" class="hidden">
-    <!-- Candidate Overview -->
-    <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-        <div class="flex flex-col md:flex-row justify-between items-center md:items-start gap-6">
-            <div>
-                <div class="flex items-center mb-2">
-                    <h2 id="candidate-name" class="text-2xl font-bold text-gray-800">Candidate Name</h2>
-                    <span class="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">Free Trial</span>
+    <!-- Single Candidate View (existing) -->
+    <div id="single-candidate-view">
+        <!-- Your existing single candidate HTML stays exactly the same -->
+        <!-- Candidate Overview -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <div class="flex flex-col md:flex-row justify-between items-center md:items-start gap-6">
+                <div>
+                    <div class="flex items-center mb-2">
+                        <h2 id="candidate-name" class="text-2xl font-bold text-gray-800">Candidate Name</h2>
+                        <span class="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">Free Trial</span>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-2 mt-2">
+                        <span class="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-md">Resume Analysis</span>
+                        <span class="text-xs bg-green-50 text-green-700 px-2 py-1 rounded-md">AI-Powered</span>
+                        <span id="analysis-date" class="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-md">May 21, 2025</span>
+                    </div>
                 </div>
                 
-                <div class="flex flex-wrap gap-2 mt-2">
-                    <span class="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-md">Resume Analysis</span>
-                    <span class="text-xs bg-green-50 text-green-700 px-2 py-1 rounded-md">AI-Powered</span>
-                    <span id="analysis-date" class="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-md">May 21, 2025</span>
-                </div>
-            </div>
-            
-            <div class="text-center">
-                <div class="score-circle" style="--score-percent: 75%">
-                    <div class="score-label">Score</div>
-                    <div class="score-value" id="candidate-score">75</div>
+                <div class="text-center">
+                    <div class="score-circle" style="--score-percent: 75%">
+                        <div class="score-label">Score</div>
+                        <div class="score-value" id="candidate-score">75</div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    
-    <!-- Executive Summary -->
-    <div class="analysis-card p-6 mb-6">
-        <div class="flex items-center mb-4">
-            <i class="fas fa-file-alt text-blue-500 mr-3"></i>
-            <h3 class="text-lg font-semibold">Executive Summary</h3>
-        </div>
-        <div id="executive-summary" class="text-gray-700">
-            <!-- Executive summary will be inserted here -->
-        </div>
-    </div>
-    
-    <!-- Core Competencies Preview -->
-    <div class="analysis-card p-6 mb-6">
-        <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center">
-                <i class="fas fa-brain text-blue-500 mr-3"></i>
-                <h3 class="text-lg font-semibold">Core Competencies</h3>
+        
+        <!-- Executive Summary -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <div class="flex items-center mb-4">
+                <i class="fas fa-file-alt text-blue-500 mr-3"></i>
+                <h3 class="text-lg font-semibold">Executive Summary</h3>
             </div>
-            <span class="text-sm text-gray-500">Top Skills Preview</span>
+            <div id="executive-summary" class="text-gray-700">
+                <!-- Executive summary will be inserted here -->
+            </div>
         </div>
-        <div id="core-competencies" class="flex flex-wrap gap-1.5">
-            <!-- Top skills will be inserted here -->
+        
+        <!-- Core Competencies Preview -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center">
+                    <i class="fas fa-brain text-blue-500 mr-3"></i>
+                    <h3 class="text-lg font-semibold">Core Competencies</h3>
+                </div>
+                <span class="text-sm text-gray-500">Top Skills Preview</span>
+            </div>
+            <div id="core-competencies" class="flex flex-wrap gap-1.5">
+                <!-- Top skills will be inserted here -->
+            </div>
+        </div>
+        
+        <!-- Upgrade CTA -->
+        <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-6 text-white mb-6">
+            <div class="md:flex justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <h3 class="font-bold text-xl mb-2">Take Your Recruitment Process to the Next Level</h3>
+                    <p class="opacity-90 mb-2">Unlock advanced customization options and powerful features:</p>
+                    <ul class="list-disc pl-5 text-sm opacity-90 space-y-1">
+                        <li>Custom metrics tracking tailored to your hiring needs</li>
+                        <li>Batch upload via Google Drive for efficient processing</li>
+                        <li>Flexible output formats (Google Docs, Slides, Sheets, PDF)</li>
+                        <li>Personalized report templates to match your brand</li>
+                        <li>Match candidates against your specific job requirements</li>
+                    </ul>
+                </div>
+                <div class="mt-4 md:mt-0 flex-shrink-0 text-center">
+                    <p class="text-sm italic text-white opacity-80 mb-2">You've tried it, now make it yours.</p>
+                    <a href="https://calendly.com/ardhipradhana/montpro_discovery" class="inline-block px-6 py-3 bg-white text-purple-700 font-medium rounded-lg hover:bg-gray-100 transition-colors shadow-md">
+                        <i class="fas fa-magic mr-2"></i>
+                        Get My Tailored Version
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
-    
-    <!-- Upgrade CTA -->
-    <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-6 text-white mb-6">
-    <div class="md:flex justify-between items-center">
-        <div class="mb-4 md:mb-0">
-            <h3 class="font-bold text-xl mb-2">Take Your Recruitment Process to the Next Level</h3>
-            <p class="opacity-90 mb-2">Unlock advanced customization options and powerful features:</p>
-            <ul class="list-disc pl-5 text-sm opacity-90 space-y-1">
-                <li>Custom metrics tracking tailored to your hiring needs</li>
-                <li>Batch upload via Google Drive for efficient processing</li>
-                <li>Flexible output formats (Google Docs, Slides, Sheets, PDF)</li>
-                <li>Personalized report templates to match your brand</li>
-                <li>Match candidates against your specific job requirements</li>
-            </ul>
-        </div>
-        <div class="mt-4 md:mt-0 flex-shrink-0 text-center">
-            <p class="text-sm italic text-white opacity-80 mb-2">You've tried it, now make it yours.</p>
-            <a href="https://calendly.com/ardhipradhana/montpro_discovery" class="inline-block px-6 py-3 bg-white text-purple-700 font-medium rounded-lg hover:bg-gray-100 transition-colors shadow-md">
-                <i class="fas fa-magic mr-2"></i>
-                Get My Tailored Version
-            </a>
+
+    <!-- Multiple Candidates View (new) -->
+    <div id="multiple-candidates-view" class="hidden">
+        <div class="candidates-overview">
+            <!-- Candidates Sidebar -->
+            <div class="candidates-sidebar">
+                <!-- Summary Header -->
+                <div class="candidate-summary">
+                    <div class="text-2xl font-bold mb-1" id="total-candidates">5</div>
+                    <div class="text-sm opacity-90">Candidates Analyzed</div>
+                    <div class="mt-3 text-xs opacity-75" id="analysis-timestamp">
+                        Analysis completed on May 22, 2025
+                    </div>
+                </div>
+
+                <!-- Candidate Cards Grid -->
+                <div class="candidate-grid" id="candidate-cards">
+                    <!-- Cards will be dynamically inserted here -->
+                </div>
+            </div>
+
+            <!-- Detailed View -->
+            <div class="candidate-detail-view">
+                <div id="selected-candidate-detail">
+                    <!-- Selected candidate details will be shown here -->
+                </div>
+            </div>
         </div>
     </div>
-</div>
     
     <!-- Actions -->
     <div class="flex flex-col md:flex-row justify-between gap-4 mt-6">
-        <button id="new-analysis-btn" class="px-4 py-2 btn-secondary rounded-lg flex items-center justify-center">
+        <button id="new-analysis-btn" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg flex items-center justify-center hover:bg-gray-300 transition-colors">
             <i class="fas fa-arrow-left mr-2"></i>
             Analyze Another Resume
         </button>
@@ -909,56 +1090,8 @@ function hideAnalysisLoading() {
 }
 
 function showAnalysisResults(data) {
-    hideAnalysisLoading();
-    document.getElementById('analysis-results').classList.remove('hidden');
-    
-    // Update candidate name if available
-    if (data.candidateName) {
-        document.getElementById('candidate-name').textContent = data.candidateName;
-    }
-    
-    // Update score if available
-    if (data.candidateScore) {
-        const scoreValue = parseInt(data.candidateScore);
-        document.getElementById('candidate-score').textContent = `${scoreValue}`;
-        document.querySelector('.score-circle').style.setProperty('--score-percent', `${scoreValue}%`);
-    }
-    
-    // Update executive summary
-    if (data.executiveSummary) {
-        document.getElementById('executive-summary').innerHTML = `<p>${data.executiveSummary}</p>`;
-    }
-    
-    // Show core competencies preview
-if (data.coreCompetencies) {
-    const skillsContainer = document.getElementById('core-competencies');
-    skillsContainer.innerHTML = '';
-    
-    // Parse skills - assuming coreCompetencies might be a string or an array
-    let skills = [];
-    if (Array.isArray(data.coreCompetencies)) {
-        skills = data.coreCompetencies;
-    } else if (typeof data.coreCompetencies === 'string') {
-        // Format the text as paragraphs with bullet points preserved
-        skillsContainer.innerHTML = data.coreCompetencies
-            .replace(/\n/g, '<br>')
-            .replace(/- /g, '• ');
-        return; // Exit early as we've directly set the HTML
-    }
-    
-    // If it's an array, show all skills
-    skills.forEach(skill => {
-        const badge = document.createElement('span');
-        badge.className = 'skill-badge';
-        badge.textContent = skill;
-        skillsContainer.appendChild(badge);
-    });
-}
-    
-    // Update analysis date
-    const today = new Date();
-    document.getElementById('analysis-date').textContent = today.toLocaleDateString();
-    
+    // Use the new multiple candidates handler
+    showMultipleCandidatesResults(data);
 }
 
 function setupDownloadPDF() {
@@ -1041,6 +1174,233 @@ async function signIn() {
     }
 }
 
+// Multiple Candidates Handling Functions
+let candidatesData = [];
+let selectedCandidateIndex = 0;
+
+function showMultipleCandidatesResults(data) {
+    hideAnalysisLoading();
+    document.getElementById('analysis-results').classList.remove('hidden');
+    
+    // Check if data is array (multiple candidates) or single object
+    if (Array.isArray(data)) {
+        candidatesData = data;
+        showMultipleCandidatesView();
+    } else {
+        // Single candidate - use existing flow
+        candidatesData = [data];
+        showSingleCandidateView(data);
+    }
+}
+
+function showMultipleCandidatesView() {
+    document.getElementById('single-candidate-view').classList.add('hidden');
+    document.getElementById('multiple-candidates-view').classList.remove('hidden');
+    
+    // Update summary
+    document.getElementById('total-candidates').textContent = candidatesData.length;
+    document.getElementById('analysis-timestamp').textContent = 
+        `Analysis completed on ${new Date().toLocaleDateString()}`;
+    
+    // Generate candidate cards
+    generateCandidateCards();
+    
+    // Show first candidate by default
+    showCandidateDetail(0);
+}
+
+function generateCandidateCards() {
+    const cardsContainer = document.getElementById('candidate-cards');
+    cardsContainer.innerHTML = '';
+    
+    candidatesData.forEach((candidate, index) => {
+        const card = createCandidateCard(candidate, index);
+        cardsContainer.appendChild(card);
+    });
+}
+
+function createCandidateCard(candidate, index) {
+    const card = document.createElement('div');
+    card.className = `candidate-mini-card ${index === selectedCandidateIndex ? 'active' : ''}`;
+    card.onclick = () => showCandidateDetail(index);
+    
+    // Extract top 3 skills for preview
+    let topSkills = [];
+    if (candidate.coreCompetencies) {
+        if (Array.isArray(candidate.coreCompetencies)) {
+            topSkills = candidate.coreCompetencies.slice(0, 3);
+        } else if (typeof candidate.coreCompetencies === 'string') {
+            // Extract first few skills from text
+            const skillMatches = candidate.coreCompetencies.match(/[\w\s]+/g);
+            if (skillMatches) {
+                topSkills = skillMatches.slice(0, 3).map(skill => skill.trim());
+            }
+        }
+    }
+    
+    const score = parseInt(candidate.candidateScore) || 75;
+    const name = candidate.candidateName || `Candidate ${index + 1}`;
+    const title = candidate.candidateTitle || candidate.position || 'Professional';
+    
+    card.innerHTML = `
+        <div class="mini-card-header">
+            <div class="mini-card-info">
+                <h4>${name}</h4>
+                <p>${title}</p>
+            </div>
+            <div class="mini-score-ring" style="--score: ${score}%;">
+                <span class="mini-score-text">${score}</span>
+            </div>
+        </div>
+        <div class="mini-skills">
+            ${topSkills.map(skill => `<span class="mini-skill-tag">${skill}</span>`).join('')}
+        </div>
+    `;
+    
+    return card;
+}
+
+function showCandidateDetail(index) {
+    selectedCandidateIndex = index;
+    const candidate = candidatesData[index];
+    
+    // Update active card
+    document.querySelectorAll('.candidate-mini-card').forEach((card, i) => {
+        if (i === index) {
+            card.classList.add('active');
+        } else {
+            card.classList.remove('active');
+        }
+    });
+    
+    // Generate detailed view
+    const detailContainer = document.getElementById('selected-candidate-detail');
+    detailContainer.innerHTML = generateCandidateDetailHTML(candidate, index);
+}
+
+function generateCandidateDetailHTML(candidate, index) {
+    const score = parseInt(candidate.candidateScore) || 75;
+    const name = candidate.candidateName || `Candidate ${index + 1}`;
+    const title = candidate.candidateTitle || candidate.position || 'Professional';
+    
+    return `
+        <!-- Candidate Overview -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <div class="flex flex-col md:flex-row justify-between items-center md:items-start gap-6">
+                <div>
+                    <div class="flex items-center mb-2">
+                        <h2 class="text-2xl font-bold text-gray-800">${name}</h2>
+                        <span class="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">Candidate ${index + 1}</span>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-2 mt-2">
+                        <span class="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-md">${title}</span>
+                        <span class="text-xs bg-green-50 text-green-700 px-2 py-1 rounded-md">AI-Powered</span>
+                        <span class="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-md">${new Date().toLocaleDateString()}</span>
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <div class="score-circle" style="--score-percent: ${score}%">
+                        <div class="score-label">Score</div>
+                        <div class="score-value">${score}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Executive Summary -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <div class="flex items-center mb-4">
+                <i class="fas fa-file-alt text-blue-500 mr-3"></i>
+                <h3 class="text-lg font-semibold">Executive Summary</h3>
+            </div>
+            <div class="text-gray-700">
+                ${candidate.executiveSummary ? `<p>${candidate.executiveSummary}</p>` : '<p>Executive summary not available.</p>'}
+            </div>
+        </div>
+        
+        <!-- Core Competencies -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center">
+                    <i class="fas fa-brain text-blue-500 mr-3"></i>
+                    <h3 class="text-lg font-semibold">Core Competencies</h3>
+                </div>
+            </div>
+            <div class="text-gray-700">
+                ${generateCompetenciesHTML(candidate.coreCompetencies)}
+            </div>
+        </div>
+        
+        <!-- Upgrade CTA -->
+        <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-6 text-white mb-6">
+            <div class="md:flex justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <h3 class="font-bold text-xl mb-2">Get Advanced Analysis for All Candidates</h3>
+                    <p class="opacity-90 mb-2">Unlock comprehensive insights for your entire candidate pool:</p>
+                    <ul class="list-disc pl-5 text-sm opacity-90 space-y-1">
+                        <li>Side-by-side candidate comparisons</li>
+                        <li>Custom scoring criteria and weightings</li>
+                        <li>Export all results to Excel or PDF reports</li>
+                        <li>Integration with your ATS system</li>
+                        <li>Advanced filtering and ranking tools</li>
+                    </ul>
+                </div>
+                <div class="mt-4 md:mt-0 flex-shrink-0 text-center">
+                    <p class="text-sm italic text-white opacity-80 mb-2">Analyze ${candidatesData.length} candidates with full features</p>
+                    <a href="https://calendly.com/ardhipradhana/montpro_discovery" class="inline-block px-6 py-3 bg-white text-purple-700 font-medium rounded-lg hover:bg-gray-100 transition-colors shadow-md">
+                        <i class="fas fa-magic mr-2"></i>
+                        Upgrade Now
+                    </a>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function generateCompetenciesHTML(competencies) {
+    if (!competencies) return '<p>No competencies data available.</p>';
+    
+    if (Array.isArray(competencies)) {
+        return competencies.map(skill => 
+            `<span class="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm mr-2 mb-2">${skill}</span>`
+        ).join('');
+    } else if (typeof competencies === 'string') {
+        return competencies.replace(/\n/g, '<br>').replace(/- /g, '• ');
+    }
+    
+    return '<p>Competencies data format not recognized.</p>';
+}
+
+function showSingleCandidateView(data) {
+    document.getElementById('multiple-candidates-view').classList.add('hidden');
+    document.getElementById('single-candidate-view').classList.remove('hidden');
+    
+    // Use existing single candidate display logic
+    if (data.candidateName) {
+        document.getElementById('candidate-name').textContent = data.candidateName;
+    }
+    
+    if (data.candidateScore) {
+        const scoreValue = parseInt(data.candidateScore);
+        document.getElementById('candidate-score').textContent = `${scoreValue}`;
+        document.querySelector('.score-circle').style.setProperty('--score-percent', `${scoreValue}%`);
+    }
+    
+    if (data.executiveSummary) {
+        document.getElementById('executive-summary').innerHTML = `<p>${data.executiveSummary}</p>`;
+    }
+    
+    if (data.coreCompetencies) {
+        const skillsContainer = document.getElementById('core-competencies');
+        skillsContainer.innerHTML = generateCompetenciesHTML(data.coreCompetencies);
+    }
+    
+    const today = new Date();
+    document.getElementById('analysis-date').textContent = today.toLocaleDateString();
+}
+        
 document.addEventListener("DOMContentLoaded", async function() {
     // 1. Process magic link
     await supabase.auth.getSession();
