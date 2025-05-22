@@ -378,12 +378,15 @@
 }
 
 .mini-skill-tag {
-    background: #f1f5f9;
-    color: #475569;
-    padding: 2px 8px;
-    border-radius: 12px;
+    background: linear-gradient(45deg, #3b82f6, #8b5cf6);
+    color: white;
+    padding: 3px 10px;
+    border-radius: 15px;
     font-size: 10px;
     font-weight: 500;
+    display: inline-block;
+    margin: 1px;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
 }
 
 .candidate-detail-view {
@@ -1288,19 +1291,8 @@ function createCandidateCard(candidate, index) {
     card.className = `candidate-mini-card ${index === selectedCandidateIndex ? 'active' : ''}`;
     card.onclick = () => showCandidateDetail(index);
     
-    // Extract top 3 skills for preview
-    let topSkills = [];
-    if (candidate.coreCompetencies) {
-        if (Array.isArray(candidate.coreCompetencies)) {
-            topSkills = candidate.coreCompetencies.slice(0, 3);
-        } else if (typeof candidate.coreCompetencies === 'string') {
-            // Extract first few skills from text
-            const skillMatches = candidate.coreCompetencies.match(/[\w\s]+/g);
-            if (skillMatches) {
-                topSkills = skillMatches.slice(0, 3).map(skill => skill.trim());
-            }
-        }
-    }
+    // Extract and format top 3 skills for preview
+    const topSkills = extractAndFormatSkills(candidate.coreCompetencies);
     
     const score = parseInt(candidate.candidateScore) || 75;
     const name = candidate.candidateName || `Candidate ${index + 1}`;
@@ -1463,6 +1455,61 @@ function showSingleCandidateView(data) {
     
     const today = new Date();
     document.getElementById('analysis-date').textContent = today.toLocaleDateString();
+}
+
+// Skill formatting functions
+function formatSkillText(skill) {
+    // Words that should remain lowercase (except at the beginning)
+    const lowercaseWords = ['and', 'of', 'in', 'the', 'a', 'an', 'to', 'for', 'with', 'by', 'on', 'at'];
+    
+    return skill.toLowerCase()
+        .split(' ')
+        .map((word, index) => {
+            // Always capitalize the first word
+            if (index === 0) {
+                return word.charAt(0).toUpperCase() + word.slice(1);
+            }
+            // Keep lowercase words lowercase unless they're the first word
+            if (lowercaseWords.includes(word)) {
+                return word;
+            }
+            // Capitalize other words
+            return word.charAt(0).toUpperCase() + word.slice(1);
+        })
+        .join(' ');
+}
+
+function extractAndFormatSkills(competencies) {
+    if (!competencies) return [];
+    
+    let skills = [];
+    if (Array.isArray(competencies)) {
+        skills = competencies.slice(0, 3);
+    } else if (typeof competencies === 'string') {
+        // Extract skills from text - look for bullet points or comma-separated items
+        const lines = competencies.split('\n');
+        for (let line of lines) {
+            if (line.includes('-') || line.includes('•')) {
+                // Extract text after bullet point
+                const skillText = line.replace(/^[-•]\s*/, '').trim();
+                if (skillText && skillText.length > 0) {
+                    // Take first few words as skill name
+                    const shortSkill = skillText.split(' ').slice(0, 4).join(' ');
+                    skills.push(shortSkill);
+                    if (skills.length >= 3) break;
+                }
+            }
+        }
+        
+        // If no bullet points found, try to extract key phrases
+        if (skills.length === 0) {
+            const phrases = competencies.match(/[A-Z][a-z]+(?:\s+[a-z]+)*(?:\s+[A-Z][a-z]+)*/g) || [];
+            skills = phrases.slice(0, 3);
+        }
+    }
+    
+    // Format each skill with proper capitalization
+    return skills.map(skill => formatSkillText(skill));
 }
         
 document.addEventListener("DOMContentLoaded", async function() {
