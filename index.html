@@ -718,7 +718,7 @@
             </div>
             <div class="flex items-center justify-center opacity-50">
                 <div class="w-4 h-4 border border-gray-300 rounded-full mr-2"></div>
-                <span>Generating recommendations</span>
+                <span>Generating outputs</span>
             </div>
         </div>
     </div>
@@ -1215,14 +1215,39 @@ function showMultipleCandidatesResults(data) {
     hideAnalysisLoading();
     document.getElementById('analysis-results').classList.remove('hidden');
     
-    // Check if data is array (multiple candidates) or single object
+    // Check if data has candidates array nested inside
+    let candidatesArray = null;
+    
     if (Array.isArray(data)) {
-        console.log('MULTIPLE CANDIDATES DETECTED - Array with', data.length, 'items');
-        candidatesData = data;
+        console.log('Data is already an array');
+        candidatesArray = data;
+    } else if (data && Array.isArray(data.candidates)) {
+        console.log('Found candidates array in data.candidates');
+        candidatesArray = data.candidates;
+    } else if (data && Array.isArray(data.data)) {
+        console.log('Found candidates array in data.data');
+        candidatesArray = data.data;
+    } else if (data && typeof data === 'object') {
+        // Check if data has any property that is an array
+        for (let key in data) {
+            if (Array.isArray(data[key]) && data[key].length > 0) {
+                console.log(`Found candidates array in data.${key}`);
+                candidatesArray = data[key];
+                break;
+            }
+        }
+    }
+    
+    if (candidatesArray && candidatesArray.length > 1) {
+        console.log('MULTIPLE CANDIDATES DETECTED - Array with', candidatesArray.length, 'items');
+        candidatesData = candidatesArray;
         showMultipleCandidatesView();
+    } else if (candidatesArray && candidatesArray.length === 1) {
+        console.log('SINGLE CANDIDATE IN ARRAY - Using single view');
+        candidatesData = candidatesArray;
+        showSingleCandidateView(candidatesArray[0]);
     } else {
-        console.log('SINGLE CANDIDATE DETECTED - Using single view');
-        // Single candidate - use existing flow
+        console.log('SINGLE CANDIDATE OBJECT - Using single view');
         candidatesData = [data];
         showSingleCandidateView(data);
     }
