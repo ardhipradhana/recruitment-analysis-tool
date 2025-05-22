@@ -1242,7 +1242,8 @@ function showMultipleCandidatesResults(data) {
     
     if (candidatesArray && candidatesArray.length > 1) {
         console.log('MULTIPLE CANDIDATES DETECTED - Array with', candidatesArray.length, 'items');
-        console.log('First candidate data:', candidatesArray[0]); // Debug the actual structure
+        console.log('First candidate structure:', candidatesArray[0]);
+        console.log('Keys in first candidate:', Object.keys(candidatesArray[0]));
         candidatesData = candidatesArray;
         showMultipleCandidatesView();
     } else if (candidatesArray && candidatesArray.length === 1) {
