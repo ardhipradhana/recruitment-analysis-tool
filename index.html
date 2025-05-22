@@ -1295,8 +1295,48 @@ function createCandidateCard(candidate, index) {
     const topSkills = extractAndFormatSkills(candidate.coreCompetencies);
     
     const score = parseInt(candidate.candidateScore) || 75;
-    const name = candidate.candidateName || `Candidate ${index + 1}`;
-    const title = candidate.candidateTitle || candidate.position || 'Professional';
+const name = candidate.candidateName || `Candidate ${index + 1}`;
+
+// Extract job title from executive summary if not directly available
+let title = candidate.candidateTitle || candidate.position || candidate.jobTitle;
+
+if (!title && candidate.executiveSummary) {
+    // Try to extract title from executive summary
+    const summaryText = candidate.executiveSummary;
+    
+    // Look for common title patterns
+    const titlePatterns = [
+        /is (?:an?|the) ([^.]+?) with/i,  // "is a Senior Manager with"
+        /(?:seasoned|experienced|accomplished) ([^.]+?) with/i,  // "seasoned Finance Director with"
+        /(?:as|is) (?:an?|the) ([^.]+?)\./i,  // "as a Product Manager."
+        /his role as ([^.]+?)\./i,  // "his role as CFO."
+        /working as (?:an?|the) ([^.]+?)\./i  // "working as a Team Lead."
+    ];
+    
+    for (let pattern of titlePatterns) {
+        const match = summaryText.match(pattern);
+        if (match && match[1]) {
+            title = match[1].trim();
+            // Clean up common words and make it more title-like
+            title = title.replace(/\b(leader|professional|expert|individual)\b/gi, '')
+                        .replace(/\s+/g, ' ')
+                        .trim();
+            if (title.length > 0 && title.length < 50) {
+                break;
+            }
+        }
+    }
+}
+
+// Fallback if no title found
+if (!title || title.length === 0) {
+    title = 'Professional';
+}
+
+// Format the title properly (capitalize first letters)
+title = title.split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
     
     card.innerHTML = `
         <div class="mini-card-header">
