@@ -1094,6 +1094,16 @@ function hideAnalysisLoading() {
 }
 
 function showAnalysisResults(data) {
+    // DEBUG: Check what we received
+    console.log('=== showAnalysisResults called ===');
+    console.log('Raw data:', data);
+    console.log('Type of data:', typeof data);
+    console.log('Is array?', Array.isArray(data));
+    if (Array.isArray(data)) {
+        console.log('Array length:', data.length);
+    }
+    console.log('================================');
+    
     // Use the new multiple candidates handler
     showMultipleCandidatesResults(data);
 }
@@ -1183,14 +1193,19 @@ let candidatesData = [];
 let selectedCandidateIndex = 0;
 
 function showMultipleCandidatesResults(data) {
+    console.log('=== showMultipleCandidatesResults called ===');
+    console.log('Data received:', data);
+    
     hideAnalysisLoading();
     document.getElementById('analysis-results').classList.remove('hidden');
     
     // Check if data is array (multiple candidates) or single object
     if (Array.isArray(data)) {
+        console.log('MULTIPLE CANDIDATES DETECTED - Array with', data.length, 'items');
         candidatesData = data;
         showMultipleCandidatesView();
     } else {
+        console.log('SINGLE CANDIDATE DETECTED - Using single view');
         // Single candidate - use existing flow
         candidatesData = [data];
         showSingleCandidateView(data);
