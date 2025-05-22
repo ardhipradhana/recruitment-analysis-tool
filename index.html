@@ -1223,7 +1223,8 @@ function showMultipleCandidatesResults(data) {
         candidatesArray = data;
     } else if (data && Array.isArray(data.candidates)) {
         console.log('Found candidates array in data.candidates');
-        candidatesArray = data.candidates;
+        // Extract the JSON objects from the candidates array
+        candidatesArray = data.candidates.map(item => item.json || item);
     } else if (data && Array.isArray(data.data)) {
         console.log('Found candidates array in data.data');
         candidatesArray = data.data;
@@ -1232,7 +1233,8 @@ function showMultipleCandidatesResults(data) {
         for (let key in data) {
             if (Array.isArray(data[key]) && data[key].length > 0) {
                 console.log(`Found candidates array in data.${key}`);
-                candidatesArray = data[key];
+                // Check if items have nested json property
+                candidatesArray = data[key].map(item => item.json || item);
                 break;
             }
         }
@@ -1240,6 +1242,7 @@ function showMultipleCandidatesResults(data) {
     
     if (candidatesArray && candidatesArray.length > 1) {
         console.log('MULTIPLE CANDIDATES DETECTED - Array with', candidatesArray.length, 'items');
+        console.log('First candidate data:', candidatesArray[0]); // Debug the actual structure
         candidatesData = candidatesArray;
         showMultipleCandidatesView();
     } else if (candidatesArray && candidatesArray.length === 1) {
