@@ -150,8 +150,7 @@
         background-size: 1000px 100%;
         animation: shimmer 2s infinite linear;
     }
-    <!-- ADD THIS CSS TO YOUR EXISTING <style> SECTION -->
-<style>
+        
 /* Background Animation Styles */
 .animated-background {
     position: fixed;
@@ -325,7 +324,7 @@
 
 .mini-card-header {
     display: flex;
-    justify-content: between;
+    justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 12px;
 }
@@ -1031,6 +1030,11 @@ async function startAnalysis() {
         } else {
             throw new Error("Invalid content-type or response format");
         }
+
+        // Debug: Let's see what the backend returned
+        console.log('Backend response:', data);
+        console.log('Is array?', Array.isArray(data));
+        console.log('Data length:', data.length);
 
         sessionStorage.setItem('analysisResults', JSON.stringify(data));
         showAnalysisResults(data);
