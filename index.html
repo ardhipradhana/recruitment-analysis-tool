@@ -503,7 +503,11 @@
     }
     
     .candidate-grid {
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 50vh;
+    overflow-y: auto;
     }
     
     /* Responsive margins for single candidate view */
@@ -1056,7 +1060,7 @@
     </div>
 
     <!-- Footer text also here for results page with bottom margin -->
-    <div class="text-center text-sm text-gray-500 mt-8 mb-8">
+    <div id="results-footer" class="text-center text-sm text-gray-500 mt-8 mb-8 hidden">
         <p>Results are provided for recruitment guidance only. Final hiring decisions should consider multiple factors beyond this analysis.</p>
         <p class="mt-1">© 2025 MontPro. All rights reserved.</p>
     </div>
@@ -1862,6 +1866,9 @@ function showAnalysisResults(data) {
 
     // Show the action buttons
     document.getElementById('analysis-actions').classList.remove('hidden');
+
+    // Show the results footer
+    document.getElementById('results-footer').classList.remove('hidden');
 
     // Set up PDF download after showing results
     setupDownloadPDF();
