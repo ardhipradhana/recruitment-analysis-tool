@@ -879,7 +879,7 @@
     </div>
     
     <!-- Actions -->
-    <div class="flex flex-col md:flex-row justify-between gap-4 mt-6" style="margin-left: 20px; margin-bottom: 20px;">
+    <div class="flex flex-col md:flex-row justify-between gap-4 mt-6" style="margin-left: 20px; margin-bottom: 20px; margin-right: 20px;">
         <button id="new-analysis-btn" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg flex items-center justify-center hover:bg-gray-300 transition-colors">
             <i class="fas fa-arrow-left mr-2"></i>
             Analyze Another Resume
@@ -1246,7 +1246,7 @@ function getCurrentCandidateData() {
         return {
             name: candidate.candidateName || `Candidate ${selectedCandidateIndex + 1}`,
             score: candidate.candidateScore || '75',
-            title: candidate.candidateTitle || candidate.position || 'Professional',
+            title: extractTitleFromSummary(candidate) || 'Professional',
             executiveSummary: candidate.executiveSummary || 'No executive summary available.',
             coreCompetencies: candidate.coreCompetencies || 'No competencies data available.',
             isMultiple: true,
@@ -1256,15 +1256,56 @@ function getCurrentCandidateData() {
     } 
     // For single candidate view
     else {
+        const currentData = candidatesData && candidatesData.length > 0 ? candidatesData[0] : null;
         return {
             name: document.getElementById('candidate-name')?.textContent || 'Candidate Name',
             score: document.getElementById('candidate-score')?.textContent || '75',
-            title: 'Professional', // You might want to extract this from somewhere
+            title: currentData ? extractTitleFromSummary(currentData) : 'Professional',
             executiveSummary: document.getElementById('executive-summary')?.textContent || 'No executive summary available.',
-            coreCompetencies: document.getElementById('core-competencies')?.textContent || 'No competencies data available.',
+            coreCompetencies: currentData ? currentData.coreCompetencies : 'No competencies data available.',
             isMultiple: false
         };
     }
+}
+
+function extractTitleFromSummary(candidate) {
+    // First try direct title fields
+    let title = candidate.candidateTitle || candidate.position || candidate.jobTitle;
+    
+    if (!title && candidate.executiveSummary) {
+        const summaryText = candidate.executiveSummary;
+        
+        // Enhanced title extraction patterns
+        const titlePatterns = [
+            /is (?:an?|the) ([^.]+?) with/i,
+            /(?:seasoned|experienced|accomplished) ([^.]+?) with/i,
+            /(?:as|is) (?:an?|the) ([^.]+?)\./i,
+            /expertise in ([^.]+?)\./i,
+            /leader in ([^.]+?)\./i,
+            /specialist in ([^.]+?)\./i,
+            /background in ([^.]+?)\./i
+        ];
+        
+        for (let pattern of titlePatterns) {
+            const match = summaryText.match(pattern);
+            if (match && match[1]) {
+                title = match[1].trim();
+                // Clean up and format
+                title = title.replace(/\b(leader|professional|expert|individual|and)\b/gi, '')
+                            .replace(/\s+/g, ' ')
+                            .trim();
+                if (title.length > 0 && title.length < 60) {
+                    // Capitalize properly
+                    title = title.split(' ')
+                        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                        .join(' ');
+                    break;
+                }
+            }
+        }
+    }
+    
+    return title || 'Professional';
 }
 
 function generatePDF(data) {
@@ -1278,33 +1319,44 @@ function generatePDF(data) {
     
     let yPosition = 20;
     
-    // Header Card
+    // Header Card with better spacing
     doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-    doc.roundedRect(15, yPosition, 180, 35, 5, 5, 'F');
+    doc.roundedRect(15, yPosition, 180, 40, 5, 5, 'F');
     
     // MontPro Logo/Title
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(20);
     doc.setFont(undefined, 'bold');
-    doc.text('MontPro', 20, yPosition + 15);
+    doc.text('MontPro', 20, yPosition + 18);
     
     doc.setFontSize(12);
     doc.setFont(undefined, 'normal');
-    doc.text('Recruitment Analysis Report', 20, yPosition + 25);
+    doc.text('Recruitment Analysis Report', 20, yPosition + 28);
     
-    // Date
+    // Date with better spacing
     doc.setFontSize(10);
-    doc.text(`Generated on ${new Date().toLocaleDateString()}`, 20, yPosition + 35);
+    doc.text(`Generated on ${new Date().toLocaleDateString()}`, 20, yPosition + 38);
     
-    // Score circle (simplified as text)
-    doc.setFontSize(24);
-    doc.setFont(undefined, 'bold');
-    doc.text(`${data.score}`, 170, yPosition + 20);
+    // Score section - improved layout
+    const scoreX = 160;
+    const scoreY = yPosition + 15;
+    
+    // Score label above the number
     doc.setFontSize(10);
     doc.setFont(undefined, 'normal');
-    doc.text('Score', 172, yPosition + 30);
+    doc.setTextColor(255, 255, 255);
+    const scoreText = `${data.score}`;
+    const scoreWidth = doc.getTextWidth(scoreText);
+    const labelWidth = doc.getTextWidth('Score');
     
-    yPosition += 50;
+    // Center align both score and label
+    doc.text('Score', scoreX + (scoreWidth - labelWidth) / 2, scoreY);
+    
+    doc.setFontSize(24);
+    doc.setFont(undefined, 'bold');
+    doc.text(scoreText, scoreX, scoreY + 12);
+    
+    yPosition += 55; // More space after header
     
     // Candidate Information
     doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
@@ -1312,11 +1364,11 @@ function generatePDF(data) {
     doc.setFont(undefined, 'bold');
     doc.text(data.name, 20, yPosition);
     
-    yPosition += 8;
+    yPosition += 10;
     doc.setFontSize(12);
     doc.setFont(undefined, 'normal');
     doc.setTextColor(grayColor[0], grayColor[1], grayColor[2]);
-    doc.text(data.title, 20, yPosition);
+    doc.text(data.title, 20, yPosition); // Now using dynamic title
     
     if (data.isMultiple) {
         doc.text(`Candidate ${data.candidateNumber} of ${data.totalCandidates}`, 140, yPosition);
@@ -1338,9 +1390,9 @@ function generatePDF(data) {
     // Split long text into multiple lines
     const summaryLines = doc.splitTextToSize(data.executiveSummary, 170);
     doc.text(summaryLines, 20, yPosition);
-    yPosition += summaryLines.length * 5 + 10;
+    yPosition += summaryLines.length * 5 + 15;
     
-    // Core Competencies Section
+    // Core Competencies Section - Enhanced with bullet formatting
     doc.setFontSize(14);
     doc.setFont(undefined, 'bold');
     doc.text('Core Competencies', 20, yPosition);
@@ -1349,15 +1401,34 @@ function generatePDF(data) {
     doc.setFontSize(10);
     doc.setFont(undefined, 'normal');
     
-    // Handle competencies text
-    let competenciesText = data.coreCompetencies;
-    if (typeof competenciesText !== 'string') {
-        competenciesText = 'Core competencies data available in detailed view.';
+    // Handle competencies with better formatting
+    if (data.coreCompetencies && typeof data.coreCompetencies === 'string') {
+        // Split by bullet points or line breaks
+        const competencies = data.coreCompetencies
+            .split(/[•\n]/)
+            .map(item => item.replace(/^[-•]\s*/, '').trim())
+            .filter(item => item.length > 0);
+        
+        competencies.forEach((competency, index) => {
+            if (competency.length > 0) {
+                // Add bullet point
+                doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+                doc.circle(22, yPosition - 1, 1, 'F');
+                
+                // Add competency text with proper wrapping
+                const competencyLines = doc.splitTextToSize(competency, 165);
+                doc.text(competencyLines, 27, yPosition);
+                yPosition += competencyLines.length * 5 + 3;
+            }
+        });
+    } else {
+        const competenciesText = 'Core competencies data available in detailed view.';
+        const competenciesLines = doc.splitTextToSize(competenciesText, 170);
+        doc.text(competenciesLines, 20, yPosition);
+        yPosition += competenciesLines.length * 5;
     }
     
-    const competenciesLines = doc.splitTextToSize(competenciesText, 170);
-    doc.text(competenciesLines, 20, yPosition);
-    yPosition += competenciesLines.length * 5 + 20;
+    yPosition += 15;
     
     // Footer
     doc.setFontSize(8);
