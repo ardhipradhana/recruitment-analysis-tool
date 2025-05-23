@@ -424,7 +424,28 @@
     margin-left: 24px;
     margin-right: 24px;
 }
+.connection-status {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 12px;
+        z-index: 1000;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        font-weight: 500;
+    }
 
+    .connection-status.online {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+    }
+
+    .connection-status.offline {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
+    }
+        
 /* Responsive design */
 @media (max-width: 1024px) {
     .candidates-overview {
@@ -477,28 +498,6 @@
         animation: shake 0.5s ease-in-out;
         border: 2px solid #ef4444 !important;
         background: #fef2f2 !important;
-    }
-
-    .connection-status {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 8px 16px;
-        border-radius: 20px;
-        font-size: 12px;
-        z-index: 1000;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        font-weight: 500;
-    }
-
-    .connection-status.online {
-        background: linear-gradient(135deg, #10b981, #059669);
-        color: white;
-    }
-
-    .connection-status.offline {
-        background: linear-gradient(135deg, #ef4444, #dc2626);
-        color: white;
     }
 }
 /* Enhanced Progress Styles */
