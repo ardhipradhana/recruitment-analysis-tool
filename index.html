@@ -249,6 +249,12 @@
     100% { transform: translateY(0); opacity: 1; }
 }
 
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+    20%, 40%, 60%, 80% { transform: translateX(10px); }
+}
+        
 .animate-slide-in {
     animation: slideIn 0.8s ease-out forwards;
     animation-delay: var(--anim-delay);
@@ -1040,25 +1046,6 @@
             }, duration);
         }
     }
-
-updateConnectionStatus(isOnline) {
-    let statusElement = document.getElementById('connection-status');
-    
-    if (!statusElement) {
-        statusElement = document.createElement('div');
-        statusElement.id = 'connection-status';
-        statusElement.className = 'connection-status';
-        document.body.appendChild(statusElement);
-    }
-    
-    if (isOnline) {
-        statusElement.className = 'connection-status online';
-        statusElement.innerHTML = '<i class="fas fa-wifi mr-2"></i>Online';
-    } else {
-        statusElement.className = 'connection-status offline';
-        statusElement.innerHTML = '<i class="fas fa-wifi-slash mr-2"></i>Offline';
-    }
-}
     // Add these methods inside your MontProFeedback class
 
 validateFile(file, options = {}) {
