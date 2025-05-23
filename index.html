@@ -1372,13 +1372,13 @@ function generatePDF(data) {
         doc.text(`Candidate ${data.candidateNumber} of ${data.totalCandidates}`, 140, yPosition);
     }
     
-    yPosition += 20;
+    yPosition += 10;
     
     // Executive Summary Section
     doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
     doc.setFontSize(14);
     doc.setFont(undefined, 'bold');
-    doc.text('Executive Summary', 20, yPosition);
+    doc.text('Executive Summary', 10, yPosition);
     
     yPosition += 10;
     doc.setFontSize(10);
@@ -1387,13 +1387,13 @@ function generatePDF(data) {
     
     // Split long text into multiple lines
     const summaryLines = doc.splitTextToSize(data.executiveSummary, 170);
-    doc.text(summaryLines, 20, yPosition);
+    doc.text(summaryLines, 10, yPosition);
     yPosition += summaryLines.length * 5 + 10; 
     
     // Core Competencies Section - Enhanced with bullet formatting
     doc.setFontSize(14);
     doc.setFont(undefined, 'bold');
-    doc.text('Core Competencies', 20, yPosition);
+    doc.text('Core Competencies', 10, yPosition);
     
     yPosition += 10;
     doc.setFontSize(10);
@@ -1411,12 +1411,12 @@ function generatePDF(data) {
             if (competency.length > 0) {
                 // Check if we have enough space for this competency + footer
                 const competencyLines = doc.splitTextToSize(competency, 165);
-                const spaceNeeded = competencyLines.length * 5 + 25; // Space for competency + footer
+                const spaceNeeded = competencyLines.length * 5 + 15; // Space for competency + footer
                 
                 if (yPosition + spaceNeeded > 270) {
                     // Not enough space, start a new page
                     doc.addPage();
-                    yPosition = 20;
+                    yPosition = 10;
                 }
                 
                 // Add bullet point
@@ -1431,14 +1431,14 @@ function generatePDF(data) {
     } else {
         const competenciesText = 'Core competencies data available in detailed view.';
         const competenciesLines = doc.splitTextToSize(competenciesText, 170);
-        doc.text(competenciesLines, 20, yPosition);
+        doc.text(competenciesLines, 10, yPosition);
         yPosition += competenciesLines.length * 5;
     }
     
     // Ensure footer has enough space
     if (yPosition > 260) {
         doc.addPage();
-        yPosition = 20;
+        yPosition = 10;
     } else {
         yPosition = Math.max(yPosition + 15, 275); // Ensure footer is at bottom
     }
