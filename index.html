@@ -1026,8 +1026,39 @@
         }
     }
     setupConnectionMonitoring() {
-        // Will be added in next steps
+    // Monitor online/offline status
+    window.addEventListener('online', () => {
+        this.showNotification('Connection restored', 'success', 3000);
+        this.updateConnectionStatus(true);
+    });
+    
+    window.addEventListener('offline', () => {
+        this.showNotification('Connection lost - working in offline mode', 'warning', 0);
+        this.updateConnectionStatus(false);
+    });
+    
+    // Initial status
+    this.updateConnectionStatus(navigator.onLine);
+}
+
+updateConnectionStatus(isOnline) {
+    let statusElement = document.getElementById('connection-status');
+    
+    if (!statusElement) {
+        statusElement = document.createElement('div');
+        statusElement.id = 'connection-status';
+        statusElement.className = 'connection-status';
+        document.body.appendChild(statusElement);
     }
+    
+    if (isOnline) {
+        statusElement.className = 'connection-status online';
+        statusElement.innerHTML = '<i class="fas fa-wifi mr-2"></i>Online';
+    } else {
+        statusElement.className = 'connection-status offline';
+        statusElement.innerHTML = '<i class="fas fa-wifi-slash mr-2"></i>Offline';
+    }
+}
     // Add these methods inside your MontProFeedback class
 
 validateFile(file, options = {}) {
