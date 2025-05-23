@@ -1025,21 +1025,6 @@
             }, duration);
         }
     }
-    setupConnectionMonitoring() {
-    // Monitor online/offline status
-    window.addEventListener('online', () => {
-        this.showNotification('Connection restored', 'success', 3000);
-        this.updateConnectionStatus(true);
-    });
-    
-    window.addEventListener('offline', () => {
-        this.showNotification('Connection lost - working in offline mode', 'warning', 0);
-        this.updateConnectionStatus(false);
-    });
-    
-    // Initial status
-    this.updateConnectionStatus(navigator.onLine);
-}
 
 updateConnectionStatus(isOnline) {
     let statusElement = document.getElementById('connection-status');
