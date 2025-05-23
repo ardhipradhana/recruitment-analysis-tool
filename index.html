@@ -799,7 +799,13 @@
             <!-- Error Message -->
             <div id="error-message" class="p-4 mb-4 bg-red-50 border-l-4 border-red-500 rounded-lg flex items-start hidden">
                 <i class="fas fa-exclamation-circle text-red-500 mr-3 mt-0.5"></i>
-                <p id="error-text" class="text-red-700 text-sm"></p>
+                <div class="flex-1">
+                    <p id="error-text" class="text-red-700 text-sm mb-3"></p>
+                    <button id="retry-btn" class="px-4 py-2 bg-red-600 text-white rounded-lg flex items-center hover:bg-red-700 transition-colors text-sm hidden">
+                        <i class="fas fa-redo mr-2"></i>
+                        Retry Analysis
+                    </button>
+                </div>
             </div>
             
             <!-- Status Message -->
@@ -1687,11 +1693,21 @@ async function startAnalysis() {
             showError(`Analysis failed: ${err.message}. Please try again.`, true);
         }
         
-        startButton.disabled = false;
+        showRetryButton();
         hideAnalysisLoading();
     }
 }
 
+function showRetryButton() {
+    const retryBtn = document.getElementById('retry-btn');
+    if (retryBtn) {
+        retryBtn.classList.remove('hidden');
+        retryBtn.onclick = () => {
+            retryBtn.classList.add('hidden');
+            startAnalysis();
+        };
+    }
+}
 
 function showAnalysisLoading() {
     document.getElementById('upload-interface').classList.add('hidden');
