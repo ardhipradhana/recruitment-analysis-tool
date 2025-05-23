@@ -1025,7 +1025,8 @@
                         </div>
                     </div>
                 </div>
-                </div>
+            </div>  
+        </div>
 
                 <!-- Candidate Cards Grid -->
                 <div class="candidate-grid" id="candidate-cards">
@@ -1043,7 +1044,7 @@
     </div>
     
     <!-- Actions -->
-    <div class="flex flex-col md:flex-row justify-between gap-4 mt-6" style="margin-left: 20px; margin-bottom: 20px; margin-right: 20px;">
+    <div id="analysis-actions" class="flex flex-col md:flex-row justify-between gap-4 mt-6 hidden" style="margin-left: 20px; margin-bottom: 20px; margin-right: 20px;">
         <button id="new-analysis-btn" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg flex items-center justify-center hover:bg-gray-300 transition-colors">
             <i class="fas fa-arrow-left mr-2"></i>
             Analyze Another Resume
@@ -1858,6 +1859,9 @@ function showAnalysisResults(data) {
     
     // Use the new multiple candidates handler
     showMultipleCandidatesResults(data);
+
+    // Show the action buttons
+    document.getElementById('analysis-actions').classList.remove('hidden');
 
     // Set up PDF download after showing results
     setupDownloadPDF();
