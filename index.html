@@ -1372,34 +1372,34 @@ function generatePDF(data) {
         doc.text(`Candidate ${data.candidateNumber} of ${data.totalCandidates}`, 140, yPosition);
     }
     
-    yPosition += 10;
+    yPosition += 15; // 10 + 5 = 15 spacing before Executive Summary
     
     // Executive Summary Section
     doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
     doc.setFontSize(14);
     doc.setFont(undefined, 'bold');
-    doc.text('Executive Summary', 10, yPosition);
+    doc.text('Executive Summary', 20, yPosition);
     
     yPosition += 10;
     doc.setFontSize(10);
     doc.setFont(undefined, 'normal');
     doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
     
-    // Split long text into multiple lines
-    const summaryLines = doc.splitTextToSize(data.executiveSummary, 170);
-    doc.text(summaryLines, 10, yPosition);
-    yPosition += summaryLines.length * 5 + 10; 
+    // Split long text into multiple lines with proper margins
+    const summaryLines = doc.splitTextToSize(data.executiveSummary, 170); // Keep 20px margins (210-20-20=170)
+    doc.text(summaryLines, 20, yPosition);
+    yPosition += summaryLines.length * 5 + 10; // 10 spacing before Core Competencies
     
     // Core Competencies Section - Enhanced with bullet formatting
     doc.setFontSize(14);
     doc.setFont(undefined, 'bold');
-    doc.text('Core Competencies', 10, yPosition);
+    doc.text('Core Competencies', 20, yPosition);
     
     yPosition += 10;
     doc.setFontSize(10);
     doc.setFont(undefined, 'normal');
     
-    // Handle competencies with better formatting and spacing control
+    // Handle competencies with better formatting and tighter spacing
     if (data.coreCompetencies && typeof data.coreCompetencies === 'string') {
         // Split by bullet points or line breaks
         const competencies = data.coreCompetencies
@@ -1410,13 +1410,13 @@ function generatePDF(data) {
         competencies.forEach((competency, index) => {
             if (competency.length > 0) {
                 // Check if we have enough space for this competency + footer
-                const competencyLines = doc.splitTextToSize(competency, 165);
-                const spaceNeeded = competencyLines.length * 5 + 15; // Space for competency + footer
+                const competencyLines = doc.splitTextToSize(competency, 165); // Keep 20px left + 5px for bullet + 20px right margins
+                const spaceNeeded = competencyLines.length * 5 + 25; // Space for competency + footer
                 
                 if (yPosition + spaceNeeded > 270) {
                     // Not enough space, start a new page
                     doc.addPage();
-                    yPosition = 10;
+                    yPosition = 20;
                 }
                 
                 // Add bullet point
@@ -1425,20 +1425,20 @@ function generatePDF(data) {
                 
                 // Add competency text with proper wrapping
                 doc.text(competencyLines, 27, yPosition);
-                yPosition += competencyLines.length * 5 + 4; // Slightly more spacing between items
+                yPosition += competencyLines.length * 5 + 2; // Tighter spacing between bullet points (reduced from 4 to 2)
             }
         });
     } else {
         const competenciesText = 'Core competencies data available in detailed view.';
         const competenciesLines = doc.splitTextToSize(competenciesText, 170);
-        doc.text(competenciesLines, 10, yPosition);
+        doc.text(competenciesLines, 20, yPosition);
         yPosition += competenciesLines.length * 5;
     }
     
     // Ensure footer has enough space
     if (yPosition > 260) {
         doc.addPage();
-        yPosition = 10;
+        yPosition = 20;
     } else {
         yPosition = Math.max(yPosition + 15, 275); // Ensure footer is at bottom
     }
