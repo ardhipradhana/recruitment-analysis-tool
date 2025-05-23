@@ -397,6 +397,28 @@
     flex: 1;
 }
 
+/* Progress bar styles */
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background-color: #e5e7eb;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+/* Single candidate view margins */
+#single-candidate-view {
+    margin-left: 24px;
+    margin-right: 24px;
+}
+
 /* Responsive design */
 @media (max-width: 1024px) {
     .candidates-overview {
@@ -417,6 +439,12 @@
     
     .candidate-grid {
         grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+    
+    /* Responsive margins for single candidate view */
+    #single-candidate-view {
+        margin-left: 20px;
+        margin-right: 20px;
     }
 }
 </style>
@@ -590,32 +618,34 @@
         </div>
         
         <!-- Feature Preview -->
-        <div class="grid grid-cols-2 gap-3 text-xs">
-    <div class="flex items-center">
-        <div class="w-4 flex justify-center mr-2">
-            <i class="fas fa-robot text-blue-500"></i>
-        </div>
-        <span class="text-gray-600">AI Analysis</span>
-    </div>
-    <div class="flex items-center">
-        <div class="w-4 flex justify-center mr-2">
-            <i class="fas fa-chart-line text-green-500"></i>
-        </div>
-        <span class="text-gray-600">Match Scoring</span>
-    </div>
-    <div class="flex items-center">
-        <div class="w-4 flex justify-center mr-2">
-            <i class="fas fa-tags text-purple-500"></i>
-        </div>
-        <span class="text-gray-600">Skill Extraction</span>
-    </div>
-    <div class="flex items-center">
-        <div class="w-4 flex justify-center mr-2">
-            <i class="fas fa-users text-orange-500"></i>
-        </div>
-        <span class="text-gray-600">Batch Processing</span>
-    </div>
-</div>
+        <div class="mt-6 pt-6 border-t border-gray-200">
+            <div class="text-center text-xs text-gray-500 mb-3">What you'll get inside:</div>
+            <div class="grid grid-cols-2 gap-3 text-xs">
+                <div class="flex items-center">
+                    <div class="w-4 flex justify-center mr-2">
+                        <i class="fas fa-robot text-blue-500"></i>
+                    </div>
+                    <span class="text-gray-600">AI Analysis</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-4 flex justify-center mr-2">
+                        <i class="fas fa-chart-line text-green-500"></i>
+                    </div>
+                    <span class="text-gray-600">Match Scoring</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-4 flex justify-center mr-2">
+                        <i class="fas fa-tags text-purple-500"></i>
+                    </div>
+                    <span class="text-gray-600">Skill Extraction</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-4 flex justify-center mr-2">
+                        <i class="fas fa-users text-orange-500"></i>
+                    </div>
+                    <span class="text-gray-600">Batch Processing</span>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -853,6 +883,10 @@
         <button id="new-analysis-btn" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg flex items-center justify-center hover:bg-gray-300 transition-colors">
             <i class="fas fa-arrow-left mr-2"></i>
             Analyze Another Resume
+        </button>
+        <button id="download-pdf-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center justify-center hover:bg-blue-700 transition-colors">
+            <i class="fas fa-download mr-2"></i>
+            Download PDF Report
         </button>
     </div>
 
@@ -1157,6 +1191,9 @@ function showAnalysisResults(data) {
     
     // Use the new multiple candidates handler
     showMultipleCandidatesResults(data);
+
+    // Set up PDF download after showing results
+    setupDownloadPDF();
 }
 
 function setupDownloadPDF() {
@@ -1843,9 +1880,6 @@ document.addEventListener("DOMContentLoaded", async function() {
         files = [];
         updateFileList();
     });
-
-// Add PDF download setup
-    setupDownloadPDF();
 
     // Set up the "Analyze Another Resume" button handler
 document.getElementById('new-analysis-btn').addEventListener('click', function() {
