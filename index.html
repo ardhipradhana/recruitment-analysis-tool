@@ -1271,12 +1271,12 @@ createProgressTracker(containerId, options = {}) {
             const message = customMessage || steps[stepIndex] || 'Processing...';
             const progressBar = container.querySelector('.enhanced-progress-bar-fill');
             const progressText = container.querySelector('.enhanced-progress-text');
-            const progressPercent = container.querySelector('.enhanced-progress-percent');
+            const progressPercentElement = container.querySelector('.enhanced-progress-percent');
             const timeEstimate = container.querySelector('.enhanced-time-estimate');
-            
+
             if (progressBar) progressBar.style.width = `${this.progress}%`;
             if (progressText) progressText.textContent = message;
-            if (progressPercent && showPercentage) progressPercent.textContent = `${this.progress}%`;
+            if (progressPercentElement && showPercentage) progressPercentElement.textContent = `${this.progress}%`;
             
             if (timeEstimate && showTimeEstimate && this.progress > 10) {
                 const elapsed = Date.now() - this.startTime;
