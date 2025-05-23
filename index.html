@@ -315,8 +315,8 @@
     content: '';
     position: absolute;
     left: 0;
-    top: 0;
-    bottom: 0;
+    top: 4px;
+    bottom: 4px;
     width: 4px;
     background: #3b82f6;
     border-radius: 0 4px 4px 0;
@@ -401,8 +401,9 @@
     }
     
     .candidates-sidebar {
-        position: static;
-        order: 2;
+        position: sticky;
+        top: 20px;
+        margin-left: 20px; /* Add breathing space from left edge */
     }
     
     .candidate-detail-view {
@@ -843,7 +844,7 @@
     </div>
     
     <!-- Actions -->
-    <div class="flex flex-col md:flex-row justify-between gap-4 mt-6">
+    <div class="flex flex-col md:flex-row justify-between gap-4 mt-6" style="margin-left: 20px; margin-bottom: 20px;">
         <button id="new-analysis-btn" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg flex items-center justify-center hover:bg-gray-300 transition-colors">
             <i class="fas fa-arrow-left mr-2"></i>
             Analyze Another Resume
@@ -1077,36 +1078,50 @@ function showAnalysisLoading() {
     document.getElementById('upload-interface').classList.add('hidden');
     document.getElementById('analysis-loading').classList.remove('hidden');
     
-    // Simulate progress updates
+    // Calculate dynamic timing based on number of files
+    const baseTime = 3000; // 3 seconds for 1 file
+    const timePerFile = 2000; // 2 seconds per additional file
+    const totalTime = baseTime + (files.length - 1) * timePerFile;
+    
+    // Random increment between 1-8% instead of fixed 5%
+    const getRandomIncrement = () => Math.floor(Math.random() * 8) + 1;
+    
     let progress = 0;
     const progressBar = document.getElementById('progress-bar-fill');
     const percentText = document.getElementById('loading-percent');
     const stepText = document.getElementById('loading-step');
     
-    const progressInterval = setInterval(() => {
-        progress += 5;
-        
-        if (progress <= 100) {
+    const updateProgress = () => {
+        if (progress < 100) {
+            const increment = getRandomIncrement();
+            progress = Math.min(progress + increment, 100);
+            
             progressBar.style.width = `${progress}%`;
             percentText.textContent = `${progress}%`;
             
             // Update loading step text based on progress
-            if (progress < 30) {
+            if (progress < 25) {
                 stepText.textContent = 'Extracting qualifications';
-            } else if (progress < 60) {
+            } else if (progress < 50) {
                 stepText.textContent = 'Analyzing skills and experience';
-            } else if (progress < 90) {
+            } else if (progress < 75) {
                 stepText.textContent = 'Evaluating candidate fit';
-            } else {
+            } else if (progress < 95) {
                 stepText.textContent = 'Finalizing results';
+            } else {
+                stepText.textContent = 'Almost complete';
             }
-        } else {
-            clearInterval(progressInterval);
+            
+            // Calculate next interval (shorter intervals as we progress)
+            const baseInterval = totalTime / 100 * (2 - progress/100);
+            const randomInterval = baseInterval * (0.5 + Math.random() * 0.5);
+            
+            setTimeout(updateProgress, randomInterval);
         }
-    }, 300);
+    };
     
-    // Store interval ID so we can clear it if needed
-    window.progressInterval = progressInterval;
+    // Start the progress
+    updateProgress();
 }
 
 function hideAnalysisLoading() {
