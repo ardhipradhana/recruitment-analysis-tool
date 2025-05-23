@@ -294,6 +294,21 @@
     text-align: center;
 }
 
+.sort-btn {
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.sort-btn.active {
+    background: rgba(255, 255, 255, 0.4) !important;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.sort-btn:hover {
+    transform: translateY(-1px);
+}
+
 .candidate-grid {
     display: grid;
     gap: 12px;
