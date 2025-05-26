@@ -3192,8 +3192,8 @@ function exportHistoryToCSV() {
                     'Executive Summary': candidate.executiveSummary ? candidate.executiveSummary.replace(/"/g, '""') : 'N/A',
                     'Core Competencies': candidate.coreCompetencies ? 
                         (typeof candidate.coreCompetencies === 'string' ? 
-                            candidate.coreCompetencies.replace(/"/g, '""') : 
-                            candidate.coreCompetencies.join('; ')) : 'N/A'
+                            "'" + candidate.coreCompetencies.replace(/"/g, '""') : 
+                            "'" + candidate.coreCompetencies.join('; ')) : 'N/A'
                 });
             });
         });
