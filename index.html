@@ -807,11 +807,20 @@
                 <img src="MontPro_logo_with_words-removebg-preview.png" alt="MontPro Logo" class="h-12 w-auto" />
                 <h1 class="text-2xl font-bold text-gray-800">Recruitment Analysis Tool</h1>
             </div>
+            <div class="flex items-center gap-3">
+            <!-- History Button -->
+            <button id="history-btn" class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white rounded-lg border border-gray-300 hover:bg-gray-50 hover:text-gray-900 transition-colors shadow-sm">
+                <i class="fas fa-history mr-2"></i>
+                <span>Recent Analyses</span>
+                <span id="history-count" class="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full hidden">0</span>
+            </button>
             <button id="logout-btn" class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white rounded-lg border border-gray-300 hover:bg-gray-50 hover:text-gray-900 transition-colors shadow-sm">
                 <span>Log Out</span>
                 <i class="fas fa-sign-out-alt ml-2"></i>
             </button>
         </header>
+
+        
 
         <div id="upload-interface" class="bg-white rounded-xl shadow-sm p-8 mb-8">
             <h2 class="text-xl font-semibold text-gray-800 mb-2">Upload Candidate Documents</h2>
@@ -1298,6 +1307,84 @@ categorizeError(error) {
         };
     }
 }
+
+// History Management System
+class AnalysisHistory {
+    constructor() {
+        this.storageKey = 'montpro_analysis_history';
+        this.maxHistoryItems = 50; // Limit to prevent localStorage bloat
+    }
+    
+    // Save analysis to history
+    saveAnalysis(candidatesData, analysisMetadata = {}) {
+        try {
+            const historyItem = {
+                id: this.generateId(),
+                timestamp: new Date().toISOString(),
+                analysisDate: new Date().toLocaleDateString(),
+                candidates: candidatesData,
+                totalCandidates: candidatesData.length,
+                metadata: {
+                    userAgent: navigator.userAgent.split(' ')[0], // Simple browser detection
+                    ...analysisMetadata
+                }
+            };
+            
+            let history = this.getHistory();
+            
+            // Add new item to beginning of array
+            history.unshift(historyItem);
+            
+            // Limit history size
+            if (history.length > this.maxHistoryItems) {
+                history = history.slice(0, this.maxHistoryItems);
+            }
+            
+            localStorage.setItem(this.storageKey, JSON.stringify(history));
+            console.log('Analysis saved to history:', historyItem.id);
+            return historyItem.id;
+            
+        } catch (error) {
+            console.error('Failed to save analysis to history:', error);
+            return null;
+        }
+    }
+    
+    // Get all history
+    getHistory() {
+        try {
+            const history = localStorage.getItem(this.storageKey);
+            return history ? JSON.parse(history) : [];
+        } catch (error) {
+            console.error('Failed to retrieve history:', error);
+            return [];
+        }
+    }
+    
+    // Get specific analysis by ID
+    getAnalysisById(id) {
+        const history = this.getHistory();
+        return history.find(item => item.id === id) || null;
+    }
+    
+    // Generate unique ID for analysis
+    generateId() {
+        return 'analysis_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    }
+    
+    // Get history statistics
+    getHistoryStats() {
+        const history = this.getHistory();
+        return {
+            totalAnalyses: history.length,
+            lastAnalysis: history[0]?.timestamp || null,
+            totalCandidates: history.reduce((sum, item) => sum + item.totalCandidates, 0)
+        };
+    }
+}
+
+// Initialize history manager
+const historyManager = new AnalysisHistory();
 
 setupConnectionMonitoring() {
     // Monitor online/offline status
@@ -1901,6 +1988,9 @@ function showAnalysisResults(data) {
 
     // Set up export options
     setupExportOptions();
+
+    // ✨ NEW: Auto-save to history
+    saveCurrentAnalysisToHistory();
 }
 
 function setupDownloadPDF() {
@@ -2948,6 +3038,127 @@ function extractAndFormatSkills(competencies) {
     // Format each skill with proper capitalization
     return skills.map(skill => formatSkillText(skill));
 }
+
+// History Management Functions
+function saveCurrentAnalysisToHistory() {
+    if (candidatesData && candidatesData.length > 0) {
+        const analysisId = historyManager.saveAnalysis(candidatesData, {
+            analysisType: candidatesData.length > 1 ? 'multiple' : 'single',
+            selectedCandidateIndex: selectedCandidateIndex || 0
+        });
+        
+        updateHistoryCounter();
+        return analysisId;
+    }
+}
+
+function updateHistoryCounter() {
+    const stats = historyManager.getHistoryStats();
+    const counterElement = document.getElementById('history-count');
+    
+    if (stats.totalAnalyses > 0) {
+        counterElement.textContent = stats.totalAnalyses;
+        counterElement.classList.remove('hidden');
+    } else {
+        counterElement.classList.add('hidden');
+    }
+}
+
+function showHistoryModal() {
+    const modal = document.getElementById('history-modal');
+    const historyList = document.getElementById('history-list');
+    const emptyState = document.getElementById('history-empty');
+    
+    // Update stats
+    const stats = historyManager.getHistoryStats();
+    document.getElementById('total-analyses').textContent = stats.totalAnalyses;
+    document.getElementById('total-candidates-analyzed').textContent = stats.totalCandidates;
+    document.getElementById('last-analysis-date').textContent = 
+        stats.lastAnalysis ? new Date(stats.lastAnalysis).toLocaleDateString() : 'Never';
+    
+    // Load history items
+    const history = historyManager.getHistory();
+    
+    if (history.length === 0) {
+        historyList.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+    } else {
+        historyList.classList.remove('hidden');
+        emptyState.classList.add('hidden');
+        renderHistoryList(history);
+    }
+    
+    modal.classList.remove('hidden');
+}
+
+function renderHistoryList(history) {
+    const historyList = document.getElementById('history-list');
+    
+    historyList.innerHTML = history.map((item, index) => `
+        <div class="bg-gray-50 rounded-lg p-4 mb-3 hover:bg-gray-100 transition-colors cursor-pointer" onclick="loadAnalysisFromHistory('${item.id}')">
+            <div class="flex justify-between items-start">
+                <div class="flex-1">
+                    <h4 class="font-medium text-gray-800 mb-1">
+                        ${item.totalCandidates} Candidate${item.totalCandidates > 1 ? 's' : ''} Analysis
+                    </h4>
+                    <p class="text-sm text-gray-600 mb-2">
+                        ${item.candidates.map(c => c.candidateName || 'Unnamed Candidate').join(', ')}
+                    </p>
+                    <div class="flex gap-4 text-xs text-gray-500">
+                        <span><i class="fas fa-calendar mr-1"></i>${item.analysisDate}</span>
+                        <span><i class="fas fa-clock mr-1"></i>${new Date(item.timestamp).toLocaleTimeString()}</span>
+                    </div>
+                </div>
+                <div class="flex flex-col items-end gap-2">
+                    <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                        ${item.totalCandidates} candidate${item.totalCandidates > 1 ? 's' : ''}
+                    </span>
+                    <button onclick="event.stopPropagation(); deleteHistoryItem('${item.id}')" class="text-red-500 hover:text-red-700 text-xs">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function loadAnalysisFromHistory(analysisId) {
+    const analysis = historyManager.getAnalysisById(analysisId);
+    if (analysis) {
+        // Load the analysis data
+        candidatesData = analysis.candidates;
+        selectedCandidateIndex = analysis.metadata.selectedCandidateIndex || 0;
+        
+        // Show the results
+        showAnalysisResults(analysis.candidates);
+        
+        // Close the modal
+        document.getElementById('history-modal').classList.add('hidden');
+        
+        showSuccess('Analysis loaded from history!');
+    }
+}
+
+// Event Listeners for History
+document.addEventListener('DOMContentLoaded', function() {
+    // Update counter on page load
+    updateHistoryCounter();
+    
+    // History button
+    document.getElementById('history-btn').addEventListener('click', showHistoryModal);
+    
+    // Close modal
+    document.getElementById('close-history-modal').addEventListener('click', () => {
+        document.getElementById('history-modal').classList.add('hidden');
+    });
+    
+    // Close modal when clicking outside
+    document.getElementById('history-modal').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) {
+            document.getElementById('history-modal').classList.add('hidden');
+        }
+    });
+});
         
 document.addEventListener("DOMContentLoaded", async function() {
     // 1. Process magic link
@@ -3070,5 +3281,73 @@ document.getElementById('new-analysis-btn').addEventListener('click', function()
 });
 });
     </script>
+
+<!-- History Modal -->
+<div id="history-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[80vh] overflow-hidden">
+            
+            <!-- Modal Header -->
+            <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-2xl font-bold">Recent Analyses</h2>
+                        <p class="text-blue-100 text-sm mt-1">Your analysis history and insights</p>
+                    </div>
+                    <button id="close-history-modal" class="text-white hover:text-gray-200 transition-colors">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <!-- History Stats -->
+                <div class="mt-4 flex gap-6 text-sm">
+                    <div class="bg-white/20 rounded-lg px-3 py-2">
+                        <div class="font-semibold" id="total-analyses">0</div>
+                        <div class="text-blue-100">Total Analyses</div>
+                    </div>
+                    <div class="bg-white/20 rounded-lg px-3 py-2">
+                        <div class="font-semibold" id="total-candidates-analyzed">0</div>
+                        <div class="text-blue-100">Candidates</div>
+                    </div>
+                    <div class="bg-white/20 rounded-lg px-3 py-2">
+                        <div class="font-semibold" id="last-analysis-date">Never</div>
+                        <div class="text-blue-100">Last Analysis</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Modal Content -->
+            <div class="p-6 max-h-96 overflow-y-auto">
+                <div id="history-list">
+                    <!-- History items will be inserted here -->
+                </div>
+                
+                <!-- Empty State -->
+                <div id="history-empty" class="text-center py-12 hidden">
+                    <i class="fas fa-history text-gray-300 text-4xl mb-4"></i>
+                    <h3 class="text-lg font-medium text-gray-600 mb-2">No Analyses Yet</h3>
+                    <p class="text-gray-500 text-sm">Your analysis history will appear here after you analyze candidates.</p>
+                </div>
+            </div>
+            
+            <!-- Modal Footer -->
+            <div class="bg-gray-50 px-6 py-4 flex justify-between items-center border-t">
+                <div class="text-sm text-gray-500">
+                    History is stored locally in your browser
+                </div>
+                <div class="flex gap-3">
+                    <button id="export-history-btn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm">
+                        <i class="fas fa-download mr-2"></i>Export History
+                    </button>
+                    <button id="clear-history-btn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm">
+                        <i class="fas fa-trash mr-2"></i>Clear All
+                    </button>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>
+    
 </body>
 </html>
