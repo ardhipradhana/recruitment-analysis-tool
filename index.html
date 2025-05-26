@@ -1322,6 +1322,7 @@ categorizeError(error) {
     // Initial status
     this.updateConnectionStatus(navigator.onLine);
 }
+}
 
 updateConnectionStatus(isOnline) {
     let statusElement = document.getElementById('connection-status');
@@ -1525,8 +1526,6 @@ showProgressModal(title, steps, onCancel = null) {
     };
     
     return tracker;
-}
-}
 }
 }
 
