@@ -3471,10 +3471,10 @@ document.getElementById('new-analysis-btn').addEventListener('click', function()
 <!-- History Modal -->
 <div id="history-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
     <div class="flex items-center justify-center min-h-screen p-4">
-        <div class="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[80vh] overflow-hidden">
+        <div class="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
             
             <!-- Modal Header -->
-            <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6">
+            <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 flex-shrink-0">
                 <div class="flex justify-between items-center">
                     <div>
                         <h2 class="text-2xl font-bold">Recent Analyses</h2>
@@ -3509,7 +3509,7 @@ document.getElementById('new-analysis-btn').addEventListener('click', function()
             </div>
             
             <!-- Modal Content -->
-            <div class="p-6 max-h-96 overflow-y-auto">
+            <div class="p-6 max-h-64 overflow-y-auto">
                 <div id="history-list">
                     <!-- History items will be inserted here -->
                 </div>
@@ -3523,7 +3523,7 @@ document.getElementById('new-analysis-btn').addEventListener('click', function()
             </div>
             
             <!-- Modal Footer -->
-            <div class="bg-gray-50 px-6 py-4 flex justify-between items-center border-t">
+            <div class="bg-gray-50 px-6 py-4 flex justify-between items-center border-t flex-shrink-0">
                 <div class="text-sm text-gray-500">
                     History is stored locally in your browser
                 </div>
