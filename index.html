@@ -1314,6 +1314,21 @@ class AnalysisHistory {
         this.storageKey = 'montpro_analysis_history';
         this.maxHistoryItems = 50; // Limit to prevent localStorage bloat
     }
+
+    // Add these methods:
+    calculateAverageScore(candidates) {
+        const scores = candidates.map(c => parseInt(c.candidateScore) || 0);
+        return scores.length ? Math.round(scores.reduce((a, b) => a + b) / scores.length) : 0;
+    }
+
+    extractTopSkills(candidates) {
+        // Extract and count skill frequency across all candidates
+        // Return top 3-5 most common skills
+    }
+
+    searchHistory(query) {
+        // Search through candidate names, skills, summaries
+    }
     
     // Save analysis to history
     saveAnalysis(candidatesData, analysisMetadata = {}) {
@@ -1324,6 +1339,9 @@ class AnalysisHistory {
                 analysisDate: new Date().toLocaleDateString(),
                 candidates: candidatesData,
                 totalCandidates: candidatesData.length,
+                averageScore: this.calculateAverageScore(candidatesData),
+                topSkills: this.extractTopSkills(candidatesData),
+                analysisType: candidatesData.length > 1 ? 'batch' : 'single',
                 metadata: {
                     userAgent: navigator.userAgent.split(' ')[0], // Simple browser detection
                     ...analysisMetadata
@@ -3045,6 +3063,8 @@ function saveCurrentAnalysisToHistory() {
         const analysisId = historyManager.saveAnalysis(candidatesData, {
             analysisType: candidatesData.length > 1 ? 'multiple' : 'single',
             selectedCandidateIndex: selectedCandidateIndex || 0
+            fileNames: files.map(f => f.name),
+            fileCount: files.length
         });
         
         updateHistoryCounter();
@@ -3223,6 +3243,16 @@ function renderHistoryList(history) {
 
 function loadAnalysisFromHistory(analysisId) {
     const analysis = historyManager.getAnalysisById(analysisId);
+    if (!analysis) {
+        showError('Analysis not found in history.');
+        return;
+    }
+    
+    // Validate data integrity
+    if (!analysis.candidates || analysis.candidates.length === 0) {
+        showError('Analysis data appears to be corrupted.');
+        return;
+    }
     if (analysis) {
         // Load the analysis data
         candidatesData = analysis.candidates;
