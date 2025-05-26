@@ -1322,12 +1322,47 @@ class AnalysisHistory {
     }
 
     extractTopSkills(candidates) {
-        // Extract and count skill frequency across all candidates
-        // Return top 3-5 most common skills
+        const skillFrequency = {};
+    
+        candidates.forEach(candidate => {
+            const skills = this.extractSkillsFromCandidate(candidate);
+            skills.forEach(skill => {
+                skillFrequency[skill] = (skillFrequency[skill] || 0) + 1;
+            });
+        });
+    
+        return Object.entries(skillFrequency)
+            .sort(([,a], [,b]) => b - a)
+            .slice(0, 5)
+            .map(([skill]) => skill);
+    }
+
+    extractSkillsFromCandidate(candidate) {
+        if (!candidate.coreCompetencies) return [];
+    
+        if (Array.isArray(candidate.coreCompetencies)) {
+            return candidate.coreCompetencies;
+        }
+    
+        // Extract from string format
+        return candidate.coreCompetencies
+            .split(/[,\n•-]/)
+            .map(skill => skill.trim())
+            .filter(skill => skill.length > 0)
+            .slice(0, 10); // Limit per candidate
     }
 
     searchHistory(query) {
-        // Search through candidate names, skills, summaries
+        const history = this.getHistory();
+        const searchTerm = query.toLowerCase();
+    
+        return history.filter(analysis => 
+            analysis.candidates.some(candidate => 
+                (candidate.candidateName || '').toLowerCase().includes(searchTerm) ||
+                (candidate.executiveSummary || '').toLowerCase().includes(searchTerm) ||
+                (candidate.coreCompetencies || '').toString().toLowerCase().includes(searchTerm)
+            )
+        );
     }
     
     // Save analysis to history
@@ -3062,7 +3097,7 @@ function saveCurrentAnalysisToHistory() {
     if (candidatesData && candidatesData.length > 0) {
         const analysisId = historyManager.saveAnalysis(candidatesData, {
             analysisType: candidatesData.length > 1 ? 'multiple' : 'single',
-            selectedCandidateIndex: selectedCandidateIndex || 0
+            selectedCandidateIndex: selectedCandidateIndex || 0,
             fileNames: files.map(f => f.name),
             fileCount: files.length
         });
@@ -3243,29 +3278,28 @@ function renderHistoryList(history) {
 
 function loadAnalysisFromHistory(analysisId) {
     const analysis = historyManager.getAnalysisById(analysisId);
+    
     if (!analysis) {
         showError('Analysis not found in history.');
         return;
     }
     
-    // Validate data integrity
     if (!analysis.candidates || analysis.candidates.length === 0) {
         showError('Analysis data appears to be corrupted.');
         return;
     }
-    if (analysis) {
-        // Load the analysis data
-        candidatesData = analysis.candidates;
-        selectedCandidateIndex = analysis.metadata.selectedCandidateIndex || 0;
-        
-        // Show the results
-        showAnalysisResults(analysis.candidates);
-        
-        // Close the modal
-        document.getElementById('history-modal').classList.add('hidden');
-        
-        showSuccess('Analysis loaded from history!');
-    }
+    
+    // Load the analysis data
+    candidatesData = analysis.candidates;
+    selectedCandidateIndex = analysis.metadata?.selectedCandidateIndex || 0;
+    
+    // Show the results
+    showAnalysisResults(analysis.candidates);
+    
+    // Close the modal
+    document.getElementById('history-modal').classList.add('hidden');
+    
+    showSuccess('Analysis loaded from history!');
 }
 
 // Event Listeners for History
@@ -3279,10 +3313,29 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // History button
     document.getElementById('history-btn').addEventListener('click', showHistoryModal);
+
+    // Add to your DOMContentLoaded
+    document.getElementById('history-search')?.addEventListener('input', debounce((e) => {
+        const query = e.target.value;
+        const filteredHistory = query ? historyManager.searchHistory(query) : historyManager.getHistory();
+        renderHistoryList(filteredHistory);
+    }, 300));
+
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
     
     // Close modal
     document.getElementById('close-history-modal').addEventListener('click', () => {
-        document.getElementById('history-modal').classList.add('hidden');
+    document.getElementById('history-modal').classList.add('hidden');
     });
     
     // Close modal when clicking outside
@@ -3446,6 +3499,12 @@ document.getElementById('new-analysis-btn').addEventListener('click', function()
                         <div class="font-semibold" id="last-analysis-date">Never</div>
                         <div class="text-blue-100">Last Analysis</div>
                     </div>
+                </div>
+
+                <!-- Add after the stats section -->
+                <div class="mt-4">
+                    <input type="text" id="history-search" placeholder="Search analyses..." 
+                           class="w-full px-3 py-2 bg-white/20 border border-white/30 rounded-lg text-white placeholder-white/70">
                 </div>
             </div>
             
