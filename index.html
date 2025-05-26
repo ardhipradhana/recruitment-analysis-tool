@@ -1312,7 +1312,7 @@ categorizeError(error) {
         this.showNotification('Connection restored', 'success', 3000);
         this.updateConnectionStatus(true);
     });
-    }
+    
     window.addEventListener('offline', () => {
         this.showNotification('Connection lost - working in offline mode', 'warning', 0);
         this.updateConnectionStatus(false);
