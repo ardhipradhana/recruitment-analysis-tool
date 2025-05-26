@@ -1306,146 +1306,13 @@ categorizeError(error) {
             type: 'unknown'
         };
     }
-}
-
-// History Management System
-class AnalysisHistory {
-    constructor() {
-        this.storageKey = 'montpro_analysis_history';
-        this.maxHistoryItems = 50; // Limit to prevent localStorage bloat
-    }
-
-    // Add these methods:
-    calculateAverageScore(candidates) {
-        const scores = candidates.map(c => parseInt(c.candidateScore) || 0);
-        return scores.length ? Math.round(scores.reduce((a, b) => a + b) / scores.length) : 0;
-    }
-
-    extractTopSkills(candidates) {
-        const skillFrequency = {};
-    
-        candidates.forEach(candidate => {
-            const skills = this.extractSkillsFromCandidate(candidate);
-            skills.forEach(skill => {
-                skillFrequency[skill] = (skillFrequency[skill] || 0) + 1;
-            });
-        });
-    
-        return Object.entries(skillFrequency)
-            .sort(([,a], [,b]) => b - a)
-            .slice(0, 5)
-            .map(([skill]) => skill);
-    }
-
-    extractSkillsFromCandidate(candidate) {
-        if (!candidate.coreCompetencies) return [];
-    
-        if (Array.isArray(candidate.coreCompetencies)) {
-            return candidate.coreCompetencies;
-        }
-    
-        // Extract from string format
-        return candidate.coreCompetencies
-            .split(/[,\n•-]/)
-            .map(skill => skill.trim())
-            .filter(skill => skill.length > 0)
-            .slice(0, 10); // Limit per candidate
-    }
-
-    searchHistory(query) {
-        const history = this.getHistory();
-        const searchTerm = query.toLowerCase();
-    
-        return history.filter(analysis => 
-            analysis.candidates.some(candidate => 
-                (candidate.candidateName || '').toLowerCase().includes(searchTerm) ||
-                (candidate.executiveSummary || '').toLowerCase().includes(searchTerm) ||
-                (candidate.coreCompetencies || '').toString().toLowerCase().includes(searchTerm)
-            )
-        );
-    }
-    
-    // Save analysis to history
-    saveAnalysis(candidatesData, analysisMetadata = {}) {
-        try {
-            const historyItem = {
-                id: this.generateId(),
-                timestamp: new Date().toISOString(),
-                analysisDate: new Date().toLocaleDateString(),
-                candidates: candidatesData,
-                totalCandidates: candidatesData.length,
-                averageScore: this.calculateAverageScore(candidatesData),
-                topSkills: this.extractTopSkills(candidatesData),
-                analysisType: candidatesData.length > 1 ? 'batch' : 'single',
-                metadata: {
-                    userAgent: navigator.userAgent.split(' ')[0], // Simple browser detection
-                    ...analysisMetadata
-                }
-            };
-            
-            let history = this.getHistory();
-            
-            // Add new item to beginning of array
-            history.unshift(historyItem);
-            
-            // Limit history size
-            if (history.length > this.maxHistoryItems) {
-                history = history.slice(0, this.maxHistoryItems);
-            }
-            
-            localStorage.setItem(this.storageKey, JSON.stringify(history));
-            console.log('Analysis saved to history:', historyItem.id);
-            return historyItem.id;
-            
-        } catch (error) {
-            console.error('Failed to save analysis to history:', error);
-            return null;
-        }
-    }
-    
-    // Get all history
-    getHistory() {
-        try {
-            const history = localStorage.getItem(this.storageKey);
-            return history ? JSON.parse(history) : [];
-        } catch (error) {
-            console.error('Failed to retrieve history:', error);
-            return [];
-        }
-    }
-    
-    // Get specific analysis by ID
-    getAnalysisById(id) {
-        const history = this.getHistory();
-        return history.find(item => item.id === id) || null;
-    }
-    
-    // Generate unique ID for analysis
-    generateId() {
-        return 'analysis_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-    }
-    
-    // Get history statistics
-    getHistoryStats() {
-        const history = this.getHistory();
-        return {
-            totalAnalyses: history.length,
-            lastAnalysis: history[0]?.timestamp || null,
-            totalCandidates: history.reduce((sum, item) => sum + item.totalCandidates, 0)
-        };
-    }
-}
-
-// Initialize history manager
-const historyManager = new AnalysisHistory();
-
-setupConnectionMonitoring() {
+    setupConnectionMonitoring() {
     // Monitor online/offline status
     window.addEventListener('online', () => {
         this.showNotification('Connection restored', 'success', 3000);
         this.updateConnectionStatus(true);
     });
-    
+    }
     window.addEventListener('offline', () => {
         this.showNotification('Connection lost - working in offline mode', 'warning', 0);
         this.updateConnectionStatus(false);
@@ -1658,6 +1525,140 @@ showProgressModal(title, steps, onCancel = null) {
     
     return tracker;
 }
+}
+}
+}
+
+// History Management System
+class AnalysisHistory {
+    constructor() {
+        this.storageKey = 'montpro_analysis_history';
+        this.maxHistoryItems = 50; // Limit to prevent localStorage bloat
+    }
+
+    // Add these methods:
+    calculateAverageScore(candidates) {
+        const scores = candidates.map(c => parseInt(c.candidateScore) || 0);
+        return scores.length ? Math.round(scores.reduce((a, b) => a + b) / scores.length) : 0;
+    }
+
+    extractTopSkills(candidates) {
+        const skillFrequency = {};
+    
+        candidates.forEach(candidate => {
+            const skills = this.extractSkillsFromCandidate(candidate);
+            skills.forEach(skill => {
+                skillFrequency[skill] = (skillFrequency[skill] || 0) + 1;
+            });
+        });
+    
+        return Object.entries(skillFrequency)
+            .sort(([,a], [,b]) => b - a)
+            .slice(0, 5)
+            .map(([skill]) => skill);
+    }
+
+    extractSkillsFromCandidate(candidate) {
+        if (!candidate.coreCompetencies) return [];
+    
+        if (Array.isArray(candidate.coreCompetencies)) {
+            return candidate.coreCompetencies;
+        }
+    
+        // Extract from string format
+        return candidate.coreCompetencies
+            .split(/[,\n•-]/)
+            .map(skill => skill.trim())
+            .filter(skill => skill.length > 0)
+            .slice(0, 10); // Limit per candidate
+    }
+
+    searchHistory(query) {
+        const history = this.getHistory();
+        const searchTerm = query.toLowerCase();
+    
+        return history.filter(analysis => 
+            analysis.candidates.some(candidate => 
+                (candidate.candidateName || '').toLowerCase().includes(searchTerm) ||
+                (candidate.executiveSummary || '').toLowerCase().includes(searchTerm) ||
+                (candidate.coreCompetencies || '').toString().toLowerCase().includes(searchTerm)
+            )
+        );
+    }
+    
+    // Save analysis to history
+    saveAnalysis(candidatesData, analysisMetadata = {}) {
+        try {
+            const historyItem = {
+                id: this.generateId(),
+                timestamp: new Date().toISOString(),
+                analysisDate: new Date().toLocaleDateString(),
+                candidates: candidatesData,
+                totalCandidates: candidatesData.length,
+                averageScore: this.calculateAverageScore(candidatesData),
+                topSkills: this.extractTopSkills(candidatesData),
+                analysisType: candidatesData.length > 1 ? 'batch' : 'single',
+                metadata: {
+                    userAgent: navigator.userAgent.split(' ')[0], // Simple browser detection
+                    ...analysisMetadata
+                }
+            };
+            
+            let history = this.getHistory();
+            
+            // Add new item to beginning of array
+            history.unshift(historyItem);
+            
+            // Limit history size
+            if (history.length > this.maxHistoryItems) {
+                history = history.slice(0, this.maxHistoryItems);
+            }
+            
+            localStorage.setItem(this.storageKey, JSON.stringify(history));
+            console.log('Analysis saved to history:', historyItem.id);
+            return historyItem.id;
+            
+        } catch (error) {
+            console.error('Failed to save analysis to history:', error);
+            return null;
+        }
+    }
+    
+    // Get all history
+    getHistory() {
+        try {
+            const history = localStorage.getItem(this.storageKey);
+            return history ? JSON.parse(history) : [];
+        } catch (error) {
+            console.error('Failed to retrieve history:', error);
+            return [];
+        }
+    }
+    
+    // Get specific analysis by ID
+    getAnalysisById(id) {
+        const history = this.getHistory();
+        return history.find(item => item.id === id) || null;
+    }
+    
+    // Generate unique ID for analysis
+    generateId() {
+        return 'analysis_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    }
+    
+    // Get history statistics
+    getHistoryStats() {
+        const history = this.getHistory();
+        return {
+            totalAnalyses: history.length,
+            lastAnalysis: history[0]?.timestamp || null,
+            totalCandidates: history.reduce((sum, item) => sum + item.totalCandidates, 0)
+        };
+    }
+}
+
+// Initialize history manager
+const historyManager = new AnalysisHistory();
     // More methods will be added in next steps...
 }
 
