@@ -2355,9 +2355,12 @@ function emailResults_() {
             totalCandidates: candidatesData.length
         };
         
+        console.log('Sending email data:', emailData);
+        
         // Send to your backend
         sendEmailViaBackend(emailData)
-            .then(() => {
+            .then((result) => {
+                console.log('Email sent successfully:', result);
                 emailBtn.innerHTML = '<i class="fas fa-check text-purple-600 mr-3"></i>Sent!';
                 showSuccess(`Analysis results sent to ${userEmail}!`);
                 
@@ -2374,14 +2377,14 @@ function emailResults_() {
                 
                 navigator.clipboard.writeText(`Subject: ${subject}\n\n${body}`).then(() => {
                     emailBtn.innerHTML = '<i class="fas fa-copy text-purple-600 mr-3"></i>Copied!';
-                    showWarning('Could not send email. Content copied to clipboard instead.');
+                    showWarning(`Could not send email to ${userEmail}. Content copied to clipboard instead.`);
                     
                     setTimeout(() => {
                         emailBtn.innerHTML = originalHtml;
                     }, 3000);
                 }).catch(() => {
                     emailBtn.innerHTML = '<i class="fas fa-exclamation-circle text-red-600 mr-3"></i>Failed';
-                    showError('Email sending failed. Please try the CSV export instead.');
+                    showError('Email sending failed and clipboard copy failed. Please try the CSV export instead.');
                     
                     setTimeout(() => {
                         emailBtn.innerHTML = originalHtml;
@@ -2398,19 +2401,35 @@ function emailResults_() {
 
 // Helper function to send email via your backend
 async function sendEmailViaBackend(emailData) {
-    const response = await fetch('https://montpro.app.n8n.cloud/webhook/send-recruitment-analysis-email', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(emailData)
-    });
-    
-    if (!response.ok) {
-        throw new Error(`Email sending failed: ${response.status} ${response.statusText}`);
+    try {
+        const response = await fetch('https://montpro.app.n8n.cloud/webhook/send-recruitment-analysis-email', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(emailData)
+        });
+        
+        console.log('Response status:', response.status);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const result = await response.json();
+        console.log('Response data:', result);
+        
+        // Check if the backend indicates success
+        if (result.success === false) {
+            throw new Error(result.message || 'Email sending failed');
+        }
+        
+        return result;
+        
+    } catch (error) {
+        console.error('Email sending error:', error);
+        throw error;
     }
-    
-    return response.json();
 }
 
 // Helper function to generate email body
