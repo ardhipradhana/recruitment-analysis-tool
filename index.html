@@ -4806,8 +4806,9 @@ function showSingleCandidateView(data) {
     const hasUltraAnalysis = data.roleAlignment || data.educationCertifications || data.communication || data.redFlags || data.strategicRecommendations || data.candidateScorecard;
 
     if (userStatus.isUltraTier && hasUltraAnalysis) {
-        // ULTRA user with job matching data - don't add PRO sections (they're already in the ULTRA data)
-        console.log('ULTRA user with premium analysis - skipping PRO sections to avoid duplication');
+        // ULTRA user with job matching data - add ULTRA sections
+        console.log('ULTRA user with premium analysis - adding ULTRA sections');
+        addUltraSections(data);
     } else if (!userStatus.isFreeTier) {
         // PRO user OR ULTRA user without job matching - show PRO sections
         addProfessionalSections(data);
@@ -4922,6 +4923,101 @@ function addProfessionalSections(data) {
         );
         coreCompetenciesContainer.insertAdjacentHTML('afterend', scorecardSection);
     }
+}
+
+function addUltraSections(data) {
+    const coreCompetenciesContainer = document.getElementById('core-competencies').parentElement;
+    
+    // Role Alignment Section
+    if (data.roleAlignment) {
+        const roleSection = createUltraSection(
+            'fas fa-crosshairs',
+            'Role Alignment & Potential Fit',
+            data.roleAlignment,
+            'text-purple-600'
+        );
+        coreCompetenciesContainer.insertAdjacentHTML('afterend', roleSection);
+    }
+    
+    // Education & Certifications
+    if (data.educationCertifications) {
+        const educationSection = createUltraSection(
+            'fas fa-graduation-cap',
+            'Education & Certifications',
+            data.educationCertifications,
+            'text-green-600'
+        );
+        coreCompetenciesContainer.insertAdjacentHTML('afterend', educationSection);
+    }
+    
+    // Communication Quality
+    if (data.communication) {
+        const commSection = createUltraSection(
+            'fas fa-comments',
+            'Communication & Presentation Quality',
+            data.communication,
+            'text-blue-600'
+        );
+        coreCompetenciesContainer.insertAdjacentHTML('afterend', commSection);
+    }
+    
+    // Red Flags
+    if (data.redFlags) {
+        const redFlagsSection = createUltraSection(
+            'fas fa-exclamation-triangle',
+            'Red Flags & Risk Analysis',
+            data.redFlags,
+            'text-red-600'
+        );
+        coreCompetenciesContainer.insertAdjacentHTML('afterend', redFlagsSection);
+    }
+    
+    // Strategic Recommendations
+    if (data.strategicRecommendations) {
+        const strategicSection = createUltraSection(
+            'fas fa-lightbulb',
+            'Strategic Recommendations',
+            data.strategicRecommendations,
+            'text-green-600'
+        );
+        coreCompetenciesContainer.insertAdjacentHTML('afterend', strategicSection);
+    }
+    
+    // Candidate Scorecard
+    if (data.candidateScorecard) {
+        const scorecardSection = createUltraSection(
+            'fas fa-chart-bar',
+            'Detailed Candidate Scorecard',
+            data.candidateScorecard,
+            'text-purple-600'
+        );
+        coreCompetenciesContainer.insertAdjacentHTML('afterend', scorecardSection);
+    }
+}
+
+function createUltraSection(iconClass, title, content, iconColor = 'text-purple-600') {
+    return `
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <div class="flex items-center mb-4">
+                <i class="${iconClass} ${iconColor} mr-3"></i>
+                <h3 class="text-lg font-semibold">${title}</h3>
+                <span class="ml-2 px-2 py-1 bg-gradient-to-r from-purple-500 to-pink-600 text-white text-xs font-medium rounded">ULTRA</span>
+            </div>
+            <div class="text-gray-700">
+                ${formatUltraContent(content)}
+            </div>
+        </div>
+    `;
+}
+
+function formatUltraContent(content) {
+    if (!content) return '<p>No data available.</p>';
+    
+    // Convert bullet points and line breaks to proper HTML
+    return content
+        .replace(/\n/g, '<br>')
+        .replace(/^- /gm, '• ')
+        .replace(/\n\n/g, '<br><br>');
 }
 
 function createPremiumSection(iconClass, title, content, iconColor = 'text-blue-500') {
