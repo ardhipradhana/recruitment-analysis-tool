@@ -2193,6 +2193,20 @@ async function startAnalysis() {
         return;
     }
 
+    // ADD THIS NEW CHECK: Make sure user has enough credits for all files
+    const remainingAnalyses = creditManager.getRemainingAnalyses();
+    const filesCount = files.length;
+
+    if (remainingAnalyses < filesCount) {
+        const status = creditManager.getStatus();
+        if (status.isFreeTier) {
+            showError(`Anda memiliki ${remainingAnalyses} analisis gratis tersisa, tapi ingin menganalisis ${filesCount} resume. Silakan kurangi jumlah file atau upgrade ke Profesional.`);
+        } else {
+            showError(`Anda memiliki ${remainingAnalyses} credits tersisa, tapi ingin menganalisis ${filesCount} resume. Silakan beli credits tambahan atau kurangi jumlah file.`);
+        }
+        return;
+    }
+
     console.log('=== STARTING ANALYSIS ===');
     console.log('Number of files:', files.length);
 
@@ -2401,14 +2415,21 @@ function showAnalysisResults(data) {
 // ADD this new function right after showAnalysisResults
 async function useAnalysisCredit() {
     try {
-        await creditManager.useAnalysis();
+        const numberOfResumes = files.length; // Count how many files were analyzed
+        console.log(`Using ${numberOfResumes} credits for ${numberOfResumes} resumes`);
+        
+        // Use credit for each resume
+        for (let i = 0; i < numberOfResumes; i++) {
+            await creditManager.useAnalysis();
+        }
+        
         updateUsageDisplay();
-        console.log('Credit used successfully');
+        showSuccess(`Berhasil menganalisis ${numberOfResumes} resume. Credits digunakan: ${numberOfResumes}`);
     } catch (error) {
-        console.error('Error using credit:', error);
+        console.error('Error using credits:', error);
+        showError('Terjadi kesalahan saat menggunakan credits.');
     }
 }
-
 function setupDownloadPDF() {
     const downloadBtn = document.querySelector('#download-pdf-btn');
     if (downloadBtn) {
