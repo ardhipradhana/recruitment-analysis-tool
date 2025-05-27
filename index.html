@@ -2779,6 +2779,7 @@ function updateUsageDisplay() {
             }
         }
     }
+    updateJobDescriptionAccess();
 }
 
 function updateJobDescriptionAccess() {
@@ -2787,22 +2788,34 @@ function updateJobDescriptionAccess() {
     const jdInfoText = document.getElementById('jd-info-text');
     const jdFeatureBadge = document.getElementById('jd-feature-badge');
     
-    if (status.isUltraTier) {
-        // Enable for ULTRA users
+    if (status.isUltraTier && status.ultraCredits > 0) {
+        // Enable for ULTRA users with ULTRA credits
         jobDescriptionTextarea.disabled = false;
         jobDescriptionTextarea.classList.remove('bg-gray-100');
-        jdInfoText.textContent = 'AI will match candidates against this job description';
+        jdInfoText.textContent = `AI will match candidates against this job description (Uses ULTRA credits: ${status.ultraCredits} available)`;
         jdFeatureBadge.innerHTML = '<i class="fas fa-crown mr-1"></i>ULTRA Active';
+        jdFeatureBadge.className = 'px-2 py-1 bg-gradient-to-r from-purple-500 to-pink-600 text-white text-xs font-medium rounded shadow-sm';
+    } else if (status.isUltraTier && status.ultraCredits === 0) {
+        // ULTRA user but no ULTRA credits
+        jobDescriptionTextarea.disabled = true;
+        jobDescriptionTextarea.classList.add('bg-gray-100');
+        jdInfoText.innerHTML = 'No ULTRA credits remaining for job matching • <a href="#" onclick="showPricingPage()" class="text-purple-600 hover:text-purple-800">Buy ULTRA Credits</a>';
+        jdFeatureBadge.innerHTML = '<i class="fas fa-exclamation-triangle mr-1"></i>Need Credits';
+        jdFeatureBadge.className = 'px-2 py-1 bg-orange-500 text-white text-xs font-medium rounded shadow-sm';
     } else if (!status.isFreeTier) {
         // PRO users see upgrade prompt
         jobDescriptionTextarea.disabled = true;
         jobDescriptionTextarea.classList.add('bg-gray-100');
         jdInfoText.innerHTML = 'Upgrade to ULTRA for job description matching • <a href="#" onclick="showPricingPage()" class="text-purple-600 hover:text-purple-800">Upgrade Now</a>';
+        jdFeatureBadge.innerHTML = '<i class="fas fa-crown mr-1"></i>ULTRA Feature';
+        jdFeatureBadge.className = 'px-2 py-1 bg-gradient-to-r from-purple-500 to-pink-600 text-white text-xs font-medium rounded shadow-sm';
     } else {
         // Free users see basic message
         jobDescriptionTextarea.disabled = true;
         jobDescriptionTextarea.classList.add('bg-gray-100');
         jdInfoText.textContent = 'Upgrade to ULTRA to unlock job description matching';
+        jdFeatureBadge.innerHTML = '<i class="fas fa-crown mr-1"></i>ULTRA Feature';
+        jdFeatureBadge.className = 'px-2 py-1 bg-gradient-to-r from-purple-500 to-pink-600 text-white text-xs font-medium rounded shadow-sm';
     }
 }
         
@@ -3245,42 +3258,45 @@ async function startAnalysis() {
         return;
     }
 
-    // ADD THIS CREDIT CHECK
-    if (!creditManager.canAnalyze()) {
-        const status = creditManager.getStatus();
-        if (status.isFreeTier) {
-            showError('Anda telah menggunakan 3 analisis gratis bulan ini. Upgrade untuk analisis lebih banyak!');
-            // Auto-show pricing page after 2 seconds
-            setTimeout(() => {
-                showPricingPage();
-            }, 2000);
-        } else {
-            showError('Credits habis! Silakan beli credits tambahan.');
-            // Auto-show pricing page after 2 seconds
-            setTimeout(() => {
-                showPricingPage();
-            }, 2000);
-        }
-        return;
-    }
-    // ADD THIS NEW CHECK: Make sure user has enough credits for all files
-    const remainingAnalyses = creditManager.getRemainingAnalyses();
+    // Enhanced credit checking for mixed system
+    const jobDescription = document.getElementById('job-description').value.trim();
+    const hasJobDescription = jobDescription.length > 0;
     const filesCount = files.length;
 
-    if (remainingAnalyses < filesCount) {
-        const status = creditManager.getStatus();
-        if (status.isFreeTier) {
-            showError(`Anda memiliki ${remainingAnalyses} analisis gratis tersisa, tapi ingin menganalisis ${filesCount} resume. Silakan kurangi jumlah file atau upgrade ke Profesional.`);
+    // Check if user can perform the analysis
+    if (hasJobDescription) {
+        // Job matching analysis - requires ULTRA credits
+        if (!creditManager.canDoJobMatching()) {
+            showError('Job Description matching requires ULTRA credits. Upgrade to ULTRA or convert your PRO credits!');
             setTimeout(() => {
                 showPricingPage();
-            }, 3000);
-        } else {
-            showError(`Anda memiliki ${remainingAnalyses} credits tersisa, tapi ingin menganalisis ${filesCount} resume. Silakan beli credits tambahan atau kurangi jumlah file.`);
-            setTimeout(() => {
-                showPricingPage();
-            }, 3000);
+            }, 2000);
+            return;
         }
-        return;
+    
+        if (creditManager.ultraCredits < filesCount) {
+            showError(`You need ${filesCount} ULTRA credits for job matching analysis, but only have ${creditManager.ultraCredits}. Buy more ULTRA credits or reduce the number of files.`);
+            setTimeout(() => {
+                showPricingPage();
+            }, 2000);
+            return;
+        }
+    } else {
+        // Basic analysis - can use PRO credits
+        const totalAvailableCredits = creditManager.proCredits + creditManager.ultraCredits + (creditManager.userTier === 'FREE' ? creditManager.getRemainingAnalyses() : 0);
+    
+        if (totalAvailableCredits < filesCount) {
+            const status = creditManager.getStatus();
+            if (status.isFreeTier) {
+                showError(`You have ${status.remaining} free analyses remaining, but want to analyze ${filesCount} resumes. Upgrade to get more credits.`);
+            } else {
+                showError(`You need ${filesCount} credits but only have ${totalAvailableCredits} total credits. Buy more credits or reduce files.`);
+            }
+            setTimeout(() => {
+                showPricingPage();
+            }, 2000);
+            return;
+        }
     }
 
     console.log('=== STARTING ANALYSIS ===');
@@ -3295,6 +3311,14 @@ async function startAnalysis() {
         files.forEach(file => {
             formData.append('files', file);
         });
+
+        // Add job description if provided
+        if (hasJobDescription) {
+            formData.append('jobDescription', jobDescription);
+            formData.append('analysisType', 'ULTRA');
+        } else {
+            formData.append('analysisType', 'PRO');
+        }
 
         console.log('Sending request to backend...');
 
@@ -3496,21 +3520,44 @@ function showAnalysisResults(data) {
 // ADD this new function right after showAnalysisResults
 async function useAnalysisCredit() {
     try {
-        const numberOfResumes = files.length; // Count how many files were analyzed
-        console.log(`Using ${numberOfResumes} credits for ${numberOfResumes} resumes`);
+        const numberOfResumes = files.length;
+        const jobDescription = document.getElementById('job-description').value.trim();
+        const hasJobDescription = jobDescription.length > 0;
         
-        // Use credit for each resume
+        console.log(`Using credits for ${numberOfResumes} resumes, job matching: ${hasJobDescription}`);
+        
+        // Use appropriate credit type for each resume
         for (let i = 0; i < numberOfResumes; i++) {
-            await creditManager.useAnalysis();
+            if (hasJobDescription) {
+                // Use ULTRA credit for job matching
+                await creditManager.useUltraCredit();
+                console.log(`Used ULTRA credit ${i + 1}/${numberOfResumes}`);
+            } else {
+                // Use PRO credit for basic analysis (or ULTRA if no PRO available)
+                if (creditManager.proCredits > 0) {
+                    await creditManager.useProCredit();
+                    console.log(`Used PRO credit ${i + 1}/${numberOfResumes}`);
+                } else if (creditManager.ultraCredits > 0) {
+                    await creditManager.useUltraCredit();
+                    console.log(`Used ULTRA credit (no PRO available) ${i + 1}/${numberOfResumes}`);
+                } else if (creditManager.userTier === 'FREE') {
+                    await creditManager.useAnalysis(); // Keep old method for free users
+                    console.log(`Used free analysis ${i + 1}/${numberOfResumes}`);
+                }
+            }
         }
         
         updateUsageDisplay();
-        showSuccess(`Berhasil menganalisis ${numberOfResumes} resume. Credits digunakan: ${numberOfResumes}`);
+        
+        const creditType = hasJobDescription ? 'ULTRA' : 'PRO';
+        showSuccess(`Successfully analyzed ${numberOfResumes} resume(s) using ${creditType} credits!`);
+        
     } catch (error) {
         console.error('Error using credits:', error);
-        showError('Terjadi kesalahan saat menggunakan credits.');
+        showError('Error using credits: ' + error.message);
     }
 }
+        
 function setupDownloadPDF() {
     const downloadBtn = document.querySelector('#download-pdf-btn');
     if (downloadBtn) {
