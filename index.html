@@ -976,7 +976,7 @@
         </header>
 
         <!-- Pricing Cards -->
-        <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div class="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
         
             <!-- FREE TIER -->
             <div class="bg-white rounded-xl shadow-lg p-8 border border-gray-200 relative">
@@ -1075,6 +1075,53 @@
             
                 <p class="text-xs text-gray-500 text-center mt-3">
                     Pembayaran aman via Midtrans • Credits langsung masuk
+                </p>
+            </div>
+
+            <!-- ULTRA TIER -->
+            <div class="bg-white rounded-xl shadow-lg p-8 border-2 border-purple-500 relative">
+                <!-- Recommended Badge -->
+                <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                    <span class="bg-gradient-to-r from-purple-500 to-pink-600 text-white px-4 py-1 rounded-full text-sm font-medium">Most Powerful</span>
+                </div>
+
+                <div class="text-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Ultra</h2>
+                    <div class="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">Rp 999.000</div>
+                    <p class="text-gray-500">20 Credits (tidak expired)</p>
+                    <p class="text-xs text-gray-400 mt-1">Rp 49.950 per analisis</p>
+                </div>
+
+                <ul class="space-y-3 mb-8">
+                    <li class="flex items-center">
+                        <i class="fas fa-check text-green-500 mr-3"></i>
+                        <span class="font-medium">Semua fitur Profesional</span>
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-target text-purple-500 mr-3"></i>
+                        <span class="font-weight-bold">Job Description Matching</span>
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-percentage text-purple-500 mr-3"></i>
+                        <span>Match Percentage & Reasoning</span>
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-lightbulb text-purple-500 mr-3"></i>
+                        <span>Gap Analysis & Recommendations</span>
+                    </li>
+                    <li class="flex items-center text-purple-600 font-medium">
+                        <i class="fas fa-crown text-purple-500 mr-3"></i>
+                        <span>Premium AI Analysis</span>
+                    </li>
+                </ul>
+
+                <button id="upgrade-ultra-btn" class="w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-medium rounded-lg hover:from-purple-700 hover:to-pink-700 transition-colors">
+                    <i class="fas fa-rocket mr-2"></i>
+                    <span id="ultra-btn-text">Upgrade to Ultra - Rp 999.000</span>
+                </button>
+
+                <p class="text-xs text-gray-500 text-center mt-3">
+                    Premium job matching • Credits tidak expired
                 </p>
             </div>
         </div>
@@ -2354,6 +2401,56 @@ class CreditManager {
             return false;
         }
     }
+    
+    calculateCreditConversion() {
+        if (this.userTier !== 'PROFESIONAL') return null;
+    
+        const proValuePerCredit = 19967; // 599k/30
+        const ultraValuePerCredit = 49950; // 999k/20
+    
+        const totalProValue = this.creditBalance * proValuePerCredit;
+        const fullUltraCredits = Math.floor(totalProValue / ultraValuePerCredit);
+        const remainder = totalProValue % ultraValuePerCredit;
+    
+        // If remainder > 40% of ultra credit value, give bonus credit
+        const bonusCredit = remainder > (ultraValuePerCredit * 0.4) ? 1 : 0;
+        const totalUltraCredits = fullUltraCredits + bonusCredit;
+    
+        return {
+            currentProCredits: this.creditBalance,
+            currentProValue: totalProValue,
+            newUltraCredits: totalUltraCredits,
+            fullCredits: fullUltraCredits,
+            bonusCredits: bonusCredit,
+            remainder: remainder,
+            savings: bonusCredit > 0 ? (ultraValuePerCredit - remainder) : 0
+        };
+    }
+
+    async convertToUltra() {
+        const conversion = this.calculateCreditConversion();
+        if (!conversion) return false;
+    
+        try {
+            // Update to ULTRA tier with converted credits
+            await supabase
+                .from('user_profiles')
+                .update({ 
+                    user_tier: 'ULTRA',
+                    credit_balance: conversion.newUltraCredits,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', this.currentUser.id);
+
+            this.userTier = 'ULTRA';
+            this.creditBalance = conversion.newUltraCredits;
+        
+            return conversion;
+        } catch (error) {
+            console.error('Error converting to ULTRA:', error);
+            return false;
+        }
+    }
 }
 
 // Midtrans Payment Handler
@@ -2628,6 +2725,7 @@ function showPricingPage() {
     
     // Update button text based on current tier
     updatePricingPageForUser();
+    updateUltraButtonForProUser();
 }
 
 function hidePricingPage() {
@@ -2768,6 +2866,52 @@ function updatePricingPageForUser() {
     } else {
         currentPlanBtn.innerHTML = '<i class="fas fa-arrow-up mr-2"></i>Upgrade ke Profesional';
         upgradeBtn.innerHTML = `<i class="fas fa-plus mr-2"></i>Beli 30 Credits Tambahan`;
+    }
+}
+
+function updateUltraButtonForProUser() {
+    const status = creditManager.getStatus();
+    const ultraBtn = document.getElementById('upgrade-ultra-btn');
+    const ultraBtnText = document.getElementById('ultra-btn-text');
+    
+    if (status.tier === 'PROFESIONAL' && status.remaining > 0) {
+        const conversion = creditManager.calculateCreditConversion();
+        if (conversion) {
+            ultraBtnText.innerHTML = `Convert ${conversion.currentProCredits} Credits → ${conversion.newUltraCredits} ULTRA Credits`;
+            
+            // Remove existing help text if any
+            const existingHelp = ultraBtn.parentNode.querySelector('.conversion-help');
+            if (existingHelp) existingHelp.remove();
+            
+            // Add helpful text below button
+            const helpText = document.createElement('p');
+            helpText.className = 'conversion-help text-xs text-green-600 text-center mt-2';
+            helpText.innerHTML = `Your ${conversion.currentProCredits} PRO credits = ${conversion.newUltraCredits} ULTRA credits${conversion.bonusCredits > 0 ? ' (+' + conversion.bonusCredits + ' bonus!)' : ''}`;
+            ultraBtn.parentNode.appendChild(helpText);
+        }
+    }
+}
+
+async function convertCreditsToUltra() {
+    const conversion = creditManager.calculateCreditConversion();
+    if (!conversion) {
+        showError('No conversion available');
+        return;
+    }
+    
+    // Show confirmation
+    const confirmMsg = `Convert ${conversion.currentProCredits} PRO credits to ${conversion.newUltraCredits} ULTRA credits${conversion.bonusCredits > 0 ? ' (including ' + conversion.bonusCredits + ' bonus credit)' : ''}?`;
+    
+    if (!confirm(confirmMsg)) return;
+    
+    const result = await creditManager.convertToUltra();
+    if (result) {
+        showSuccess(`Converted to ULTRA! You now have ${result.newUltraCredits} ULTRA credits${result.bonusCredits > 0 ? ' (including ' + result.bonusCredits + ' bonus credit!)' : ''}`);
+        updateUsageDisplay();
+        updateJobDescriptionAccess();
+        hidePricingPage();
+    } else {
+        showError('Conversion failed. Please try again.');
     }
 }
         
@@ -4929,6 +5073,34 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.innerHTML = '<i class="fas fa-rocket mr-2"></i>Beli 30 Credits - Rp 599.000';
                 this.disabled = false;
             }, 2000);
+        }
+    });
+
+    // ADD this right after the existing upgrade-profesional-btn listener:
+    document.getElementById('upgrade-ultra-btn').addEventListener('click', async function() {
+        const status = creditManager.getStatus();
+    
+        if (status.tier === 'PROFESIONAL' && status.remaining > 0) {
+            // PRO user converting credits
+            await convertCreditsToUltra();
+        } else {
+            // New ULTRA purchase
+            const userEmail = creditManager.currentUser.email;
+        
+            this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Memproses...';
+            this.disabled = true;
+        
+            try {
+                await paymentHandler.createPayment(999000, 20, userEmail);
+            } catch (error) {
+                console.error('Payment initiation failed:', error);
+                showError('Gagal memulai pembayaran. Silakan coba lagi.');
+            } finally {
+                setTimeout(() => {
+                    this.innerHTML = '<i class="fas fa-rocket mr-2"></i>Upgrade to Ultra - Rp 999.000';
+                    this.disabled = false;
+                }, 2000);
+            }
         }
     });
 });
