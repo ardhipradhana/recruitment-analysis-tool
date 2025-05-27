@@ -1858,6 +1858,38 @@ class CreditManager {
             freeUsed: this.freeAnalysesUsed
         };
     }
+
+    async useAnalysis() {
+        if (!this.canAnalyze()) {
+            throw new Error('No analyses remaining');
+        }
+
+        try {
+            if (this.userTier === 'FREE') {
+                this.freeAnalysesUsed++;
+                await supabase
+                    .from('user_profiles')
+                    .update({ 
+                        free_analyses_used: this.freeAnalysesUsed,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('id', this.currentUser.id);
+            } else {
+                this.creditBalance--;
+                await supabase
+                    .from('user_profiles')
+                    .update({ 
+                        credit_balance: this.creditBalance,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('id', this.currentUser.id);
+            }
+            console.log('Analysis used. Remaining:', this.getRemainingAnalyses());
+        } catch (error) {
+            console.error('Error using analysis:', error);
+            throw error;
+        }
+    }
 }
 
 // Candidate Filter System
@@ -2150,6 +2182,17 @@ async function startAnalysis() {
         return;
     }
 
+    // ADD THIS CREDIT CHECK
+    if (!creditManager.canAnalyze()) {
+        const status = creditManager.getStatus();
+        if (status.isFreeTier) {
+            showError('Anda telah menggunakan 3 analisis gratis bulan ini. Upgrade untuk analisis lebih banyak!');
+        } else {
+            showError('Credits habis! Silakan beli credits tambahan.');
+        }
+        return;
+    }
+
     console.log('=== STARTING ANALYSIS ===');
     console.log('Number of files:', files.length);
 
@@ -2350,6 +2393,20 @@ function showAnalysisResults(data) {
 
     // ✨ NEW: Auto-save to history
     saveCurrentAnalysisToHistory();
+
+     // ✨ NEW: Add this at the very end of the function
+    useAnalysisCredit();
+}
+
+// ADD this new function right after showAnalysisResults
+async function useAnalysisCredit() {
+    try {
+        await creditManager.useAnalysis();
+        updateUsageDisplay();
+        console.log('Credit used successfully');
+    } catch (error) {
+        console.error('Error using credit:', error);
+    }
 }
 
 function setupDownloadPDF() {
