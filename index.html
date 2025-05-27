@@ -4566,6 +4566,18 @@ function generateCandidateDetailHTML(candidate, index) {
     const score = parseInt(candidate.candidateScore) || 75;
     const name = candidate.candidateName || `Candidate ${index + 1}`;
     const title = extractTitleFromSummary(candidate) || 'Professional';
+
+    // ADD THIS DEBUG:
+    console.log('=== BADGE DEBUG ===');
+    console.log('Candidate:', name);
+    console.log('Has roleAlignment?', !!candidate.roleAlignment);
+    console.log('Has educationCertifications?', !!candidate.educationCertifications);
+    console.log('Has communication?', !!candidate.communication);
+    console.log('Has redFlags?', !!candidate.redFlags);
+    console.log('Has strategicRecommendations?', !!candidate.strategicRecommendations);
+    console.log('Has candidateScorecard?', !!candidate.candidateScorecard);
+    console.log('Should be ULTRA?', !!(candidate.roleAlignment || candidate.educationCertifications || candidate.communication || candidate.redFlags || candidate.strategicRecommendations || candidate.candidateScorecard));
+    console.log('=== END BADGE DEBUG ===');
     
     // Base HTML structure
     let detailHTML = `
@@ -4667,6 +4679,11 @@ function generateCandidateDetailHTML(candidate, index) {
 
 function getAnalysisTypeBadge(candidate) {
     const hasUltraAnalysis = candidate.roleAlignment || candidate.educationCertifications || candidate.communication || candidate.redFlags || candidate.strategicRecommendations || candidate.candidateScorecard;
+
+    console.log('=== getAnalysisTypeBadge DEBUG ===');
+    console.log('hasUltraAnalysis:', hasUltraAnalysis);
+    console.log('Will show:', hasUltraAnalysis ? 'ULTRA' : 'PRO');
+    console.log('=== END getAnalysisTypeBadge DEBUG ===');
     
     if (hasUltraAnalysis) {
         return '<span class="ml-2 px-2 py-1 bg-gradient-to-r from-purple-500 to-pink-600 text-white text-xs font-medium rounded shadow-sm"><i class="fas fa-crown mr-1"></i>ULTRA Analysis</span>';
