@@ -3744,9 +3744,10 @@ function showCandidateDetail(index) {
 function generateCandidateDetailHTML(candidate, index) {
     const score = parseInt(candidate.candidateScore) || 75;
     const name = candidate.candidateName || `Candidate ${index + 1}`;
-    const title = candidate.candidateTitle || candidate.position || 'Professional';
+    const title = extractTitleFromSummary(candidate) || 'Professional';
     
-    return `
+    // Base HTML structure
+    let detailHTML = `
         <!-- Candidate Overview -->
         <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
             <div class="flex flex-col md:flex-row justify-between items-center md:items-start gap-6">
@@ -3795,7 +3796,20 @@ function generateCandidateDetailHTML(candidate, index) {
                 ${generateCompetenciesHTML(candidate.coreCompetencies)}
             </div>
         </div>
-        
+    `;
+    
+    // Add premium sections or upgrade prompt based on user tier
+    const userStatus = creditManager.getStatus();
+    if (!userStatus.isFreeTier) {
+        // PROFESSIONAL user - add premium sections
+        detailHTML += generatePremiumSectionsHTML(candidate);
+    } else {
+        // FREE user - add upgrade prompt
+        detailHTML += generateUpgradePromptHTML();
+    }
+    
+    // Add upgrade CTA at the end
+    detailHTML += `
         <!-- Upgrade CTA -->
         <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-6 text-white mb-6">
             <div class="md:flex justify-between items-center">
@@ -3817,6 +3831,112 @@ function generateCandidateDetailHTML(candidate, index) {
                         Get My Tailored Version
                     </a>
                 </div>
+            </div>
+        </div>
+    `;
+    
+    return detailHTML;
+}
+
+function generatePremiumSectionsHTML(candidate) {
+    let premiumHTML = '';
+    
+    // Role Alignment Section
+    if (candidate.roleAlignment) {
+        premiumHTML += createPremiumSectionHTML(
+            'fas fa-crosshairs',
+            'Role Alignment & Potential Fit',
+            candidate.roleAlignment
+        );
+    }
+    
+    // Education & Certifications
+    if (candidate.educationCertifications) {
+        premiumHTML += createPremiumSectionHTML(
+            'fas fa-graduation-cap',
+            'Education & Certifications',
+            candidate.educationCertifications
+        );
+    }
+    
+    // Communication Quality
+    if (candidate.communication) {
+        premiumHTML += createPremiumSectionHTML(
+            'fas fa-comments',
+            'Communication & Presentation Quality',
+            candidate.communication
+        );
+    }
+    
+    // Red Flags
+    if (candidate.redFlags) {
+        premiumHTML += createPremiumSectionHTML(
+            'fas fa-exclamation-triangle',
+            'Red Flags & Risk Analysis',
+            candidate.redFlags,
+            'text-red-600'
+        );
+    }
+    
+    // Strategic Recommendations
+    if (candidate.strategicRecommendations) {
+        premiumHTML += createPremiumSectionHTML(
+            'fas fa-lightbulb',
+            'Strategic Recommendations',
+            candidate.strategicRecommendations,
+            'text-green-600'
+        );
+    }
+    
+    // Candidate Scorecard
+    if (candidate.candidateScorecard) {
+        premiumHTML += createPremiumSectionHTML(
+            'fas fa-chart-bar',
+            'Detailed Candidate Scorecard',
+            candidate.candidateScorecard,
+            'text-blue-600'
+        );
+    }
+    
+    return premiumHTML;
+}
+
+function createPremiumSectionHTML(iconClass, title, content, iconColor = 'text-blue-500') {
+    return `
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <div class="flex items-center mb-4">
+                <i class="${iconClass} ${iconColor} mr-3"></i>
+                <h3 class="text-lg font-semibold">${title}</h3>
+                <span class="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">PRO</span>
+            </div>
+            <div class="text-gray-700">
+                ${formatPremiumContentHTML(content)}
+            </div>
+        </div>
+    `;
+}
+
+function formatPremiumContentHTML(content) {
+    if (!content) return '<p>No data available.</p>';
+    
+    // Convert bullet points and line breaks to proper HTML
+    return content
+        .replace(/\n/g, '<br>')
+        .replace(/^- /gm, '• ')
+        .replace(/\n\n/g, '<br><br>');
+}
+
+function generateUpgradePromptHTML() {
+    return `
+        <div class="bg-gradient-to-r from-gray-100 to-gray-200 rounded-xl p-6 mb-6 border-2 border-dashed border-gray-300">
+            <div class="text-center">
+                <i class="fas fa-lock text-gray-400 text-3xl mb-3"></i>
+                <h3 class="text-lg font-semibold text-gray-600 mb-2">Premium Analysis Available</h3>
+                <p class="text-gray-500 mb-4">Role Alignment, Education Analysis, Red Flags Detection, Strategic Recommendations, and Detailed Scorecard</p>
+                <button onclick="showPricingPage()" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                    <i class="fas fa-arrow-up mr-2"></i>
+                    Upgrade untuk Analisis Lengkap
+                </button>
             </div>
         </div>
     `;
