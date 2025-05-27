@@ -3295,9 +3295,9 @@ function updateFileList() {
         startButton.disabled = false;
         fileList.innerHTML = '';
 
-        // ADD THIS LINE TO REMOVE EXISTING WARNINGS
-        const existingWarning = fileListContainer.querySelector('.processing-warning');
-        if (existingWarning) existingWarning.remove();
+        // REMOVE ALL EXISTING WARNINGS (not just one)
+        const existingWarnings = fileListContainer.querySelectorAll('.processing-warning');
+        existingWarnings.forEach(warning => warning.remove());
         
         files.forEach((file, index) => {
             const fileItem = document.createElement('div');
@@ -3332,10 +3332,10 @@ function updateFileList() {
             fileList.appendChild(fileItem);
         });
 
-        // ADD PROCESSING TIME WARNING
+        // ADD PROCESSING TIME WARNING - only ONE warning now
         if (files.length > 2) {
             const warningDiv = document.createElement('div');
-            warningDiv.className = 'mt-3 p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg';
+            warningDiv.className = 'mt-3 p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg processing-warning';
             warningDiv.innerHTML = `
                 <div class="flex items-start">
                     <i class="fas fa-clock text-yellow-500 mr-2 mt-0.5"></i>
