@@ -2541,6 +2541,7 @@ class PaymentHandler {
                 body: JSON.stringify({
                     amount: amount,
                     credits: credits,
+                    credit_type: creditType,
                     user_email: userEmail,
                     user_id: creditManager.currentUser.id
                 })
@@ -2552,7 +2553,7 @@ class PaymentHandler {
             
             if (data.success && data.token) {
                 // Open Midtrans popup
-                this.openPaymentPopup(data.token, credits);
+                this.openPaymentPopup(data.token, credits, creditType);
             } else {
                 throw new Error('Failed to create payment token: ' + JSON.stringify(data));
             }
@@ -2969,21 +2970,67 @@ function updateUltraButtonForProUser() {
     const ultraBtn = document.getElementById('upgrade-ultra-btn');
     const ultraBtnText = document.getElementById('ultra-btn-text');
     
-    if (status.tier === 'PROFESIONAL' && status.remaining > 0) {
+    if (status.tier === 'PROFESIONAL' && status.proCredits > 0) {
+        // PRO user with existing credits - show conversion option
         const conversion = creditManager.calculateCreditConversion();
         if (conversion) {
-            ultraBtnText.innerHTML = `Convert ${conversion.currentProCredits} PRO Credits → ${conversion.newUltraCredits} ULTRA Credits`;
+            ultraBtnText.innerHTML = `Convert to ${conversion.newUltraCredits} ULTRA Credits`;
             
             // Remove existing help text if any
             const existingHelp = ultraBtn.parentNode.querySelector('.conversion-help');
             if (existingHelp) existingHelp.remove();
             
-            // Add helpful text below button
-            const helpText = document.createElement('p');
-            helpText.className = 'conversion-help text-xs text-green-600 text-center mt-2';
-            helpText.innerHTML = `Your ${conversion.currentProCredits} PRO credits = ${conversion.newUltraCredits} ULTRA credits${conversion.bonusCredits > 0 ? ' (+' + conversion.bonusCredits + ' bonus!)' : ''}`;
+            // Add helpful text and second button
+            const helpText = document.createElement('div');
+            helpText.className = 'conversion-help mt-3';
+            helpText.innerHTML = `
+                <p class="text-xs text-green-600 text-center mb-3">
+                    Your ${conversion.currentProCredits} PRO credits = ${conversion.newUltraCredits} ULTRA credits${conversion.bonusCredits > 0 ? ' (+' + conversion.bonusCredits + ' bonus!)' : ''}
+                </p>
+                <div class="text-center">
+                    <button id="buy-new-ultra-btn" class="w-full py-2 px-4 bg-white text-purple-600 border border-purple-600 font-medium rounded-lg hover:bg-purple-50 transition-colors text-sm">
+                        <i class="fas fa-shopping-cart mr-2"></i>
+                        Or Buy 20 New ULTRA Credits - Rp 999.000
+                    </button>
+                </div>
+            `;
             ultraBtn.parentNode.appendChild(helpText);
+            
+            // Add event listener for the new button
+            document.getElementById('buy-new-ultra-btn').addEventListener('click', () => purchaseNewUltraCredits());
         }
+    } else if (status.tier === 'ULTRA') {
+        // ULTRA user - show purchase options
+        ultraBtnText.innerHTML = 'Buy More ULTRA Credits';
+        
+        // Remove existing help text if any
+        const existingHelp = ultraBtn.parentNode.querySelector('.conversion-help');
+        if (existingHelp) existingHelp.remove();
+        
+        // Add purchase options
+        const purchaseOptions = document.createElement('div');
+        purchaseOptions.className = 'conversion-help mt-3 space-y-2';
+        purchaseOptions.innerHTML = `
+            <button id="buy-ultra-credits-btn" class="w-full py-2 px-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-medium rounded-lg hover:from-purple-700 hover:to-pink-700 transition-colors text-sm">
+                <i class="fas fa-crown mr-2"></i>
+                Buy 20 ULTRA Credits - Rp 999.000
+            </button>
+            <button id="buy-pro-credits-btn" class="w-full py-2 px-4 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                <i class="fas fa-plus mr-2"></i>
+                Buy 30 PRO Credits - Rp 599.000
+            </button>
+            <p class="text-xs text-gray-500 text-center mt-2">
+                PRO credits work for basic analysis • ULTRA credits for job matching
+            </p>
+        `;
+        ultraBtn.parentNode.appendChild(purchaseOptions);
+        
+        // Add event listeners
+        document.getElementById('buy-ultra-credits-btn').addEventListener('click', () => purchaseNewUltraCredits());
+        document.getElementById('buy-pro-credits-btn').addEventListener('click', () => purchaseProCredits());
+        
+        // Hide the main button since we have the options below
+        ultraBtn.style.display = 'none';
     }
 }
 
@@ -3007,6 +3054,28 @@ async function convertCreditsToUltra() {
         hidePricingPage();
     } else {
         showError('Conversion failed. Please try again.');
+    }
+}
+
+async function purchaseNewUltraCredits() {
+    const userEmail = creditManager.currentUser.email;
+    
+    try {
+        await paymentHandler.createPayment(999000, 20, userEmail, 'ULTRA');
+    } catch (error) {
+        console.error('ULTRA payment initiation failed:', error);
+        showError('Gagal memulai pembayaran ULTRA. Silakan coba lagi.');
+    }
+}
+
+async function purchaseProCredits() {
+    const userEmail = creditManager.currentUser.email;
+    
+    try {
+        await paymentHandler.createPayment(599000, 30, userEmail, 'PROFESIONAL');
+    } catch (error) {
+        console.error('PRO payment initiation failed:', error);
+        showError('Gagal memulai pembayaran PRO. Silakan coba lagi.');
     }
 }
         
