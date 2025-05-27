@@ -4575,7 +4575,8 @@ function generateCandidateDetailHTML(candidate, index) {
                 <div>
                     <div class="flex items-center mb-2">
                         <h2 class="text-2xl font-bold text-gray-800">${name}</h2>
-                        <span id="user-tier-badge-multiple" class="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">Candidate ${index + 1}</span>
+                        <span class="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">Candidate ${index + 1}</span>
+                        ${getAnalysisTypeBadge(candidate)}
                     </div>
                     
                     <div class="flex flex-wrap gap-2 mt-2">
@@ -4624,10 +4625,10 @@ function generateCandidateDetailHTML(candidate, index) {
     const hasUltraAnalysis = candidate.roleAlignment || candidate.educationCertifications || candidate.communication || candidate.redFlags || candidate.strategicRecommendations || candidate.candidateScorecard;
 
     if (userStatus.isUltraTier && hasUltraAnalysis) {
-        // ULTRA user with job matching data - premium sections already included in candidate data
-        console.log('ULTRA user with premium analysis - using data from backend');
+        // ULTRA analysis used - add ULTRA sections
+        detailHTML += generateUltraSectionsHTML(candidate);
     } else if (!userStatus.isFreeTier) {
-        // PRO user OR ULTRA user without job matching - add premium sections
+        // PRO analysis used - add PRO sections
         detailHTML += generatePremiumSectionsHTML(candidate);
     } else {
         // FREE user - add upgrade prompt
@@ -4664,6 +4665,88 @@ function generateCandidateDetailHTML(candidate, index) {
     return detailHTML;
 }
 
+function getAnalysisTypeBadge(candidate) {
+    const hasUltraAnalysis = candidate.roleAlignment || candidate.educationCertifications || candidate.communication || candidate.redFlags || candidate.strategicRecommendations || candidate.candidateScorecard;
+    
+    if (hasUltraAnalysis) {
+        return '<span class="ml-2 px-2 py-1 bg-gradient-to-r from-purple-500 to-pink-600 text-white text-xs font-medium rounded shadow-sm"><i class="fas fa-crown mr-1"></i>ULTRA Analysis</span>';
+    } else {
+        return '<span class="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded"><i class="fas fa-star mr-1"></i>PRO Analysis</span>';
+    }
+}
+
+function generateUltraSectionsHTML(candidate) {
+    let ultraHTML = '';
+    
+    // Role Alignment Section
+    if (candidate.roleAlignment) {
+        ultraHTML += createPremiumSectionHTML(
+            'fas fa-crosshairs',
+            'Role Alignment & Potential Fit',
+            candidate.roleAlignment,
+            'text-purple-600',
+            'ULTRA'
+        );
+    }
+    
+    // Education & Certifications
+    if (candidate.educationCertifications) {
+        ultraHTML += createPremiumSectionHTML(
+            'fas fa-graduation-cap',
+            'Education & Certifications',
+            candidate.educationCertifications,
+            'text-green-600',
+            'ULTRA'
+        );
+    }
+    
+    // Communication Quality
+    if (candidate.communication) {
+        ultraHTML += createPremiumSectionHTML(
+            'fas fa-comments',
+            'Communication & Presentation Quality',
+            candidate.communication,
+            'text-blue-600',
+            'ULTRA'
+        );
+    }
+    
+    // Red Flags
+    if (candidate.redFlags) {
+        ultraHTML += createPremiumSectionHTML(
+            'fas fa-exclamation-triangle',
+            'Red Flags & Risk Analysis',
+            candidate.redFlags,
+            'text-red-600',
+            'ULTRA'
+        );
+    }
+    
+    // Strategic Recommendations
+    if (candidate.strategicRecommendations) {
+        ultraHTML += createPremiumSectionHTML(
+            'fas fa-lightbulb',
+            'Strategic Recommendations',
+            candidate.strategicRecommendations,
+            'text-green-600',
+            'ULTRA'
+        );
+    }
+    
+    // Candidate Scorecard
+    if (candidate.candidateScorecard) {
+        ultraHTML += createPremiumSectionHTML(
+            'fas fa-chart-bar',
+            'Detailed Candidate Scorecard',
+            candidate.candidateScorecard,
+            'text-purple-600',
+            'ULTRA'
+        );
+    }
+    
+    return ultraHTML;
+}
+        
 function generatePremiumSectionsHTML(candidate) {
     let premiumHTML = '';
     
@@ -4727,13 +4810,17 @@ function generatePremiumSectionsHTML(candidate) {
     return premiumHTML;
 }
 
-function createPremiumSectionHTML(iconClass, title, content, iconColor = 'text-blue-500') {
+function createPremiumSectionHTML(iconClass, title, content, iconColor = 'text-blue-500', badgeType = 'PRO') {
+    const badgeClass = badgeType === 'ULTRA' 
+        ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-white' 
+        : 'bg-blue-100 text-blue-800';
+        
     return `
         <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
             <div class="flex items-center mb-4">
                 <i class="${iconClass} ${iconColor} mr-3"></i>
                 <h3 class="text-lg font-semibold">${title}</h3>
-                <span class="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">PRO</span>
+                <span class="ml-2 px-2 py-1 ${badgeClass} text-xs font-medium rounded">${badgeType}</span>
             </div>
             <div class="text-gray-700">
                 ${formatPremiumContentHTML(content)}
@@ -4809,12 +4896,15 @@ function showSingleCandidateView(data) {
         // ULTRA user with job matching data - add ULTRA sections
         console.log('ULTRA user with premium analysis - adding ULTRA sections');
         addUltraSections(data);
+        updateUserTierBadge('ULTRA');
     } else if (!userStatus.isFreeTier) {
         // PRO user OR ULTRA user without job matching - show PRO sections
         addProfessionalSections(data);
+        updateUserTierBadge('PRO');
     } else {
         // User is FREE - show upgrade prompts where premium content would be
         addUpgradePrompts();
+        updateUserTierBadge('FREE');
     }
     
     if (data.coreCompetencies) {
@@ -4828,17 +4918,23 @@ function showSingleCandidateView(data) {
     updateUserTierBadge();
 }
 
-function updateUserTierBadge() {
+function updateUserTierBadge(analysisType = null) {
     const userStatus = creditManager.getStatus();
     const badgeElement = document.getElementById('user-tier-badge');
     
     if (badgeElement) {
-        if (userStatus.isFreeTier) {
+        // Use analysis type if provided, otherwise use user tier
+        const displayType = analysisType || (userStatus.isFreeTier ? 'FREE' : userStatus.isUltraTier ? 'ULTRA' : 'PRO');
+        
+        if (displayType === 'FREE') {
             badgeElement.className = 'ml-2 px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded';
             badgeElement.innerHTML = 'Free Plan';
-        } else {
-            badgeElement.className = 'ml-2 px-2 py-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white text-xs font-medium rounded shadow-sm';
-            badgeElement.innerHTML = '<i class="fas fa-crown mr-1"></i>PRO';
+        } else if (displayType === 'PRO') {
+            badgeElement.className = 'ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded';
+            badgeElement.innerHTML = '<i class="fas fa-star mr-1"></i>PRO Analysis';
+        } else if (displayType === 'ULTRA') {
+            badgeElement.className = 'ml-2 px-2 py-1 bg-gradient-to-r from-purple-500 to-pink-600 text-white text-xs font-medium rounded shadow-sm';
+            badgeElement.innerHTML = '<i class="fas fa-crown mr-1"></i>ULTRA Analysis';
         }
     }
 }
@@ -5026,7 +5122,7 @@ function createPremiumSection(iconClass, title, content, iconColor = 'text-blue-
             <div class="flex items-center mb-4">
                 <i class="${iconClass} ${iconColor} mr-3"></i>
                 <h3 class="text-lg font-semibold">${title}</h3>
-                <span class="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">PRO</span>
+                <span class="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">PRO</span>
             </div>
             <div class="text-gray-700">
                 ${formatPremiumContent(content)}
