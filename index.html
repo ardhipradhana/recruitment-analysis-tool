@@ -4363,6 +4363,17 @@ function showMultipleCandidatesResults(data) {
         console.log('Found candidates array in data.candidates');
         // Extract the JSON objects from the candidates array
         candidatesArray = data.candidates.map(item => item.json || item);
+
+        // TEMPORARY DEBUG - check extraction
+        console.log('=== AFTER EXTRACTION DEBUG ===');
+        console.log('candidatesArray:', candidatesArray);
+        if (candidatesArray[0]) {
+            console.log('First extracted candidate:', candidatesArray[0]);
+            console.log('Has roleAlignment?', candidatesArray[0].roleAlignment);
+            console.log('Has educationCertifications?', candidatesArray[0].educationCertifications);
+        }
+        console.log('=== END EXTRACTION DEBUG ===');
+        
     } else if (data && Array.isArray(data.data)) {
         console.log('Found candidates array in data.data');
         candidatesArray = data.data;
