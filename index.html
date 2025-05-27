@@ -1692,6 +1692,16 @@ validateFile(file, options = {}) {
         errors.push(`File "${file.name}" is too large (${this.formatFileSize(file.size)}). Maximum size allowed: ${this.formatFileSize(maxSize)}`);
     }
     
+    // NEW: Very small PDF check (likely corrupted or password-protected)
+    if (file.type === 'application/pdf' && file.size < 1000) {
+        errors.push(`File "${file.name}" is unusually small for a PDF. It might be corrupted, password-protected, or not a valid PDF file.`);
+    }
+
+    // NEW: Password-protected PDF detection (basic heuristic)
+    if (file.type === 'application/pdf' && file.name.toLowerCase().includes('password')) {
+        errors.push(`File "${file.name}" appears to be password-protected. Please upload an unprotected PDF.`);
+    }
+    
     // Type validation
     if (!allowedTypes.includes(file.type)) {
         errors.push(`File "${file.name}" has unsupported format. Supported formats: PDF`);
@@ -1708,9 +1718,9 @@ validateFile(file, options = {}) {
         errors.push(`File "${file.name}" appears to be empty`);
     }
     
-    // Corrupted file check (basic)
-    if (file.name.includes('~') || file.name.startsWith('.')) {
-        errors.push(`File "${file.name}" may be corrupted or is a system file`);
+    // Corrupted file check (enhanced)
+    if (file.name.includes('~') || file.name.startsWith('.') || file.name.includes('$')) {
+        errors.push(`File "${file.name}" may be corrupted, is a system file, or has an invalid name format`);
     }
     
     return {
@@ -2387,12 +2397,15 @@ class CreditManager {
 
     async addCredits(amount) {
         try {
-            this.creditBalance += amount;
+            // Add to PRO credits specifically
+            this.proCredits += amount;
+            this.creditBalance = this.proCredits + this.ultraCredits; // Update total
         
             // Update database
             await supabase
                 .from('user_profiles')
                 .update({ 
+                    pro_credits: this.proCredits,
                     credit_balance: this.creditBalance,
                     user_tier: 'PROFESIONAL',  // Automatically upgrade to professional
                     updated_at: new Date().toISOString()
@@ -2405,14 +2418,50 @@ class CreditManager {
                 .insert({
                     user_id: this.currentUser.id,
                     credits_purchased: amount,
+                    credit_type: 'PROFESIONAL', // Add this field
                     amount_paid: this.pricing.PROFESIONAL.price
                 });
 
             this.userTier = 'PROFESIONAL';
-            console.log(`Added ${amount} credits. New balance: ${this.creditBalance}`);
+            console.log(`Added ${amount} PRO credits. New balance: ${this.proCredits}`);
             return true;
         } catch (error) {
-            console.error('Error adding credits:', error);
+            console.error('Error adding PRO credits:', error);
+            return false;
+        }
+    }
+
+    async addUltraCredits(amount) {
+        try {
+            this.ultraCredits += amount;
+            this.creditBalance = this.proCredits + this.ultraCredits; // Update total
+        
+            // Update database
+            await supabase
+                .from('user_profiles')
+                .update({ 
+                    ultra_credits: this.ultraCredits,
+                    credit_balance: this.creditBalance,
+                    user_tier: 'ULTRA',  // Automatically upgrade to ULTRA
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', this.currentUser.id);
+
+            // Log purchase in credit_purchases table
+            await supabase
+                .from('credit_purchases')
+                .insert({
+                    user_id: this.currentUser.id,
+                    credits_purchased: amount,
+                    credit_type: 'ULTRA',
+                    amount_paid: this.pricing.ULTRA.price
+                });
+
+            this.userTier = 'ULTRA';
+            console.log(`Added ${amount} ULTRA credits. New balance: ${this.ultraCredits}`);
+            return true;
+        } catch (error) {
+            console.error('Error adding ULTRA credits:', error);
             return false;
         }
     }
@@ -2587,23 +2636,44 @@ class PaymentHandler {
         });
     }
 
-    async handlePaymentSuccess(credits) {
+    async handlePaymentSuccess(credits, creditType) {
         try {
-            const success = await creditManager.addCredits(credits);
-            
+            let success = false;
+            const ticketId = 'TXN-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
+        
+            if (creditType === 'ULTRA') {
+                // For ULTRA purchases - add to ultra_credits
+                success = await creditManager.addUltraCredits(credits);
+            } else {
+                // For PRO purchases - add to pro_credits  
+                success = await creditManager.addCredits(credits);
+            }
+        
             if (success) {
-                showSuccess(`${credits} credits telah ditambahkan ke akun Anda!`);
+                showSuccess(`${credits} ${creditType} credits telah ditambahkan ke akun Anda!`);
                 updateUsageDisplay();
-                
+            
                 setTimeout(() => {
                     hidePricingPage();
                 }, 2000);
             } else {
-                showError('Gagal menambahkan credits. Hubungi support.');
+                // NEW: Give user a support ticket number
+                showError(`Pembayaran berhasil tetapi gagal menambahkan credits. Support ticket: ${ticketId}. Email support@aapgrp.com dengan nomor tiket ini untuk bantuan.`, true);
+            
+                // Log for your reference
+                console.error('Credit addition failed after successful payment:', {
+                    ticketId,
+                    credits,
+                    creditType,
+                    userId: creditManager.currentUser.id,
+                    timestamp: new Date().toISOString()
+                });
             }
         } catch (error) {
-            console.error('Error handling payment success:', error);
-            showError('Terjadi kesalahan. Hubungi support.');
+            const ticketId = 'TXN-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
+            console.error('Error handling payment success:', error, { ticketId });
+        
+            showError(`Terjadi kesalahan saat memproses pembayaran. Support ticket: ${ticketId}. Email support@aapgrp.com dengan nomor tiket ini.`, true);
         }
     }
 }
@@ -3367,15 +3437,17 @@ async function startAnalysis() {
     } catch (err) {
         console.error("Analysis failed:", err);
         
-        // Enhanced error handling
+        // Enhanced error handling with better user messages
         if (err.message.includes('timeout')) {
-            showError('Analysis timed out. Your files may be too large or complex. Please try with smaller files or check your connection.', true);
+            showError('Analysis took longer than expected. This usually happens with complex CVs, poor internet connection, or high server load. Please try again in a few moments, or contact support@aapgrp.com if the problem persists.', true);
         } else if (err.message.includes('Network')) {
-            showError('Network error occurred. Please check your internet connection and try again.', true);
-        } else if (err.message.includes('Server')) {
-            showError('Server is temporarily unavailable. Please try again in a few minutes.', true);
+            showError('Network connection issue detected. Please check your internet connection and try again. If you continue having problems, contact support@aapgrp.com', true);
+        } else if (err.message.includes('Server error: 5')) {
+            showError('Our analysis server is temporarily overloaded. Please wait 2-3 minutes and try again, or contact support@aapgrp.com if this continues.', true);
+        } else if (err.message.includes('Server error: 4')) {
+            showError('There was an issue with your uploaded files. Please ensure they are valid, unprotected PDF files and try again. Contact support@aapgrp.com if you need help.', true);
         } else {
-            showError(`Analysis failed: ${err.message}. Please try again.`, true);
+            showError(`Analysis failed: ${err.message}. Please try again or contact support@aapgrp.com with details about what you were trying to analyze.`, true);
         }
         
         showRetryButton();
