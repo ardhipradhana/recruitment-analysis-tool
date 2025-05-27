@@ -4585,7 +4585,7 @@ function generateCandidateDetailHTML(candidate, index) {
                     <div class="flex items-center mb-2">
                         <h2 class="text-2xl font-bold text-gray-800">${name}</h2>
                         <span class="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">Candidate ${index + 1}</span>
-                        ${getAnalysisTypeBadge(candidate)}
+                        ${getUserTierBadge()}
                     </div>
                     
                     <div class="flex flex-wrap gap-2 mt-2">
@@ -4695,6 +4695,18 @@ function getAnalysisTypeBadge(candidate) {
         return '<span class="ml-2 px-2 py-1 bg-gradient-to-r from-purple-500 to-pink-600 text-white text-xs font-medium rounded shadow-sm"><i class="fas fa-crown mr-1"></i>ULTRA Analysis</span>';
     } else {
         return '<span class="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded"><i class="fas fa-star mr-1"></i>PRO Analysis</span>';
+    }
+}
+
+function getUserTierBadge() {
+    const userStatus = creditManager.getStatus();
+    
+    if (userStatus.isFreeTier) {
+        return '<span class="ml-2 px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded">Free Plan</span>';
+    } else if (userStatus.isUltraTier) {
+        return '<span class="ml-2 px-2 py-1 bg-gradient-to-r from-purple-500 to-pink-600 text-white text-xs font-medium rounded shadow-sm"><i class="fas fa-crown mr-1"></i>ULTRA User</span>';
+    } else {
+        return '<span class="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded"><i class="fas fa-star mr-1"></i>PRO User</span>';
     }
 }
 
