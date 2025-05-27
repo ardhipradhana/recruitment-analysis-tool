@@ -1064,8 +1064,8 @@
             <div class="space-y-4">
                 <div>
                     <h3 class="font-semibold text-gray-700 mb-2">Email Support</h3>
-                    <a href="mailto:support@montpro.id" class="text-blue-600 hover:text-blue-800">
-                        support@montpro.id
+                    <a href="mailto:support@aapgrp.com" class="text-blue-600 hover:text-blue-800">
+                        support@aapgrp.com
                     </a>
                     <p class="text-sm text-gray-500 mt-1">
                         Respon dalam 24 jam (hari kerja)
@@ -2545,9 +2545,16 @@ function updateUsageDisplay() {
 
 // Pricing Page Navigation Functions
 function showPricingPage() {
-    document.getElementById('main-app').style.display = 'none';
-    document.getElementById('analysis-results').classList.add('hidden');
-    document.getElementById('pricing-page').style.display = 'block';
+    console.log('Showing pricing page...');
+    hideAllPages(); // Use the new unified function
+    
+    const pricingPage = document.getElementById('pricing-page');
+    if (pricingPage) {
+        pricingPage.style.display = 'block';
+        pricingPage.style.position = 'relative'; // Ensure proper positioning
+        pricingPage.style.zIndex = '1';
+        console.log('Pricing page shown');
+    }
     
     // Update button text based on current tier
     updatePricingPageForUser();
@@ -2568,42 +2575,85 @@ function hidePricingPage() {
 }
 
 // Support Pages Navigation Functions
+// Support Pages Navigation Functions (with debug)
 function showSupportPage() {
-    document.getElementById('main-app').style.display = 'none';
-    document.getElementById('analysis-results').classList.add('hidden');
-    document.getElementById('pricing-page').style.display = 'none';
-    document.getElementById('support-page').style.display = 'block';
+    console.log('Showing support page...');
+    hideAllPages();
+    const supportPage = document.getElementById('support-page');
+    if (supportPage) {
+        supportPage.style.display = 'block';
+        console.log('Support page shown');
+    } else {
+        console.error('Support page element not found!');
+    }
 }
 
 function showFAQPage() {
-    document.getElementById('main-app').style.display = 'none';
-    document.getElementById('analysis-results').classList.add('hidden');
-    document.getElementById('pricing-page').style.display = 'none';
-    document.getElementById('faq-page').style.display = 'block';
+    console.log('Showing FAQ page...');
+    hideAllPages();
+    const faqPage = document.getElementById('faq-page');
+    if (faqPage) {
+        faqPage.style.display = 'block';
+        console.log('FAQ page shown');
+    } else {
+        console.error('FAQ page element not found!');
+    }
 }
 
 function showTermsPage() {
-    document.getElementById('main-app').style.display = 'none';
-    document.getElementById('analysis-results').classList.add('hidden');
-    document.getElementById('pricing-page').style.display = 'none';
-    document.getElementById('terms-page').style.display = 'block';
+    console.log('Showing terms page...');
+    hideAllPages();
+    const termsPage = document.getElementById('terms-page');
+    if (termsPage) {
+        termsPage.style.display = 'block';
+        console.log('Terms page shown');
+    } else {
+        console.error('Terms page element not found!');
+    }
+}
+
+function hideAllPages() {
+    // Hide main app components
+    const mainApp = document.getElementById('main-app');
+    const analysisResults = document.getElementById('analysis-results');
+    const pricingPage = document.getElementById('pricing-page');
+    
+    if (mainApp) mainApp.style.display = 'none';
+    if (analysisResults) analysisResults.classList.add('hidden');
+    if (pricingPage) pricingPage.style.display = 'none';
+    
+    // Hide support pages
+    const supportPage = document.getElementById('support-page');
+    const faqPage = document.getElementById('faq-page');
+    const termsPage = document.getElementById('terms-page');
+    
+    if (supportPage) supportPage.style.display = 'none';
+    if (faqPage) faqPage.style.display = 'none';
+    if (termsPage) termsPage.style.display = 'none';
 }
 
 function hideAllSupportPages() {
-    document.getElementById('support-page').style.display = 'none';
-    document.getElementById('faq-page').style.display = 'none';
-    document.getElementById('terms-page').style.display = 'none';
+    console.log('Hiding all support pages...');
+    hideAllPages();
     
-    // Return to main app
-    document.getElementById('main-app').style.display = 'block';
+    // Show main app
+    const mainApp = document.getElementById('main-app');
+    if (mainApp) {
+        mainApp.style.display = 'block';
+        console.log('Main app restored');
+    }
     
     // Show appropriate content
     const analysisResults = document.getElementById('analysis-results');
+    const uploadInterface = document.getElementById('upload-interface');
+    
     if (analysisResults && !analysisResults.classList.contains('hidden')) {
         // Keep showing results if they exist
-    } else {
+        console.log('Showing analysis results');
+    } else if (uploadInterface) {
         // Show upload interface if no results
-        document.getElementById('upload-interface').classList.remove('hidden');
+        uploadInterface.classList.remove('hidden');
+        console.log('Showing upload interface');
     }
 }
 
