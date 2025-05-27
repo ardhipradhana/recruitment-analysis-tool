@@ -854,17 +854,21 @@
                 <span id="history-count" class="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full hidden">0</span>
             </button>
             <!-- Add this BEFORE the logout button -->
-            <div id="usage-display" class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white rounded-lg border border-gray-300 shadow-sm">
-                <i class="fas fa-chart-pie mr-2 text-blue-500"></i>
-                <span id="usage-text">Loading...</span>
+            <div class="flex items-center gap-3">
+                <div id="usage-display" class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white rounded-lg border border-gray-300 shadow-sm">
+                    <i class="fas fa-chart-pie mr-2 text-blue-500"></i>
+                    <span id="usage-text">Loading...</span>
+                </div>
+                <!-- Upgrade Button (shows only for free users or when credits are low) -->
+                <button id="upgrade-btn" class="hidden px-3 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-colors shadow-sm" onclick="showPricingPage()">
+                    <i class="fas fa-arrow-up mr-1"></i>
+                    Upgrade
+                </button>
             </div>
+            
             <button id="logout-btn" class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white rounded-lg border border-gray-300 hover:bg-gray-50 hover:text-gray-900 transition-colors shadow-sm">
                 <span>Log Out</span>
                 <i class="fas fa-sign-out-alt ml-2"></i>
-            </button>
-            <!-- Add this temporarily in your header, next to the other buttons -->
-            <button onclick="showPricingPage()" class="px-3 py-2 bg-blue-600 text-white rounded text-sm">
-                Test Pricing
             </button>
         </header>
 
@@ -2141,6 +2145,7 @@ let candidateFilter = new CandidateFilter();
 function updateUsageDisplay() {
     const status = creditManager.getStatus();
     const usageElement = document.getElementById('usage-text');
+    const upgradeBtn = document.getElementById('upgrade-btn');
     
     if (!usageElement) {
         console.log('Usage display element not found yet');
@@ -2151,15 +2156,32 @@ function updateUsageDisplay() {
         usageElement.textContent = `${status.remaining}/3 gratis tersisa`;
         if (status.remaining === 0) {
             usageElement.className = 'text-red-600 font-medium';
+        } else if (status.remaining === 1) {
+            usageElement.className = 'text-orange-600 font-medium';
         } else {
             usageElement.className = 'text-gray-700';
         }
+        // Show upgrade button for free users
+        if (upgradeBtn) {
+            upgradeBtn.classList.remove('hidden');
+            upgradeBtn.innerHTML = '<i class="fas fa-arrow-up mr-1"></i>Upgrade';
+        }
+        
     } else {
         usageElement.textContent = `${status.remaining} credits`;
         if (status.remaining < 5) {
             usageElement.className = 'text-orange-600 font-medium';
+            // Show top-up button when credits are low
+            if (upgradeBtn) {
+                upgradeBtn.classList.remove('hidden');
+                upgradeBtn.innerHTML = '<i class="fas fa-plus mr-1"></i>Top Up';
+            }
         } else {
             usageElement.className = 'text-green-600 font-medium';
+            // Hide button when credits are sufficient
+            if (upgradeBtn) {
+                upgradeBtn.classList.add('hidden');
+            }
         }
     }
 }
@@ -2363,12 +2385,19 @@ async function startAnalysis() {
         const status = creditManager.getStatus();
         if (status.isFreeTier) {
             showError('Anda telah menggunakan 3 analisis gratis bulan ini. Upgrade untuk analisis lebih banyak!');
+            // Auto-show pricing page after 2 seconds
+            setTimeout(() => {
+                showPricingPage();
+            }, 2000);
         } else {
             showError('Credits habis! Silakan beli credits tambahan.');
+            // Auto-show pricing page after 2 seconds
+            setTimeout(() => {
+                showPricingPage();
+            }, 2000);
         }
         return;
     }
-
     // ADD THIS NEW CHECK: Make sure user has enough credits for all files
     const remainingAnalyses = creditManager.getRemainingAnalyses();
     const filesCount = files.length;
@@ -2377,8 +2406,14 @@ async function startAnalysis() {
         const status = creditManager.getStatus();
         if (status.isFreeTier) {
             showError(`Anda memiliki ${remainingAnalyses} analisis gratis tersisa, tapi ingin menganalisis ${filesCount} resume. Silakan kurangi jumlah file atau upgrade ke Profesional.`);
+            setTimeout(() => {
+                showPricingPage();
+            }, 3000);
         } else {
             showError(`Anda memiliki ${remainingAnalyses} credits tersisa, tapi ingin menganalisis ${filesCount} resume. Silakan beli credits tambahan atau kurangi jumlah file.`);
+            setTimeout(() => {
+                showPricingPage();
+            }, 3000);
         }
         return;
     }
