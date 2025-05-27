@@ -10,6 +10,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <!-- Add this after your other script tags -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Add this with your other script tags in the <head> section -->
+    <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="SB-Mid-client-toPT0o1aYQUZ6W4m"></script>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -2041,6 +2043,124 @@ class CreditManager {
             throw error;
         }
     }
+
+    async addCredits(amount) {
+        try {
+            this.creditBalance += amount;
+        
+            // Update database
+            await supabase
+                .from('user_profiles')
+                .update({ 
+                    credit_balance: this.creditBalance,
+                    user_tier: 'PROFESIONAL',  // Automatically upgrade to professional
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', this.currentUser.id);
+
+            // Log purchase in credit_purchases table
+            await supabase
+                .from('credit_purchases')
+                .insert({
+                    user_id: this.currentUser.id,
+                    credits_purchased: amount,
+                    amount_paid: this.pricing.PROFESIONAL.price
+                });
+
+            this.userTier = 'PROFESIONAL';
+            console.log(`Added ${amount} credits. New balance: ${this.creditBalance}`);
+            return true;
+        } catch (error) {
+            console.error('Error adding credits:', error);
+            return false;
+        }
+    }
+}
+
+// Midtrans Payment Handler
+// Temporary Test Version - Replace your PaymentHandler class
+class PaymentHandler {
+    constructor() {
+        this.isProduction = false; // Sandbox mode
+    }
+
+    async createPayment(amount, credits, userEmail) {
+        try {
+            // Temporary: Create mock transaction for testing
+            const mockSnapToken = await this.createMockTransaction(amount, credits, userEmail);
+            
+            if (mockSnapToken) {
+                // Open Midtrans popup with mock token
+                // For testing, we'll simulate the token
+                this.openPaymentPopup(mockSnapToken, credits);
+            } else {
+                throw new Error('Failed to create payment token');
+            }
+        } catch (error) {
+            console.error('Payment creation failed:', error);
+            showError('Tidak dapat membuat pembayaran. Silakan coba lagi.');
+        }
+    }
+
+    async createMockTransaction(amount, credits, userEmail) {
+        // Mock Midtrans API call for testing
+        // In reality, this would call your backend
+        console.log('Creating payment for:', { amount, credits, userEmail });
+        
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // For now, return a test message instead of real snap token
+        showWarning('Backend belum dibuat. Simulasi pembayaran berhasil!');
+        
+        // Simulate successful payment for testing
+        setTimeout(async () => {
+            await this.handlePaymentSuccess(credits);
+        }, 2000);
+        
+        return null; // We're not opening real Midtrans popup yet
+    }
+
+    openPaymentPopup(snapToken, credits) {
+        // This will be used when we have real backend
+        window.snap.pay(snapToken, {
+            onSuccess: async (result) => {
+                console.log('Payment success:', result);
+                await this.handlePaymentSuccess(credits);
+            },
+            onPending: (result) => {
+                console.log('Payment pending:', result);
+                showWarning('Pembayaran sedang diproses.');
+            },
+            onError: (result) => {
+                console.log('Payment error:', result);
+                showError('Pembayaran gagal. Silakan coba lagi.');
+            },
+            onClose: () => {
+                console.log('Payment popup closed');
+            }
+        });
+    }
+
+    async handlePaymentSuccess(credits) {
+        try {
+            const success = await creditManager.addCredits(credits);
+            
+            if (success) {
+                showSuccess(`Pembayaran berhasil! ${credits} credits telah ditambahkan ke akun Anda.`);
+                updateUsageDisplay();
+                
+                setTimeout(() => {
+                    hidePricingPage();
+                }, 2000);
+            } else {
+                showError('Pembayaran berhasil tapi gagal menambahkan credits. Hubungi support.');
+            }
+        } catch (error) {
+            console.error('Error handling payment success:', error);
+            showError('Terjadi kesalahan setelah pembayaran. Hubungi support.');
+        }
+    }
 }
 
 // Candidate Filter System
@@ -2141,6 +2261,7 @@ let allowedTypes;
 let typeNames;
 let typeIcons;
 let candidateFilter = new CandidateFilter();
+let paymentHandler = new PaymentHandler();
 
 function updateUsageDisplay() {
     const status = creditManager.getStatus();
@@ -4038,9 +4159,27 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add these lines inside your existing DOMContentLoaded function
     document.getElementById('back-to-app-btn').addEventListener('click', hidePricingPage);
 
-    document.getElementById('upgrade-profesional-btn').addEventListener('click', function() {
-        // Placeholder for payment integration (next step)
-        alert('Payment integration akan ditambahkan di langkah selanjutnya!');
+    // REPLACE your existing upgrade button listener with this:
+    document.getElementById('upgrade-profesional-btn').addEventListener('click', async function() {
+        const status = creditManager.getStatus();
+        const userEmail = creditManager.currentUser.email;
+    
+        // Show loading state
+        this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Memproses...';
+        this.disabled = true;
+    
+        try {
+            await paymentHandler.createPayment(599000, 30, userEmail);
+        } catch (error) {
+            console.error('Payment initiation failed:', error);
+            showError('Gagal memulai pembayaran. Silakan coba lagi.');
+        } finally {
+            // Reset button
+            setTimeout(() => {
+                this.innerHTML = '<i class="fas fa-rocket mr-2"></i>Beli 30 Credits - Rp 599.000';
+                this.disabled = false;
+            }, 2000);
+        }
     });
 });
         
