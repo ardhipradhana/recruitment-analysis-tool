@@ -437,6 +437,45 @@
     box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
 }
 
+/* Search and Filter Styles */
+.filter-section {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 16px;
+}
+
+.filter-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 14px;
+}
+
+.filter-input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.filter-input:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.score-range-slider {
+    width: 100%;
+    margin: 8px 0;
+}
+
+.filter-results-count {
+    font-size: 11px;
+    opacity: 0.8;
+    margin-top: 8px;
+}
+        
 .candidate-detail-view {
     flex: 1;
 }
@@ -1036,6 +1075,27 @@
                                 Name
                             </button>
                         </div>
+                    </div>
+                </div>
+
+                <!-- ADD this section after the sort buttons div -->
+                <div class="filter-section">
+                    <div class="text-xs opacity-75 mb-2">Search & Filter:</div>
+    
+                    <!-- Search Input -->
+                    <input type="text" id="candidate-search" class="filter-input" 
+                           placeholder="Search names, titles, skills...">
+    
+                    <!-- Score Range Filter -->
+                    <div class="mt-3">
+                        <div class="text-xs opacity-75 mb-1">Min Score: <span id="score-display">0</span></div>
+                        <input type="range" id="score-range" class="score-range-slider" 
+                               min="0" max="100" value="0">
+                    </div>
+    
+                    <!-- Results Counter -->
+                    <div id="filter-results" class="filter-results-count">
+                        Showing all candidates
                     </div>
                 </div>
 
@@ -1657,6 +1717,76 @@ class AnalysisHistory {
     }
 }
 
+// Candidate Filter System
+class CandidateFilter {
+    constructor() {
+        this.originalCandidates = [];
+        this.filteredCandidates = [];
+        this.activeFilters = {
+            searchQuery: '',
+            minScore: 0
+        };
+    }
+    
+    setCandidates(candidates) {
+        this.originalCandidates = [...candidates];
+        this.filteredCandidates = [...candidates];
+        return this;
+    }
+    
+    applySearchFilter(query) {
+        this.activeFilters.searchQuery = query.toLowerCase();
+        this.updateFilteredResults();
+        return this;
+    }
+    
+    applyScoreFilter(minScore) {
+        this.activeFilters.minScore = parseInt(minScore);
+        this.updateFilteredResults();
+        return this;
+    }
+    
+    updateFilteredResults() {
+        this.filteredCandidates = this.originalCandidates.filter(candidate => {
+            // Search filter
+            if (this.activeFilters.searchQuery) {
+                const searchFields = [
+                    candidate.candidateName || '',
+                    candidate.executiveSummary || '',
+                    (candidate.coreCompetencies || '').toString(),
+                    extractTitleFromSummary(candidate) || ''
+                ].join(' ').toLowerCase();
+                
+                if (!searchFields.includes(this.activeFilters.searchQuery)) {
+                    return false;
+                }
+            }
+            
+            // Score filter
+            const candidateScore = parseInt(candidate.candidateScore) || 0;
+            if (candidateScore < this.activeFilters.minScore) {
+                return false;
+            }
+            
+            return true;
+        });
+        
+        return this;
+    }
+    
+    getFilteredCandidates() {
+        return this.filteredCandidates;
+    }
+    
+    getFilterStats() {
+        return {
+            total: this.originalCandidates.length,
+            filtered: this.filteredCandidates.length,
+            hidden: this.originalCandidates.length - this.filteredCandidates.length
+        };
+    }
+}
+
 // Initialize history manager
 const historyManager = new AnalysisHistory();
     // More methods will be added in next steps...
@@ -1684,6 +1814,7 @@ let clearAllBtn;
 let allowedTypes;
 let typeNames;
 let typeIcons;
+let candidateFilter = new CandidateFilter();
 
 function showMainApp() {
     document.getElementById('auth-box').style.display = 'none';
@@ -2727,6 +2858,84 @@ async function signIn() {
 let candidatesData = [];
 let selectedCandidateIndex = 0;
 
+// Filter Control Functions
+function addFilterControlsToSidebar() {
+    // Initialize filter with current candidates
+    candidateFilter.setCandidates(candidatesData);
+    
+    // Search input handler
+    const searchInput = document.getElementById('candidate-search');
+    if (searchInput) {
+        searchInput.addEventListener('input', debounce((e) => {
+            handleSearchFilter(e.target.value);
+        }, 300));
+    }
+    
+    // Score range handler
+    const scoreRange = document.getElementById('score-range');
+    const scoreDisplay = document.getElementById('score-display');
+    if (scoreRange && scoreDisplay) {
+        scoreRange.addEventListener('input', (e) => {
+            const value = e.target.value;
+            scoreDisplay.textContent = value;
+            handleScoreFilter(value);
+        });
+    }
+}
+
+function handleSearchFilter(query) {
+    candidateFilter.applySearchFilter(query);
+    updateCandidateDisplay();
+}
+
+function handleScoreFilter(minScore) {
+    candidateFilter.applyScoreFilter(minScore);
+    updateCandidateDisplay();
+}
+
+function updateCandidateDisplay() {
+    const filteredCandidates = candidateFilter.getFilteredCandidates();
+    const stats = candidateFilter.getFilterStats();
+    
+    // Update the candidate cards with filtered results
+    generateFilteredCandidateCards(filteredCandidates);
+    
+    // Update results counter
+    const resultsElement = document.getElementById('filter-results');
+    if (resultsElement) {
+        if (stats.filtered === stats.total) {
+            resultsElement.textContent = `Showing all ${stats.total} candidates`;
+        } else {
+            resultsElement.textContent = `Showing ${stats.filtered} of ${stats.total} candidates`;
+        }
+    }
+    
+    // Auto-select first candidate if current selection is filtered out
+    if (filteredCandidates.length > 0) {
+        const currentCandidate = candidatesData[selectedCandidateIndex];
+        const isCurrentVisible = filteredCandidates.includes(currentCandidate);
+        
+        if (!isCurrentVisible) {
+            // Find the index of the first filtered candidate in the original array
+            const firstFilteredIndex = candidatesData.indexOf(filteredCandidates[0]);
+            showCandidateDetail(firstFilteredIndex);
+        }
+    }
+}
+
+// Debounce function for search
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+        
 function showMultipleCandidatesResults(data) {
     console.log('=== showMultipleCandidatesResults called ===');
     console.log('Data received:', data);
@@ -2784,6 +2993,9 @@ function showMultipleCandidatesView() {
     document.getElementById('total-candidates').textContent = candidatesData.length;
     document.getElementById('analysis-timestamp').textContent = 
         `Analysis completed on ${new Date().toLocaleDateString()}`;
+
+    // Add filter controls to sidebar
+    addFilterControlsToSidebar();
     
     // Generate candidate cards
     generateCandidateCards();
@@ -2802,6 +3014,19 @@ function generateCandidateCards() {
     
     candidatesData.forEach((candidate, index) => {
         const card = createCandidateCard(candidate, index);
+        cardsContainer.appendChild(card);
+    });
+}
+
+// Add this NEW function right after generateCandidateCards
+function generateFilteredCandidateCards(filteredCandidates) {
+    const cardsContainer = document.getElementById('candidate-cards');
+    cardsContainer.innerHTML = '';
+    
+    filteredCandidates.forEach((candidate) => {
+        // Find the original index of this candidate
+        const originalIndex = candidatesData.indexOf(candidate);
+        const card = createCandidateCard(candidate, originalIndex);
         cardsContainer.appendChild(card);
     });
 }
