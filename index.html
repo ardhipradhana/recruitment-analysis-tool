@@ -2591,10 +2591,26 @@ function showSupportPage() {
 function showFAQPage() {
     console.log('Showing FAQ page...');
     hideAllPages();
+    
     const faqPage = document.getElementById('faq-page');
     if (faqPage) {
         faqPage.style.display = 'block';
-        console.log('FAQ page shown');
+        
+        // Enhanced debugging
+        console.log('FAQ page element:', faqPage);
+        console.log('FAQ page display:', faqPage.style.display);
+        console.log('FAQ page computed style:', window.getComputedStyle(faqPage).display);
+        console.log('FAQ page visibility:', window.getComputedStyle(faqPage).visibility);
+        console.log('FAQ page height:', faqPage.offsetHeight);
+        console.log('FAQ page width:', faqPage.offsetWidth);
+        
+        // Force positioning
+        faqPage.style.position = 'relative';
+        faqPage.style.zIndex = '999';
+        faqPage.style.backgroundColor = 'white';
+        faqPage.style.minHeight = '100vh';
+        
+        console.log('FAQ page shown with forced styles');
     } else {
         console.error('FAQ page element not found!');
     }
