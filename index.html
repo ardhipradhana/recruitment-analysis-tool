@@ -3445,12 +3445,12 @@ function exportToCSV() {
     try {
         csvBtn.innerHTML = '<i class="fas fa-spinner fa-spin text-green-600 mr-3"></i>Generating...';
         
-        const userStatus = creditManager.getStatus();
         let csvData = [];
         
         if (candidatesData.length > 1) {
             // Multiple candidates
             csvData = candidatesData.map((candidate, index) => {
+                const userStatus = creditManager.getStatus();
                 const baseData = {
                     'Candidate Name': candidate.candidateName || `Candidate ${index + 1}`,
                     'Score': candidate.candidateScore || 'N/A',
@@ -3476,8 +3476,9 @@ function exportToCSV() {
                 return baseData;
             });
         } else {
-            // Single candidate - same logic
+            // Single candidate
             const candidate = candidatesData[0];
+            const userStatus = creditManager.getStatus();
             const baseData = {
                 'Candidate Name': candidate.candidateName || 'Candidate',
                 'Score': candidate.candidateScore || 'N/A',
@@ -3503,7 +3504,7 @@ function exportToCSV() {
             csvData = [baseData];
         }
         
-        // Rest of the function stays the same...
+        // Convert to CSV
         const headers = Object.keys(csvData[0]);
         const csvContent = [
             headers.join(','),
