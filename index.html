@@ -1218,7 +1218,7 @@
     </div>
 </div>
 
-<!-- Terms & Privacy Page -->
+<!-- Terms Page -->
 <div id="terms-page" class="max-w-4xl mx-auto p-6 support-page-hidden">
     <header class="text-center mb-8">
         <h1 class="text-3xl font-bold text-gray-800 mb-4">Syarat & Ketentuan</h1>
@@ -1268,6 +1268,54 @@
     
     <div class="text-center mt-8">
         <button id="back-from-terms" class="px-6 py-2 text-gray-600 hover:text-gray-800 transition-colors">
+            <i class="fas fa-arrow-left mr-2"></i>Kembali ke Aplikasi
+        </button>
+    </div>
+</div>
+
+<!-- Privacy Policy Page -->
+<div id="privacy-page" class="max-w-4xl mx-auto p-6 support-page-hidden">
+    <header class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-4">Kebijakan Privasi</h1>
+        <p class="text-gray-600">Terakhir diperbarui: 27 Mei 2025</p>
+    </header>
+
+    <div class="bg-white rounded-xl shadow-lg p-8">
+        <div class="prose max-w-none">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">1. Informasi yang Kami Kumpulkan</h2>
+            <p class="text-gray-600 mb-4">
+                Kami mengumpulkan informasi yang Anda berikan secara langsung, seperti alamat email untuk login 
+                dan file CV yang Anda upload untuk analisis.
+            </p>
+
+            <h2 class="text-xl font-bold text-gray-800 mb-4">2. Penggunaan Informasi</h2>
+            <p class="text-gray-600 mb-4">
+                Informasi yang kami kumpulkan digunakan untuk menyediakan layanan analisis CV, 
+                mengelola akun Anda, dan berkomunikasi dengan Anda tentang layanan kami.
+            </p>
+
+            <h2 class="text-xl font-bold text-gray-800 mb-4">3. Penyimpanan Data</h2>
+            <p class="text-gray-600 mb-4">
+                File CV yang diupload diproses secara real-time dan tidak disimpan di server kami. 
+                Hasil analisis disimpan dalam akun Anda dan dapat dihapus kapan saja.
+            </p>
+
+            <h2 class="text-xl font-bold text-gray-800 mb-4">4. Keamanan Data</h2>
+            <p class="text-gray-600 mb-4">
+                Kami menggunakan teknologi enkripsi dan praktik keamanan standar industri 
+                untuk melindungi informasi pribadi Anda.
+            </p>
+
+            <h2 class="text-xl font-bold text-gray-800 mb-4">5. Kontak</h2>
+            <p class="text-gray-600 mb-4">
+                Jika Anda memiliki pertanyaan tentang kebijakan privasi ini, hubungi kami di 
+                <a href="mailto:support@montpro.id" class="text-blue-600">support@montpro.id</a>
+            </p>
+        </div>
+    </div>
+    
+    <div class="text-center mt-8">
+        <button id="back-from-privacy" class="px-6 py-2 text-gray-600 hover:text-gray-800 transition-colors">
             <i class="fas fa-arrow-left mr-2"></i>Kembali ke Aplikasi
         </button>
     </div>
@@ -2587,6 +2635,18 @@ function showTermsPage() {
         console.log('Terms page shown');
     } else {
         console.error('Terms page element not found!');
+    }
+}
+
+function showPrivacyPage() {
+    console.log('Showing privacy page...');
+    hideAllPages();
+    const privacyPage = document.getElementById('privacy-page');
+    if (privacyPage) {
+        privacyPage.style.display = 'block';
+        console.log('Privacy page shown');
+    } else {
+        console.error('Privacy page element not found!');
     }
 }
 
@@ -4685,6 +4745,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // History button
     document.getElementById('history-btn').addEventListener('click', showHistoryModal);
 
+    document.getElementById('back-from-privacy').addEventListener('click', hideAllSupportPages);
+
     // Add to your DOMContentLoaded
     document.getElementById('history-search')?.addEventListener('input', debounce((e) => {
         const query = e.target.value;
@@ -4979,7 +5041,7 @@ document.getElementById('new-analysis-btn').addEventListener('click', function()
                 <h3 class="font-semibold text-gray-800 mb-3">Legal</h3>
                 <ul class="space-y-2 text-sm text-gray-600">
                     <li><a href="#" onclick="showTermsPage()" class="hover:text-blue-600">Syarat & Ketentuan</a></li>
-                    <li><a href="#" onclick="showTermsPage()" class="hover:text-blue-600">Kebijakan Privasi</a></li>
+                    <li><a href="#" onclick="showPrivacyPage()" class="hover:text-blue-600">Kebijakan Privasi</a></li>
                 </ul>
             </div>
         </div>
