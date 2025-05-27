@@ -895,31 +895,48 @@
                 <p class="text-sm text-gray-500">Supported formats: PDF</p>
             </div>
 
-            <!-- Job Description Input (add this AFTER the drag-area div) -->
+            <!-- Job Description Input (update this section) -->
             <div id="job-description-section" class="mb-6">
                 <div class="flex items-center justify-between mb-3">
                     <h3 class="font-medium text-gray-800">Job Description (Optional)</h3>
-                    <span id="jd-feature-badge" class="px-2 py-1 bg-gradient-to-r from-purple-500 to-pink-600 text-white text-xs font-medium rounded shadow-sm">
-                        <i class="fas fa-crown mr-1"></i>ULTRA Feature
-                    </span>
+                    <div class="flex items-center gap-2">
+                        <span id="jd-feature-badge" class="px-2 py-1 bg-gradient-to-r from-purple-500 to-pink-600 text-white text-xs font-medium rounded shadow-sm">
+                            <i class="fas fa-crown mr-1"></i>ULTRA Feature
+                        </span>
+                    </div>
                 </div>
-    
-                <textarea 
-                    id="job-description" 
-                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all resize-none"
-                    rows="6"
-                    placeholder="Paste the job description here to get AI-powered candidate matching analysis...
+
+                <div class="relative">
+                    <textarea 
+                        id="job-description" 
+                        class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all resize-none"
+                        rows="6"
+                        placeholder="Paste the job description here to get AI-powered candidate matching analysis...
 
             Example:
             - Required: 5+ years React experience
             - Preferred: Leadership experience
             - Must have: Strong communication skills"
-                    disabled
-                ></textarea>
-    
-                <div class="mt-2 text-sm text-gray-500 flex items-center">
-                    <i class="fas fa-info-circle mr-2"></i>
-                    <span id="jd-info-text">Upgrade to ULTRA to unlock job description matching</span>
+                        disabled
+                    ></textarea>
+        
+                    <!-- Clear Button (NEW) -->
+                    <button 
+                        id="clear-jd-btn" 
+                        class="absolute top-2 right-2 p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors hidden"
+                        title="Clear job description"
+                        type="button"
+                    >
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="mt-2 flex justify-between items-center text-sm text-gray-500">
+                    <div class="flex items-center">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        <span id="jd-info-text">Upgrade to ULTRA to unlock job description matching</span>
+                    </div>
+                    <span id="jd-char-count" class="text-xs text-gray-400 hidden">0 characters</span>
                 </div>
             </div>
             
@@ -5687,6 +5704,64 @@ document.addEventListener("DOMContentLoaded", async function() {
         }
     };
 
+    // Job Description Clear Button Functionality
+    const jobDescriptionTextarea = document.getElementById('job-description');
+    const clearJdBtn = document.getElementById('clear-jd-btn');
+
+    if (jobDescriptionTextarea && clearJdBtn) {
+        // Show/hide clear button based on content
+        jobDescriptionTextarea.addEventListener('input', function() {
+            const charCount = this.value.length;
+            const charCountElement = document.getElementById('jd-char-count');
+        
+            if (charCount > 0) {
+                clearJdBtn.classList.remove('hidden');
+            
+                // Show and update character counter
+                if (charCountElement) {
+                    charCountElement.classList.remove('hidden');
+                    charCountElement.textContent = `${charCount.toLocaleString()} characters`;
+                
+                    // Optional: Color coding for very long descriptions
+                    if (charCount > 2000) {
+                        charCountElement.className = 'text-xs text-orange-500';
+                    } else if (charCount > 1000) {
+                        charCountElement.className = 'text-xs text-yellow-600';
+                    } else {
+                        charCountElement.className = 'text-xs text-gray-400';
+                    }
+                }
+            } else {
+                clearJdBtn.classList.add('hidden');
+                if (charCountElement) {
+                    charCountElement.classList.add('hidden');
+                }
+            }
+        });
+
+        // Clear button functionality
+        clearJdBtn.addEventListener('click', function() {
+            jobDescriptionTextarea.value = '';
+            clearJdBtn.classList.add('hidden');
+        
+            // Hide character counter
+            const charCountElement = document.getElementById('jd-char-count');
+            if (charCountElement) {
+                charCountElement.classList.add('hidden');
+            }
+        
+            jobDescriptionTextarea.focus();
+            showSuccess('Job description cleared!');
+        });
+
+        // Also check on page load in case there's existing content
+        if (jobDescriptionTextarea.value.trim().length > 0) {
+            clearJdBtn.classList.remove('hidden');
+            // Trigger input event to show counter
+            jobDescriptionTextarea.dispatchEvent(new Event('input'));
+        }
+    }
+
     // ---- File Handling and Analysis Logic ----
     fileInput = document.getElementById('file-input');
     dragArea = document.getElementById('drag-area');
@@ -5758,7 +5833,7 @@ document.addEventListener("DOMContentLoaded", async function() {
     });
 
     // Set up the "Analyze Another Resume" button handler
-document.getElementById('new-analysis-btn').addEventListener('click', function() {
+    document.getElementById('new-analysis-btn').addEventListener('click', function() {
     // Hide results, show upload interface
     document.getElementById('analysis-results').classList.add('hidden');
     document.getElementById('upload-interface').classList.remove('hidden');
