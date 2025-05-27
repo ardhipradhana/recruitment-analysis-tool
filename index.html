@@ -2082,7 +2082,7 @@ class CreditManager {
 // REPLACE your existing PaymentHandler class with this:
 class PaymentHandler {
     constructor() {
-        this.isProduction = false; // Sandbox mode
+        this.isProduction = true; // Sandbox mode
         this.serverUrl = 'https://montpro.app.n8n.cloud/webhook/create-payment'; // Your n8n webhook URL
     }
 
