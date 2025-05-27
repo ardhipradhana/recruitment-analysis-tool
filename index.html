@@ -894,6 +894,34 @@
                 <h3 class="text-lg font-medium mb-1">Drag & drop files or click to browse</h3>
                 <p class="text-sm text-gray-500">Supported formats: PDF</p>
             </div>
+
+            <!-- Job Description Input (add this AFTER the drag-area div) -->
+            <div id="job-description-section" class="mb-6">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="font-medium text-gray-800">Job Description (Optional)</h3>
+                    <span id="jd-feature-badge" class="px-2 py-1 bg-gradient-to-r from-purple-500 to-pink-600 text-white text-xs font-medium rounded shadow-sm">
+                        <i class="fas fa-crown mr-1"></i>ULTRA Feature
+                    </span>
+                </div>
+    
+                <textarea 
+                    id="job-description" 
+                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all resize-none"
+                    rows="6"
+                    placeholder="Paste the job description here to get AI-powered candidate matching analysis...
+
+            Example:
+            - Required: 5+ years React experience
+            - Preferred: Leadership experience
+            - Must have: Strong communication skills"
+                    disabled
+                ></textarea>
+    
+                <div class="mt-2 text-sm text-gray-500 flex items-center">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    <span id="jd-info-text">Upgrade to ULTRA to unlock job description matching</span>
+                </div>
+            </div>
             
             <!-- File List -->
             <div id="file-list-container" class="mb-6 hidden">
@@ -2136,6 +2164,12 @@ class CreditManager {
                 creditsPerPurchase: 30,
                 price: 599000,
                 priceFormatted: 'Rp 599.000'
+            },
+            ULTRA: {
+                name: 'Ultra',
+                creditsPerPurchase: 20,
+                price: 999000,
+                priceFormatted: 'Rp 999.000'
             }
         };
     }
@@ -2251,6 +2285,7 @@ class CreditManager {
             remaining: this.getRemainingAnalyses(),
             canAnalyze: this.canAnalyze(),
             isFreeTier: this.userTier === 'FREE',
+            isUltraTier: this.userTier === 'ULTRA',
             creditsBalance: this.creditBalance,
             freeUsed: this.freeAnalysesUsed
         };
@@ -2553,6 +2588,31 @@ function updateUsageDisplay() {
     }
 }
 
+function updateJobDescriptionAccess() {
+    const status = creditManager.getStatus();
+    const jobDescriptionTextarea = document.getElementById('job-description');
+    const jdInfoText = document.getElementById('jd-info-text');
+    const jdFeatureBadge = document.getElementById('jd-feature-badge');
+    
+    if (status.isUltraTier) {
+        // Enable for ULTRA users
+        jobDescriptionTextarea.disabled = false;
+        jobDescriptionTextarea.classList.remove('bg-gray-100');
+        jdInfoText.textContent = 'AI will match candidates against this job description';
+        jdFeatureBadge.innerHTML = '<i class="fas fa-crown mr-1"></i>ULTRA Active';
+    } else if (!status.isFreeTier) {
+        // PRO users see upgrade prompt
+        jobDescriptionTextarea.disabled = true;
+        jobDescriptionTextarea.classList.add('bg-gray-100');
+        jdInfoText.innerHTML = 'Upgrade to ULTRA for job description matching • <a href="#" onclick="showPricingPage()" class="text-purple-600 hover:text-purple-800">Upgrade Now</a>';
+    } else {
+        // Free users see basic message
+        jobDescriptionTextarea.disabled = true;
+        jobDescriptionTextarea.classList.add('bg-gray-100');
+        jdInfoText.textContent = 'Upgrade to ULTRA to unlock job description matching';
+    }
+}
+        
 // Pricing Page Navigation Functions
 function showPricingPage() {
     console.log('Showing pricing page...');
@@ -2724,6 +2784,7 @@ async function showMainApp() {
     // Initialize credit management
     await creditManager.initialize();
     updateUsageDisplay();
+    updateJobDescriptionAccess();
 }
         
 function showAuthBox() {
