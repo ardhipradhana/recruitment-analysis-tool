@@ -4914,20 +4914,28 @@ function showSingleCandidateView(data) {
     const hasJobDescription = jobDescription.length > 0;
     const hasUltraAnalysis = data.roleAlignment || data.educationCertifications || data.communication || data.redFlags || data.strategicRecommendations || data.candidateScorecard;
 
+    console.log('=== showSingleCandidateView DEBUG ===');
+    console.log('Job description:', `"${jobDescription}"`);
+    console.log('hasJobDescription:', hasJobDescription);
+    console.log('userStatus.isFreeTier:', userStatus.isFreeTier);
+    
     if (hasJobDescription) {
         // ULTRA analysis used
-        console.log('ULTRA user with premium analysis - adding ULTRA sections');
+        console.log('TAKING ULTRA PATH - Job description provided');
         addUltraSections(data);
         updateUserTierBadge('ULTRA');
     } else if (!userStatus.isFreeTier) {
         // PRO analysis used
+        console.log('TAKING PRO PATH - No job description');
         addProfessionalSections(data);
         updateUserTierBadge('PRO');
     } else {
         // User is FREE - show upgrade prompts where premium content would be
+        console.log('TAKING FREE PATH');
         addUpgradePrompts();
         updateUserTierBadge('FREE');
     }
+    console.log('=== END showSingleCandidateView DEBUG ===');
     
     if (data.coreCompetencies) {
         const skillsContainer = document.getElementById('core-competencies');
