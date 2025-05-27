@@ -2322,6 +2322,15 @@ function showPricingPage() {
 function hidePricingPage() {
     document.getElementById('pricing-page').style.display = 'none';
     document.getElementById('main-app').style.display = 'block';
+    
+    // Always show analysis results if they exist
+    const analysisResults = document.getElementById('analysis-results');
+    if (analysisResults && !analysisResults.classList.contains('hidden')) {
+        // Keep showing results
+    } else {
+        // Show upload interface if no results
+        document.getElementById('upload-interface').classList.remove('hidden');
+    }
 }
 
 function updatePricingPageForUser() {
