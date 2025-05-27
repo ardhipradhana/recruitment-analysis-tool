@@ -3532,18 +3532,15 @@ async function useAnalysisCredit() {
                 // Use ULTRA credit for job matching
                 await creditManager.useUltraCredit();
                 console.log(`Used ULTRA credit ${i + 1}/${numberOfResumes}`);
-            } else {
-                // Use PRO credit for basic analysis (or ULTRA if no PRO available)
-                if (creditManager.proCredits > 0) {
-                    await creditManager.useProCredit();
-                    console.log(`Used PRO credit ${i + 1}/${numberOfResumes}`);
-                } else if (creditManager.ultraCredits > 0) {
-                    await creditManager.useUltraCredit();
-                    console.log(`Used ULTRA credit (no PRO available) ${i + 1}/${numberOfResumes}`);
-                } else if (creditManager.userTier === 'FREE') {
-                    await creditManager.useAnalysis(); // Keep old method for free users
-                    console.log(`Used free analysis ${i + 1}/${numberOfResumes}`);
-                }
+            } else if (creditManager.userTier === 'FREE') {
+                await creditManager.useAnalysis();
+                console.log(`Used free analysis ${i + 1}/${numberOfResumes}`);
+            } else if (creditManager.proCredits > 0) {
+                await creditManager.useProCredit();
+                console.log(`Used PRO credit ${i + 1}/${numberOfResumes}`);
+            } else if (creditManager.ultraCredits > 0) {
+                await creditManager.useUltraCredit();
+                console.log(`Used ULTRA credit (no PRO available) ${i + 1}/${numberOfResumes}`);
             }
         }
         
@@ -4678,14 +4675,17 @@ function generateCandidateDetailHTML(candidate, index) {
 }
 
 function getAnalysisTypeBadge(candidate) {
+    const jobDescription = document.getElementById('job-description').value.trim();
+    const hasJobDescription = jobDescription.length > 0;
     const hasUltraAnalysis = candidate.roleAlignment || candidate.educationCertifications || candidate.communication || candidate.redFlags || candidate.strategicRecommendations || candidate.candidateScorecard;
 
     console.log('=== getAnalysisTypeBadge DEBUG ===');
+    console.log('hasJobDescription:', hasJobDescription);
     console.log('hasUltraAnalysis:', hasUltraAnalysis);
-    console.log('Will show:', hasUltraAnalysis ? 'ULTRA' : 'PRO');
+    console.log('Will show:', (hasJobDescription || hasUltraAnalysis) ? 'ULTRA' : 'PRO');
     console.log('=== END getAnalysisTypeBadge DEBUG ===');
     
-    if (hasUltraAnalysis) {
+    if (hasJobDescription || hasUltraAnalysis) {
         return '<span class="ml-2 px-2 py-1 bg-gradient-to-r from-purple-500 to-pink-600 text-white text-xs font-medium rounded shadow-sm"><i class="fas fa-crown mr-1"></i>ULTRA Analysis</span>';
     } else {
         return '<span class="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded"><i class="fas fa-star mr-1"></i>PRO Analysis</span>';
@@ -4907,15 +4907,17 @@ function showSingleCandidateView(data) {
 
     // ADD PROFESSIONAL-ONLY SECTIONS
     const userStatus = creditManager.getStatus();
+    const jobDescription = document.getElementById('job-description').value.trim();
+    const hasJobDescription = jobDescription.length > 0;
     const hasUltraAnalysis = data.roleAlignment || data.educationCertifications || data.communication || data.redFlags || data.strategicRecommendations || data.candidateScorecard;
 
-    if (userStatus.isUltraTier && hasUltraAnalysis) {
-        // ULTRA user with job matching data - add ULTRA sections
+    if (hasJobDescription || (userStatus.isUltraTier && hasUltraAnalysis)) {
+        // ULTRA analysis used
         console.log('ULTRA user with premium analysis - adding ULTRA sections');
         addUltraSections(data);
         updateUserTierBadge('ULTRA');
     } else if (!userStatus.isFreeTier) {
-        // PRO user OR ULTRA user without job matching - show PRO sections
+        // PRO analysis used
         addProfessionalSections(data);
         updateUserTierBadge('PRO');
     } else {
