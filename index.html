@@ -3460,7 +3460,7 @@ async function startAnalysis() {
             }
         );
 
-        / Check if this response is for the current request (prevent race conditions)
+        // Check if this response is for the current request (prevent race conditions)
         if (window.currentAnalysisRequest !== requestId) {
             console.log('Ignoring response for outdated request:', requestId);
             return;
