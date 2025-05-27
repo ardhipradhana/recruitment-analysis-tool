@@ -2596,7 +2596,7 @@ function hideAllPages() {
     const analysisResults = document.getElementById('analysis-results');
     const pricingPage = document.getElementById('pricing-page');
     
-    if (mainApp) mainApp.style.display = 'block';
+    if (mainApp) mainApp.style.display = 'none';
     if (analysisResults) analysisResults.classList.add('hidden');
     if (pricingPage) pricingPage.style.display = 'none';
     
@@ -2605,9 +2605,9 @@ function hideAllPages() {
     const faqPage = document.getElementById('faq-page');
     const termsPage = document.getElementById('terms-page');
     
-    if (supportPage) supportPage.style.display = 'none';
-    if (faqPage) faqPage.style.display = 'none';
-    if (termsPage) termsPage.style.display = 'none';
+    if (supportPage) supportPage.style.display = 'block';
+    if (faqPage) faqPage.style.display = 'block';
+    if (termsPage) termsPage.style.display = 'block';
 }
 
 function hideAllSupportPages() {
