@@ -2664,10 +2664,12 @@ function hideAllPages() {
     const supportPage = document.getElementById('support-page');
     const faqPage = document.getElementById('faq-page');
     const termsPage = document.getElementById('terms-page');
+    const privacyPage = document.getElementById('privacy-page');
     
     if (supportPage) supportPage.style.display = 'none';
     if (faqPage) faqPage.style.display = 'none';
     if (termsPage) termsPage.style.display = 'none';
+    if (privacyPage) privacyPage.style.display = 'none';
 }
 
 function hideAllSupportPages() {
@@ -4807,8 +4809,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // History button
     document.getElementById('history-btn').addEventListener('click', showHistoryModal);
 
-    document.getElementById('back-from-privacy').addEventListener('click', hideAllSupportPages);
-
     // Add to your DOMContentLoaded
     document.getElementById('history-search')?.addEventListener('input', debounce((e) => {
         const query = e.target.value;
@@ -4846,6 +4846,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('back-from-support').addEventListener('click', hideAllSupportPages);
     document.getElementById('back-from-faq').addEventListener('click', hideAllSupportPages);
     document.getElementById('back-from-terms').addEventListener('click', hideAllSupportPages);
+    document.getElementById('back-from-privacy').addEventListener('click', hideAllSupportPages);
 
     // REPLACE your existing upgrade button listener with this:
     document.getElementById('upgrade-profesional-btn').addEventListener('click', async function() {
