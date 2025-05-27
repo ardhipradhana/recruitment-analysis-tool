@@ -2198,6 +2198,8 @@ class CreditManager {
         this.userTier = 'FREE';
         this.creditBalance = 0;
         this.freeAnalysesUsed = 0;
+        this.proCredits = 0;
+        this.ultraCredits = 0;
         
         // Pricing configuration
         this.pricing = {
@@ -2252,7 +2254,18 @@ class CreditManager {
             if (data) {
                 this.userTier = data.user_tier || 'FREE';
                 this.creditBalance = data.credit_balance || 0;
+                this.proCredits = data.pro_credits || 0;
+                this.ultraCredits = data.ultra_credits || 0;
                 this.freeAnalysesUsed = data.free_analyses_used || 0;
+    
+                // For backward compatibility - if creditBalance exists but no separate credits
+                if (this.creditBalance > 0 && this.proCredits === 0 && this.ultraCredits === 0) {
+                    if (this.userTier === 'ULTRA') {
+                        this.ultraCredits = this.creditBalance;
+                    } else {
+                        this.proCredits = this.creditBalance;
+                    }
+                }
                 
                 // Check if we need to reset free analyses (monthly)
                 await this.checkFreeReset(data.free_reset_date);
@@ -2334,6 +2347,8 @@ class CreditManager {
             isFreeTier: this.userTier === 'FREE',
             isUltraTier: this.userTier === 'ULTRA',
             creditsBalance: this.creditBalance,
+            proCredits: this.proCredits,
+            ultraCredits: this.ultraCredits,
             freeUsed: this.freeAnalysesUsed
         };
     }
@@ -2437,18 +2452,69 @@ class CreditManager {
                 .from('user_profiles')
                 .update({ 
                     user_tier: 'ULTRA',
+                    pro_credits: 0,
+                    ultra_credits: conversion.newUltraCredits,
                     credit_balance: conversion.newUltraCredits,
                     updated_at: new Date().toISOString()
                 })
                 .eq('id', this.currentUser.id);
 
             this.userTier = 'ULTRA';
+            this.proCredits = 0;
+            this.ultraCredits = conversion.newUltraCredits;
             this.creditBalance = conversion.newUltraCredits;
         
             return conversion;
         } catch (error) {
             console.error('Error converting to ULTRA:', error);
             return false;
+        }
+    }
+
+    hasProCredits() {
+        return this.proCredits > 0;
+    }
+
+    hasUltraCredits() {
+        return this.ultraCredits > 0;
+    }
+
+    canDoJobMatching() {
+        return this.ultraCredits > 0;
+    }
+
+    async useProCredit() {
+        if (this.proCredits <= 0) {
+            throw new Error('No PRO credits remaining');
+        }
+    
+        this.proCredits--;
+        await this.updateCreditsInDatabase();
+    }
+
+    async useUltraCredit() {
+        if (this.ultraCredits <= 0) {
+            throw new Error('No ULTRA credits remaining');
+        }
+    
+        this.ultraCredits--;
+        await this.updateCreditsInDatabase();
+    }
+
+    async updateCreditsInDatabase() {
+        try {
+            await supabase
+                .from('user_profiles')
+                .update({ 
+                    pro_credits: this.proCredits,
+                    ultra_credits: this.ultraCredits,
+                    credit_balance: this.proCredits + this.ultraCredits, // Keep for compatibility
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', this.currentUser.id);
+        } catch (error) {
+            console.error('Error updating credits:', error);
+            throw error;
         }
     }
 }
@@ -2666,17 +2732,46 @@ function updateUsageDisplay() {
             upgradeBtn.innerHTML = '<i class="fas fa-arrow-up mr-1"></i>Upgrade';
         }
         
-    } else {
-        usageElement.textContent = `${status.remaining} credits`;
-        if (status.remaining < 5) {
-            usageElement.className = 'text-orange-600 font-medium';
-            // Show top-up button when credits are low
+    } else if (status.isUltraTier) {
+        // ULTRA user - show both credit types
+        if (status.ultraCredits > 0 && status.proCredits > 0) {
+            usageElement.textContent = `${status.ultraCredits} ULTRA • ${status.proCredits} PRO`;
+            usageElement.className = 'text-purple-600 font-medium';
+        } else if (status.ultraCredits > 0) {
+            usageElement.textContent = `${status.ultraCredits} ULTRA credits`;
+            usageElement.className = 'text-purple-600 font-medium';
+        } else if (status.proCredits > 0) {
+            usageElement.textContent = `${status.proCredits} PRO credits`;
+            usageElement.className = 'text-blue-600 font-medium';
+        } else {
+            usageElement.textContent = `0 credits`;
+            usageElement.className = 'text-red-600 font-medium';
+        }
+        
+        // Show upgrade button when credits are low
+        if ((status.ultraCredits + status.proCredits) < 5) {
             if (upgradeBtn) {
                 upgradeBtn.classList.remove('hidden');
-                upgradeBtn.innerHTML = '<i class="fas fa-plus mr-1"></i>Top Up';
+                upgradeBtn.innerHTML = '<i class="fas fa-plus mr-1"></i>Buy Credits';
             }
         } else {
-            usageElement.className = 'text-green-600 font-medium';
+            if (upgradeBtn) {
+                upgradeBtn.classList.add('hidden');
+            }
+        }
+        
+    } else {
+        // PRO user - show PRO credits
+        usageElement.textContent = `${status.proCredits} PRO credits`;
+        if (status.proCredits < 5) {
+            usageElement.className = 'text-orange-600 font-medium';
+            // Show upgrade button when credits are low
+            if (upgradeBtn) {
+                upgradeBtn.classList.remove('hidden');
+                upgradeBtn.innerHTML = '<i class="fas fa-plus mr-1"></i>Buy Credits';
+            }
+        } else {
+            usageElement.className = 'text-blue-600 font-medium';
             // Hide button when credits are sufficient
             if (upgradeBtn) {
                 upgradeBtn.classList.add('hidden');
