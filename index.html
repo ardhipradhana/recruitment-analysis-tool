@@ -3327,6 +3327,26 @@ function updateFileList() {
             fileItem.appendChild(removeBtn);
             fileList.appendChild(fileItem);
         });
+
+        // ADD PROCESSING TIME WARNING
+        if (files.length > 2) {
+            const warningDiv = document.createElement('div');
+            warningDiv.className = 'mt-3 p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg';
+            warningDiv.innerHTML = `
+                <div class="flex items-start">
+                    <i class="fas fa-clock text-yellow-500 mr-2 mt-0.5"></i>
+                    <div class="text-sm">
+                        <p class="text-yellow-800 font-medium">Processing Time Notice</p>
+                        <p class="text-yellow-700 mt-1">
+                            ${files.length} files will take approximately ${Math.ceil(files.length * 1.5)}-${Math.ceil(files.length * 2)} minutes to analyze. 
+                            Please keep this tab open and avoid refreshing the page.
+                        </p>
+                    </div>
+                </div>
+            `;
+            
+            fileListContainer.appendChild(warningDiv);
+        }
     } else {
         fileListContainer.classList.add('hidden');
         startButton.disabled = true;
@@ -3344,6 +3364,13 @@ async function startAnalysis() {
         showError('Please upload at least one file before starting analysis.');
         return;
     }
+
+    // Generate unique request ID to prevent duplicate processing
+    const requestId = 'req_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    console.log('Starting analysis with request ID:', requestId);
+
+    // Store request ID to track this specific request
+    window.currentAnalysisRequest = requestId;
 
     // Enhanced credit checking for mixed system
     const jobDescription = document.getElementById('job-description').value.trim();
@@ -3399,6 +3426,10 @@ async function startAnalysis() {
             formData.append('files', file);
         });
 
+        // Add request ID and timeout info
+        formData.append('requestId', requestId);
+        formData.append('expectedProcessingTime', Math.max(60, filesCount * 20)); // 20s per file minimum
+
         // Add job description if provided
         if (hasJobDescription) {
             formData.append('jobDescription', jobDescription);
@@ -3407,7 +3438,11 @@ async function startAnalysis() {
             formData.append('analysisType', 'PRO');
         }
 
-        console.log('Sending request to backend...');
+        console.log('Sending request to backend with ID:');
+
+        // INCREASED timeout for multiple files
+        const timeoutDuration = Math.max(120000, filesCount * 40000); // 40s per file, min 2 minutes
+        console.log(`Setting timeout to ${timeoutDuration/1000} seconds for ${filesCount} files`);
 
         // Use enhanced request method with retry logic
         const response = await feedback.makeRequest(
@@ -3415,16 +3450,21 @@ async function startAnalysis() {
             {
                 method: 'POST',
                 body: formData,
-                timeout: 60000, // 60 seconds for file upload
-                retries: 2,
-                retryDelay: 3000,
+                timeout: timeoutDuration, // Dynamic timeout
+                retries: 1, // REDUCED retries for long processes
+                retryDelay: 5000, // Longer delay between retries
                 onRetry: (attempt, maxAttempts, error) => {
-                    console.log(`Retry attempt ${attempt}/${maxAttempts}:`, error.message);
-                    // Update loading message during retry
-                    document.getElementById('loading-step').textContent = `Retrying... (${attempt}/${maxAttempts})`;
+                    console.log(`Retry attempt ${attempt}/${maxAttempts} for request ${requestId}:`, error.message);
+                    document.getElementById('loading-step').textContent = `Retrying analysis... (${attempt}/${maxAttempts})`;
                 }
             }
         );
+
+        / Check if this response is for the current request (prevent race conditions)
+        if (window.currentAnalysisRequest !== requestId) {
+            console.log('Ignoring response for outdated request:', requestId);
+            return;
+        }
 
         console.log('Response received, status:', response.status);
 
@@ -3440,9 +3480,14 @@ async function startAnalysis() {
 
         if (contentType && contentType.includes("application/json")) {
             data = JSON.parse(raw);
-            console.log('=== PARSED DATA DEBUG ===');
-            console.log('Parsed data:', data);
-            console.log('========================');
+
+            // Verify response matches our request
+            if (data.requestId && data.requestId !== requestId) {
+                console.log('Response ID mismatch. Expected:', requestId, 'Got:', data.requestId);
+                throw new Error('Response mismatch - please try again');
+            }
+            
+            console.log('Valid response received for request:', requestId);
         } else {
             throw new Error("Invalid content-type or response format");
         }
@@ -3454,21 +3499,24 @@ async function startAnalysis() {
     } catch (err) {
         console.error("Analysis failed:", err);
         
-        // Enhanced error handling with better user messages
-        if (err.message.includes('timeout')) {
-            showError('Analysis took longer than expected. This usually happens with complex CVs, poor internet connection, or high server load. Please try again in a few moments, or contact support@aapgrp.com if the problem persists.', true);
-        } else if (err.message.includes('Network')) {
-            showError('Network connection issue detected. Please check your internet connection and try again. If you continue having problems, contact support@aapgrp.com', true);
-        } else if (err.message.includes('Server error: 5')) {
-            showError('Our analysis server is temporarily overloaded. Please wait 2-3 minutes and try again, or contact support@aapgrp.com if this continues.', true);
-        } else if (err.message.includes('Server error: 4')) {
-            showError('There was an issue with your uploaded files. Please ensure they are valid, unprotected PDF files and try again. Contact support@aapgrp.com if you need help.', true);
-        } else {
-            showError(`Analysis failed: ${err.message}. Please try again or contact support@aapgrp.com with details about what you were trying to analyze.`, true);
+        if (window.currentAnalysisRequest === requestId) {
+            if (err.message.includes('timeout')) {
+                showError(`Analysis timed out after ${timeoutDuration/1000} seconds. For ${filesCount} files, this process can take up to ${Math.ceil(filesCount * 2)} minutes. Please try with fewer files or contact support@aapgrp.com if this persists.`, true);
+            } else if (err.message.includes('Network')) {
+                showError('Network error occurred. Please check your internet connection and try again.', true);
+            } else {
+                showError(`Analysis failed: ${err.message}. Please try again or contact support@aapgrp.com`, true);
+            }
+            
+            showRetryButton();
         }
         
-        showRetryButton();
         hideAnalysisLoading();
+    } finally {
+        // Clean up request tracking
+        if (window.currentAnalysisRequest === requestId) {
+            window.currentAnalysisRequest = null;
+        }
     }
 }
 
