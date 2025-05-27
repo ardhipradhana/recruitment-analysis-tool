@@ -2714,15 +2714,20 @@ function hideAnalysisLoading() {
 }
 
 function showAnalysisResults(data) {
-    // DEBUG: Check what we received
-    console.log('=== showAnalysisResults called ===');
-    console.log('Raw data:', data);
-    console.log('Type of data:', typeof data);
-    console.log('Is array?', Array.isArray(data));
-    if (Array.isArray(data)) {
-        console.log('Array length:', data.length);
+    // 🔍 TEMPORARY DEBUG - Remove after we understand the data structure
+    console.log('=== FULL BACKEND DATA DEBUG ===');
+    console.log('Complete data structure:', data);
+    
+    if (Array.isArray(data) && data.length > 0) {
+        console.log('First candidate full data:', data[0]);
+        console.log('Available keys in first candidate:', Object.keys(data[0]));
+        
+        // Log each property to see what's available
+        Object.keys(data[0]).forEach(key => {
+            console.log(`${key}:`, data[0][key]);
+        });
     }
-    console.log('================================');
+    console.log('=== END DEBUG ===');
     
     // Use the new multiple candidates handler
     showMultipleCandidatesResults(data);
