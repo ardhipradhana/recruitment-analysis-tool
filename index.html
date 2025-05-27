@@ -3445,25 +3445,40 @@ function exportToCSV() {
     try {
         csvBtn.innerHTML = '<i class="fas fa-spinner fa-spin text-green-600 mr-3"></i>Generating...';
         
+        const userStatus = creditManager.getStatus();
         let csvData = [];
         
         if (candidatesData.length > 1) {
             // Multiple candidates
-            csvData = candidatesData.map((candidate, index) => ({
-                'Candidate Name': candidate.candidateName || `Candidate ${index + 1}`,
-                'Score': candidate.candidateScore || 'N/A',
-                'Title/Position': extractTitleFromSummary(candidate) || 'Professional',
-                'Executive Summary': candidate.executiveSummary ? candidate.executiveSummary.replace(/"/g, '""') : 'N/A',
-                'Core Competencies': candidate.coreCompetencies ? 
-                    (typeof candidate.coreCompetencies === 'string' ? 
-                        (candidate.coreCompetencies.startsWith('-') ? "'" + candidate.coreCompetencies.replace(/"/g, '""') : candidate.coreCompetencies.replace(/"/g, '""')) : 
-                        candidate.coreCompetencies.join('; ')) : 'N/A',
-                'Analysis Date': new Date().toLocaleDateString()
-            }));
+            csvData = candidatesData.map((candidate, index) => {
+                const baseData = {
+                    'Candidate Name': candidate.candidateName || `Candidate ${index + 1}`,
+                    'Score': candidate.candidateScore || 'N/A',
+                    'Title/Position': extractTitleFromSummary(candidate) || 'Professional',
+                    'Executive Summary': candidate.executiveSummary ? candidate.executiveSummary.replace(/"/g, '""') : 'N/A',
+                    'Core Competencies': candidate.coreCompetencies ? 
+                        (typeof candidate.coreCompetencies === 'string' ? 
+                            (candidate.coreCompetencies.startsWith('-') ? "'" + candidate.coreCompetencies.replace(/"/g, '""') : candidate.coreCompetencies.replace(/"/g, '""')) : 
+                            candidate.coreCompetencies.join('; ')) : 'N/A',
+                    'Analysis Date': new Date().toLocaleDateString()
+                };
+
+                // Add PRO fields if user is professional
+                if (!userStatus.isFreeTier) {
+                    baseData['Role Alignment'] = candidate.roleAlignment ? candidate.roleAlignment.replace(/"/g, '""') : 'N/A';
+                    baseData['Education & Certifications'] = candidate.educationCertifications ? candidate.educationCertifications.replace(/"/g, '""') : 'N/A';
+                    baseData['Communication Quality'] = candidate.communication ? candidate.communication.replace(/"/g, '""') : 'N/A';
+                    baseData['Red Flags'] = candidate.redFlags ? candidate.redFlags.replace(/"/g, '""') : 'N/A';
+                    baseData['Strategic Recommendations'] = candidate.strategicRecommendations ? candidate.strategicRecommendations.replace(/"/g, '""') : 'N/A';
+                    baseData['Candidate Scorecard'] = candidate.candidateScorecard ? candidate.candidateScorecard.replace(/"/g, '""') : 'N/A';
+                }
+
+                return baseData;
+            });
         } else {
-            // Single candidate
+            // Single candidate - same logic
             const candidate = candidatesData[0];
-            csvData = [{
+            const baseData = {
                 'Candidate Name': candidate.candidateName || 'Candidate',
                 'Score': candidate.candidateScore || 'N/A',
                 'Title/Position': extractTitleFromSummary(candidate) || 'Professional',
@@ -3473,10 +3488,22 @@ function exportToCSV() {
                         (candidate.coreCompetencies.startsWith('-') ? "'" + candidate.coreCompetencies.replace(/"/g, '""') : candidate.coreCompetencies.replace(/"/g, '""')) : 
                         candidate.coreCompetencies.join('; ')) : 'N/A',
                 'Analysis Date': new Date().toLocaleDateString()
-            }];
+            };
+
+            // Add PRO fields if user is professional
+            if (!userStatus.isFreeTier) {
+                baseData['Role Alignment'] = candidate.roleAlignment ? candidate.roleAlignment.replace(/"/g, '""') : 'N/A';
+                baseData['Education & Certifications'] = candidate.educationCertifications ? candidate.educationCertifications.replace(/"/g, '""') : 'N/A';
+                baseData['Communication Quality'] = candidate.communication ? candidate.communication.replace(/"/g, '""') : 'N/A';
+                baseData['Red Flags'] = candidate.redFlags ? candidate.redFlags.replace(/"/g, '""') : 'N/A';
+                baseData['Strategic Recommendations'] = candidate.strategicRecommendations ? candidate.strategicRecommendations.replace(/"/g, '""') : 'N/A';
+                baseData['Candidate Scorecard'] = candidate.candidateScorecard ? candidate.candidateScorecard.replace(/"/g, '""') : 'N/A';
+            }
+
+            csvData = [baseData];
         }
         
-        // Convert to CSV
+        // Rest of the function stays the same...
         const headers = Object.keys(csvData[0]);
         const csvContent = [
             headers.join(','),
