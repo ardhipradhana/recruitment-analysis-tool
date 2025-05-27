@@ -853,6 +853,11 @@
                 <span>Recent Analyses</span>
                 <span id="history-count" class="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full hidden">0</span>
             </button>
+            <!-- Add this BEFORE the logout button -->
+            <div id="usage-display" class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white rounded-lg border border-gray-300 shadow-sm">
+                <i class="fas fa-chart-pie mr-2 text-blue-500"></i>
+                <span id="usage-text">Loading...</span>
+            </div>
             <button id="logout-btn" class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white rounded-lg border border-gray-300 hover:bg-gray-50 hover:text-gray-900 transition-colors shadow-sm">
                 <span>Log Out</span>
                 <i class="fas fa-sign-out-alt ml-2"></i>
@@ -1714,6 +1719,147 @@ class AnalysisHistory {
     }
 }
 
+// Credit Management System
+class CreditManager {
+    constructor() {
+        this.currentUser = null;
+        this.userTier = 'FREE';
+        this.creditBalance = 0;
+        this.freeAnalysesUsed = 0;
+        
+        // Pricing configuration
+        this.pricing = {
+            FREE: {
+                name: 'Gratis',
+                monthlyLimit: 3,
+                price: 0
+            },
+            PROFESIONAL: {
+                name: 'Profesional',
+                creditsPerPurchase: 30,
+                price: 599000,
+                priceFormatted: 'Rp 599.000'
+            }
+        };
+    }
+
+    async initialize() {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+            this.currentUser = user;
+            await this.loadUserData();
+        }
+    }
+
+    async loadUserData() {
+        try {
+            // Try to get existing profile
+            let { data, error } = await supabase
+                .from('user_profiles')
+                .select('*')
+                .eq('id', this.currentUser.id)
+                .single();
+
+            if (error && error.code === 'PGRST116') {
+                // Profile doesn't exist, create it
+                await this.createUserProfile();
+                // Load again after creating
+                ({ data, error } = await supabase
+                    .from('user_profiles')
+                    .select('*')
+                    .eq('id', this.currentUser.id)
+                    .single());
+            }
+
+            if (data) {
+                this.userTier = data.user_tier || 'FREE';
+                this.creditBalance = data.credit_balance || 0;
+                this.freeAnalysesUsed = data.free_analyses_used || 0;
+                
+                // Check if we need to reset free analyses (monthly)
+                await this.checkFreeReset(data.free_reset_date);
+            }
+        } catch (error) {
+            console.error('Error loading user data:', error);
+        }
+    }
+
+    async createUserProfile() {
+        try {
+            const { error } = await supabase
+                .from('user_profiles')
+                .insert({
+                    id: this.currentUser.id,
+                    user_tier: 'FREE',
+                    credit_balance: 0,
+                    free_analyses_used: 0,
+                    free_reset_date: new Date().toISOString().split('T')[0]
+                });
+
+            if (error) {
+                console.error('Error creating user profile:', error);
+            }
+        } catch (error) {
+            console.error('Error creating user profile:', error);
+        }
+    }
+
+    async checkFreeReset(lastResetDate) {
+        const now = new Date();
+        const resetDate = new Date(lastResetDate);
+        
+        // If it's a new month, reset free analyses
+        if (now.getMonth() !== resetDate.getMonth() || now.getFullYear() !== resetDate.getFullYear()) {
+            await this.resetFreeAnalyses();
+        }
+    }
+
+    async resetFreeAnalyses() {
+        try {
+            const { error } = await supabase
+                .from('user_profiles')
+                .update({ 
+                    free_analyses_used: 0,
+                    free_reset_date: new Date().toISOString().split('T')[0]
+                })
+                .eq('id', this.currentUser.id);
+
+            if (!error) {
+                this.freeAnalysesUsed = 0;
+            }
+        } catch (error) {
+            console.error('Error resetting free analyses:', error);
+        }
+    }
+
+    canAnalyze() {
+        if (this.userTier === 'FREE') {
+            return this.freeAnalysesUsed < this.pricing.FREE.monthlyLimit;
+        } else {
+            return this.creditBalance > 0;
+        }
+    }
+
+    getRemainingAnalyses() {
+        if (this.userTier === 'FREE') {
+            return Math.max(0, this.pricing.FREE.monthlyLimit - this.freeAnalysesUsed);
+        } else {
+            return this.creditBalance;
+        }
+    }
+
+    getStatus() {
+        return {
+            tier: this.userTier,
+            remaining: this.getRemainingAnalyses(),
+            canAnalyze: this.canAnalyze(),
+            isFreeTier: this.userTier === 'FREE',
+            creditsBalance: this.creditBalance,
+            freeUsed: this.freeAnalysesUsed
+        };
+    }
+}
+
 // Candidate Filter System
 class CandidateFilter {
     constructor() {
@@ -1813,15 +1959,47 @@ let typeNames;
 let typeIcons;
 let candidateFilter = new CandidateFilter();
 
-function showMainApp() {
+function updateUsageDisplay() {
+    const status = creditManager.getStatus();
+    const usageElement = document.getElementById('usage-text');
+    
+    if (!usageElement) {
+        console.log('Usage display element not found yet');
+        return;
+    }
+    
+    if (status.isFreeTier) {
+        usageElement.textContent = `${status.remaining}/3 gratis tersisa`;
+        if (status.remaining === 0) {
+            usageElement.className = 'text-red-600 font-medium';
+        } else {
+            usageElement.className = 'text-gray-700';
+        }
+    } else {
+        usageElement.textContent = `${status.remaining} credits`;
+        if (status.remaining < 5) {
+            usageElement.className = 'text-orange-600 font-medium';
+        } else {
+            usageElement.className = 'text-green-600 font-medium';
+        }
+    }
+}
+        
+async function showMainApp() {
     document.getElementById('auth-box').style.display = 'none';
     document.getElementById('main-app').style.display = '';
+    
     // Hide the animated background when logged in
     const animatedBg = document.querySelector('.animated-background');
     if (animatedBg) {
         animatedBg.style.display = 'none';
     }
+    
+    // Initialize credit management
+    await creditManager.initialize();
+    updateUsageDisplay();
 }
+        
 function showAuthBox() {
     document.getElementById('auth-box').style.display = '';
     document.getElementById('main-app').style.display = 'none';
@@ -2854,6 +3032,7 @@ async function signIn() {
 // Multiple Candidates Handling Functions
 let candidatesData = [];
 let selectedCandidateIndex = 0;
+let creditManager = new CreditManager();
 
 // Filter Control Functions
 function addFilterControlsToSidebar() {
