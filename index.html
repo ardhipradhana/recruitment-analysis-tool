@@ -4610,8 +4610,13 @@ function generateCandidateDetailHTML(candidate, index) {
     
     // Add premium sections or upgrade prompt based on user tier
     const userStatus = creditManager.getStatus();
-    if (!userStatus.isFreeTier) {
-        // PROFESSIONAL user - add premium sections
+    const hasUltraAnalysis = candidate.roleAlignment || candidate.educationCertifications || candidate.communication || candidate.redFlags || candidate.strategicRecommendations || candidate.candidateScorecard;
+
+    if (userStatus.isUltraTier && hasUltraAnalysis) {
+        // ULTRA user with job matching data - premium sections already included in candidate data
+        console.log('ULTRA user with premium analysis - using data from backend');
+    } else if (!userStatus.isFreeTier) {
+        // PRO user OR ULTRA user without job matching - add premium sections
         detailHTML += generatePremiumSectionsHTML(candidate);
     } else {
         // FREE user - add upgrade prompt
@@ -4787,8 +4792,13 @@ function showSingleCandidateView(data) {
 
     // ADD PROFESSIONAL-ONLY SECTIONS
     const userStatus = creditManager.getStatus();
-        if (!userStatus.isFreeTier) {
-    // User is PROFESSIONAL - show additional sections
+    const hasUltraAnalysis = data.roleAlignment || data.educationCertifications || data.communication || data.redFlags || data.strategicRecommendations || data.candidateScorecard;
+
+    if (userStatus.isUltraTier && hasUltraAnalysis) {
+        // ULTRA user with job matching data - don't add PRO sections (they're already in the ULTRA data)
+        console.log('ULTRA user with premium analysis - skipping PRO sections to avoid duplication');
+    } else if (!userStatus.isFreeTier) {
+        // PRO user OR ULTRA user without job matching - show PRO sections
         addProfessionalSections(data);
     } else {
         // User is FREE - show upgrade prompts where premium content would be
