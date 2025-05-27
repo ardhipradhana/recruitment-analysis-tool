@@ -4631,13 +4631,14 @@ function generateCandidateDetailHTML(candidate, index) {
     
     // Add premium sections or upgrade prompt based on user tier
     const userStatus = creditManager.getStatus();
-    const hasUltraAnalysis = candidate.roleAlignment || candidate.educationCertifications || candidate.communication || candidate.redFlags || candidate.strategicRecommendations || candidate.candidateScorecard;
+    const jobDescription = document.getElementById('job-description').value.trim();
+    const hasJobDescription = jobDescription.length > 0;
 
-    if (userStatus.isUltraTier && hasUltraAnalysis) {
-        // ULTRA analysis used - add ULTRA sections
+    if (hasJobDescription) {
+        // Job description was used - ULTRA sections with ULTRA badges
         detailHTML += generateUltraSectionsHTML(candidate);
     } else if (!userStatus.isFreeTier) {
-        // PRO analysis used - add PRO sections
+        // No job description - PRO sections with PRO badges
         detailHTML += generatePremiumSectionsHTML(candidate);
     } else {
         // FREE user - add upgrade prompt
@@ -4720,7 +4721,7 @@ function generateUltraSectionsHTML(candidate) {
             'Role Alignment & Potential Fit',
             candidate.roleAlignment,
             'text-purple-600',
-            'ULTRA'
+            'PRO'
         );
     }
     
