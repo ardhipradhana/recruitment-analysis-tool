@@ -4675,18 +4675,21 @@ function generateCandidateDetailHTML(candidate, index) {
 }
 
 function getAnalysisTypeBadge(candidate) {
-    const jobDescription = document.getElementById('job-description').value.trim();
+    console.log('=== getAnalysisTypeBadge CALLED ===');
+    
+    const jobDescriptionElement = document.getElementById('job-description');
+    if (!jobDescriptionElement) {
+        console.log('ERROR: job-description element not found!');
+        return '<span class="ml-2 px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded">ERROR</span>';
+    }
+    
+    const jobDescription = jobDescriptionElement.value.trim();
     const hasJobDescription = jobDescription.length > 0;
-    const hasUltraAnalysis = candidate.roleAlignment || candidate.educationCertifications || candidate.communication || candidate.redFlags || candidate.strategicRecommendations || candidate.candidateScorecard;
-
-    console.log('=== getAnalysisTypeBadge DEBUG ===');
-    console.log('Job description element:', document.getElementById('job-description'));
+    
     console.log('Job description text:', `"${jobDescription}"`);
     console.log('Job description length:', jobDescription.length);
     console.log('hasJobDescription:', hasJobDescription);
-    console.log('hasUltraAnalysis:', hasUltraAnalysis);
-    console.log('Will show:', hasJobDescription ? 'ULTRA' : 'PRO');
-    console.log('=== END getAnalysisTypeBadge DEBUG ===');
+    console.log('=== END getAnalysisTypeBadge ===');
     
     if (hasJobDescription) {
         return '<span class="ml-2 px-2 py-1 bg-gradient-to-r from-purple-500 to-pink-600 text-white text-xs font-medium rounded shadow-sm"><i class="fas fa-crown mr-1"></i>ULTRA Analysis</span>';
