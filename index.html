@@ -4680,9 +4680,11 @@ function getAnalysisTypeBadge(candidate) {
     const hasUltraAnalysis = candidate.roleAlignment || candidate.educationCertifications || candidate.communication || candidate.redFlags || candidate.strategicRecommendations || candidate.candidateScorecard;
 
     console.log('=== getAnalysisTypeBadge DEBUG ===');
+    console.log('Job description text:', `"${jobDescription}"`);
+    console.log('Job description length:', jobDescription.length);
     console.log('hasJobDescription:', hasJobDescription);
     console.log('hasUltraAnalysis:', hasUltraAnalysis);
-    console.log('Will show:', (hasJobDescription || hasUltraAnalysis) ? 'ULTRA' : 'PRO');
+    console.log('Will show:', hasJobDescription ? 'ULTRA' : 'PRO');
     console.log('=== END getAnalysisTypeBadge DEBUG ===');
     
     if (hasJobDescription) {
