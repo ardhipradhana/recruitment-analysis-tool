@@ -2877,7 +2877,7 @@ function updateUltraButtonForProUser() {
     if (status.tier === 'PROFESIONAL' && status.remaining > 0) {
         const conversion = creditManager.calculateCreditConversion();
         if (conversion) {
-            ultraBtnText.innerHTML = `Convert ${conversion.currentProCredits} Credits → ${conversion.newUltraCredits} ULTRA Credits`;
+            ultraBtnText.innerHTML = `Convert ${conversion.currentProCredits} PRO Credits → ${conversion.newUltraCredits} ULTRA Credits`;
             
             // Remove existing help text if any
             const existingHelp = ultraBtn.parentNode.querySelector('.conversion-help');
