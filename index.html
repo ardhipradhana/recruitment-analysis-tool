@@ -4954,10 +4954,18 @@ function showSingleCandidateView(data) {
 function updateUserTierBadge(analysisType = null) {
     const userStatus = creditManager.getStatus();
     const badgeElement = document.getElementById('user-tier-badge');
+
+    console.log('=== updateUserTierBadge DEBUG ===');
+    console.log('analysisType parameter:', analysisType);
+    console.log('userStatus.isFreeTier:', userStatus.isFreeTier);
+    console.log('userStatus.isUltraTier:', userStatus.isUltraTier);
     
     if (badgeElement) {
         // Use analysis type if provided, otherwise use user tier
         const displayType = analysisType || (userStatus.isFreeTier ? 'FREE' : userStatus.isUltraTier ? 'ULTRA' : 'PRO');
+
+        console.log('Final displayType:', displayType);
+        console.log('=== END updateUserTierBadge DEBUG ===');
         
         if (displayType === 'FREE') {
             badgeElement.className = 'ml-2 px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded';
