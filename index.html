@@ -4680,6 +4680,7 @@ function getAnalysisTypeBadge(candidate) {
     const hasUltraAnalysis = candidate.roleAlignment || candidate.educationCertifications || candidate.communication || candidate.redFlags || candidate.strategicRecommendations || candidate.candidateScorecard;
 
     console.log('=== getAnalysisTypeBadge DEBUG ===');
+    console.log('Job description element:', document.getElementById('job-description'));
     console.log('Job description text:', `"${jobDescription}"`);
     console.log('Job description length:', jobDescription.length);
     console.log('hasJobDescription:', hasJobDescription);
