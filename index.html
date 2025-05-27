@@ -3294,6 +3294,10 @@ function updateFileList() {
         fileCount.textContent = files.length;
         startButton.disabled = false;
         fileList.innerHTML = '';
+
+        // ADD THIS LINE TO REMOVE EXISTING WARNINGS
+        const existingWarning = fileListContainer.querySelector('.processing-warning');
+        if (existingWarning) existingWarning.remove();
         
         files.forEach((file, index) => {
             const fileItem = document.createElement('div');
