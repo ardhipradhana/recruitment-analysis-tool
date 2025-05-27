@@ -1050,8 +1050,39 @@
                 </p>
             </div>
         </div>
+    
+        <!-- Value Proposition -->
+        <div class="mt-12 bg-gray-50 rounded-xl p-6">
+            <h3 class="text-lg font-semibold text-center mb-4">Mengapa Profesional?</h3>
+            <div class="grid md:grid-cols-3 gap-6 text-center">
+                <div>
+                    <i class="fas fa-clock text-blue-500 text-2xl mb-3"></i>
+                    <h4 class="font-medium mb-2">Hemat Waktu</h4>
+                    <p class="text-sm text-gray-600">15+ jam screening manual menjadi 2 menit per kandidat</p>
+                </div>
+                <div>
+                    <i class="fas fa-eye text-green-500 text-2xl mb-3"></i>
+                    <h4 class="font-medium mb-2">Insight Mendalam</h4>
+                    <p class="text-sm text-gray-600">Analisis komprehensif yang tidak terlihat di screening manual</p>
+                </div>
+                <div>
+                    <i class="fas fa-shield-alt text-purple-500 text-2xl mb-3"></i>
+                    <h4 class="font-medium mb-2">Hindari Bad Hire</h4>
+                    <p class="text-sm text-gray-600">Red flags detection mencegah kesalahan rekrutmen</p>
+                </div>
+            </div>
+        </div>
+    
+        <!-- Back Button -->
+        <div class="text-center mt-12">
+            <button id="back-to-app-btn" class="px-6 py-2 text-gray-600 hover:text-gray-800 transition-colors">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Kembali ke Aplikasi
+            </button>
+        </div>
+    </div>
 
-        <!-- Support/Contact Page -->
+     <!-- Support/Contact Page -->
 <div id="support-page" class="max-w-4xl mx-auto p-6 support-page-hidden">
     <header class="text-center mb-8">
         <h1 class="text-3xl font-bold text-gray-800 mb-4">Bantuan & Dukungan</h1>
@@ -1230,7 +1261,7 @@
             <h2 class="text-xl font-bold text-gray-800 mb-4">6. Kontak</h2>
             <p class="text-gray-600 mb-4">
                 Untuk pertanyaan tentang syarat dan ketentuan ini, hubungi kami di 
-                <a href="mailto:support@montpro.id" class="text-blue-600">support@montpro.id</a>
+                <a href="mailto:support@aapgrp.com" class="text-blue-600">support@aapgrp.com</a>
             </p>
         </div>
     </div>
@@ -1241,37 +1272,6 @@
         </button>
     </div>
 </div>
-    
-        <!-- Value Proposition -->
-        <div class="mt-12 bg-gray-50 rounded-xl p-6">
-            <h3 class="text-lg font-semibold text-center mb-4">Mengapa Profesional?</h3>
-            <div class="grid md:grid-cols-3 gap-6 text-center">
-                <div>
-                    <i class="fas fa-clock text-blue-500 text-2xl mb-3"></i>
-                    <h4 class="font-medium mb-2">Hemat Waktu</h4>
-                    <p class="text-sm text-gray-600">15+ jam screening manual menjadi 2 menit per kandidat</p>
-                </div>
-                <div>
-                    <i class="fas fa-eye text-green-500 text-2xl mb-3"></i>
-                    <h4 class="font-medium mb-2">Insight Mendalam</h4>
-                    <p class="text-sm text-gray-600">Analisis komprehensif yang tidak terlihat di screening manual</p>
-                </div>
-                <div>
-                    <i class="fas fa-shield-alt text-purple-500 text-2xl mb-3"></i>
-                    <h4 class="font-medium mb-2">Hindari Bad Hire</h4>
-                    <p class="text-sm text-gray-600">Red flags detection mencegah kesalahan rekrutmen</p>
-                </div>
-            </div>
-        </div>
-    
-        <!-- Back Button -->
-        <div class="text-center mt-12">
-            <button id="back-to-app-btn" class="px-6 py-2 text-gray-600 hover:text-gray-800 transition-colors">
-                <i class="fas fa-arrow-left mr-2"></i>
-                Kembali ke Aplikasi
-            </button>
-        </div>
-    </div>
 
     <!-- 1. Add the loading UI section right after your upload-interface section -->
 <div id="analysis-loading" class="hidden">
@@ -2605,9 +2605,9 @@ function hideAllPages() {
     const faqPage = document.getElementById('faq-page');
     const termsPage = document.getElementById('terms-page');
     
-    if (supportPage) supportPage.style.display = 'block';
-    if (faqPage) faqPage.style.display = 'block';
-    if (termsPage) termsPage.style.display = 'block';
+    if (supportPage) supportPage.style.display = 'none';
+    if (faqPage) faqPage.style.display = 'none';
+    if (termsPage) termsPage.style.display = 'none';
 }
 
 function hideAllSupportPages() {
