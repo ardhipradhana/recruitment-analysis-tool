@@ -862,6 +862,10 @@
                 <span>Log Out</span>
                 <i class="fas fa-sign-out-alt ml-2"></i>
             </button>
+            <!-- Add this temporarily in your header, next to the other buttons -->
+            <button onclick="showPricingPage()" class="px-3 py-2 bg-blue-600 text-white rounded text-sm">
+                Test Pricing
+            </button>
         </header>
 
         
@@ -921,6 +925,149 @@
                 <p>This tool will analyze your candidate documents and extract relevant information for recruitment purposes.</p>
                 <p class="mt-1">© 2025 MontPro. All rights reserved.</p>
             </div>
+        </div>
+    </div>
+
+    <!-- Pricing Page (add this RIGHT AFTER the main-app div) -->
+    <div id="pricing-page" class="max-w-4xl mx-auto p-6" style="display: none;">
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <h1 class="text-3xl font-bold text-gray-800 mb-4">Pilih Paket yang Tepat untuk Anda</h1>
+            <p class="text-gray-600">Tingkatkan proses rekrutmen dengan analisis AI yang powerful</p>
+        </header>
+
+        <!-- Pricing Cards -->
+        <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        
+            <!-- FREE TIER -->
+            <div class="bg-white rounded-xl shadow-lg p-8 border border-gray-200 relative">
+                <div class="text-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Gratis</h2>
+                    <div class="text-4xl font-bold text-gray-600 mb-2">Rp 0</div>
+                    <p class="text-gray-500">3 analisis per bulan</p>
+                </div>
+            
+                <ul class="space-y-3 mb-8">
+                    <li class="flex items-center">
+                        <i class="fas fa-check text-green-500 mr-3"></i>
+                        <span>Skor Kandidat Otomatis</span>
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-check text-green-500 mr-3"></i>
+                        <span>Ringkasan Eksekutif</span>
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-check text-green-500 mr-3"></i>
+                        <span>Kompetensi Inti</span>
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-check text-green-500 mr-3"></i>
+                        <span>Export PDF Dasar</span>
+                    </li>
+                    <li class="flex items-center text-gray-400">
+                        <i class="fas fa-times text-gray-400 mr-3"></i>
+                        <span>Analisis Mendalam</span>
+                    </li>
+                    <li class="flex items-center text-gray-400">
+                        <i class="fas fa-times text-gray-400 mr-3"></i>
+                        <span>Red Flags Detection</span>
+                    </li>
+                </ul>
+            
+                <button id="current-plan-btn" class="w-full py-3 px-4 bg-gray-200 text-gray-700 font-medium rounded-lg cursor-not-allowed">
+                    <i class="fas fa-check mr-2"></i>
+                    Paket Aktif
+                </button>
+            </div>
+
+            <!-- PROFESIONAL TIER -->
+            <div class="bg-white rounded-xl shadow-lg p-8 border-2 border-blue-500 relative">
+                <!-- Recommended Badge -->
+                <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                    <span class="bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-medium">Rekomendasi</span>
+                </div>
+            
+                <div class="text-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Profesional</h2>
+                    <div class="text-4xl font-bold text-blue-600 mb-2">Rp 599.000</div>
+                    <p class="text-gray-500">30 Credits (tidak expired)</p>
+                    <p class="text-xs text-gray-400 mt-1">Rp 19.967 per analisis</p>
+                </div>
+            
+                <ul class="space-y-3 mb-8">
+                    <li class="flex items-center">
+                        <i class="fas fa-check text-green-500 mr-3"></i>
+                        <span class="font-medium">Semua fitur Gratis</span>
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-check text-green-500 mr-3"></i>
+                        <span>Role Alignment & Potential Fit</span>
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-check text-green-500 mr-3"></i>
+                        <span>Education & Certifications</span>
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-check text-green-500 mr-3"></i>
+                        <span>Communication Quality Analysis</span>
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-check text-green-500 mr-3"></i>
+                        <span>Red Flags & Risk Detection</span>
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-check text-green-500 mr-3"></i>
+                        <span>Strategic Recommendations</span>
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-check text-green-500 mr-3"></i>
+                        <span>Detailed Candidate Scorecard</span>
+                    </li>
+                    <li class="flex items-center text-blue-600 font-medium">
+                        <i class="fas fa-infinity text-blue-500 mr-3"></i>
+                        <span>Credits Tidak Pernah Expired</span>
+                    </li>
+                </ul>
+            
+                <button id="upgrade-profesional-btn" class="w-full py-3 px-4 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                    <i class="fas fa-rocket mr-2"></i>
+                    Beli 30 Credits - Rp 599.000
+                </button>
+            
+                <p class="text-xs text-gray-500 text-center mt-3">
+                    Pembayaran aman via Midtrans • Credits langsung masuk
+                </p>
+            </div>
+        </div>
+    
+        <!-- Value Proposition -->
+        <div class="mt-12 bg-gray-50 rounded-xl p-6">
+            <h3 class="text-lg font-semibold text-center mb-4">Mengapa Profesional?</h3>
+            <div class="grid md:grid-cols-3 gap-6 text-center">
+                <div>
+                    <i class="fas fa-clock text-blue-500 text-2xl mb-3"></i>
+                    <h4 class="font-medium mb-2">Hemat Waktu</h4>
+                    <p class="text-sm text-gray-600">15+ jam screening manual menjadi 2 menit per kandidat</p>
+                </div>
+                <div>
+                    <i class="fas fa-eye text-green-500 text-2xl mb-3"></i>
+                    <h4 class="font-medium mb-2">Insight Mendalam</h4>
+                    <p class="text-sm text-gray-600">Analisis komprehensif yang tidak terlihat di screening manual</p>
+                </div>
+                <div>
+                    <i class="fas fa-shield-alt text-purple-500 text-2xl mb-3"></i>
+                    <h4 class="font-medium mb-2">Hindari Bad Hire</h4>
+                    <p class="text-sm text-gray-600">Red flags detection mencegah kesalahan rekrutmen</p>
+                </div>
+            </div>
+        </div>
+    
+        <!-- Back Button -->
+        <div class="text-center mt-12">
+            <button id="back-to-app-btn" class="px-6 py-2 text-gray-600 hover:text-gray-800 transition-colors">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Kembali ke Aplikasi
+            </button>
         </div>
     </div>
 
@@ -2014,6 +2161,35 @@ function updateUsageDisplay() {
         } else {
             usageElement.className = 'text-green-600 font-medium';
         }
+    }
+}
+
+// Pricing Page Navigation Functions
+function showPricingPage() {
+    document.getElementById('main-app').style.display = 'none';
+    document.getElementById('analysis-results').classList.add('hidden');
+    document.getElementById('pricing-page').style.display = 'block';
+    
+    // Update button text based on current tier
+    updatePricingPageForUser();
+}
+
+function hidePricingPage() {
+    document.getElementById('pricing-page').style.display = 'none';
+    document.getElementById('main-app').style.display = 'block';
+}
+
+function updatePricingPageForUser() {
+    const status = creditManager.getStatus();
+    const currentPlanBtn = document.getElementById('current-plan-btn');
+    const upgradeBtn = document.getElementById('upgrade-profesional-btn');
+    
+    if (status.isFreeTier) {
+        currentPlanBtn.innerHTML = '<i class="fas fa-check mr-2"></i>Paket Aktif';
+        upgradeBtn.innerHTML = '<i class="fas fa-rocket mr-2"></i>Beli 30 Credits - Rp 599.000';
+    } else {
+        currentPlanBtn.innerHTML = '<i class="fas fa-arrow-up mr-2"></i>Upgrade ke Profesional';
+        upgradeBtn.innerHTML = `<i class="fas fa-plus mr-2"></i>Beli 30 Credits Tambahan`;
     }
 }
         
@@ -3822,6 +3998,14 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.target === e.currentTarget) {
             document.getElementById('history-modal').classList.add('hidden');
         }
+    });
+
+    // Add these lines inside your existing DOMContentLoaded function
+    document.getElementById('back-to-app-btn').addEventListener('click', hidePricingPage);
+
+    document.getElementById('upgrade-profesional-btn').addEventListener('click', function() {
+        // Placeholder for payment integration (next step)
+        alert('Payment integration akan ditambahkan di langkah selanjutnya!');
     });
 });
         
