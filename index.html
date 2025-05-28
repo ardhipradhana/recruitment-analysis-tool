@@ -4462,6 +4462,60 @@ async function signInWithGoogle() {
     }
 }
 
+// Sample Resume Function
+async function loadSampleResume() {
+    const sampleBtn = document.getElementById('sample-resume-btn');
+    const originalBtnHtml = sampleBtn.innerHTML;
+    
+    // Update button to show loading state
+    sampleBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Loading Sample...';
+    sampleBtn.disabled = true;
+    
+    try {
+        // Fetch the sample resume PDF
+        const response = await fetch('sample-resume.pdf');
+        
+        if (!response.ok) {
+            throw new Error('Failed to load sample resume');
+        }
+        
+        // Convert response to blob
+        const blob = await response.blob();
+        
+        // Create a File object from the blob
+        const sampleFile = new File([blob], 'John_Smith_Resume.pdf', {
+            type: 'application/pdf',
+            lastModified: new Date().getTime()
+        });
+        
+        // Add to files array
+        files = [sampleFile];
+        
+        // Update the file list display
+        updateFileList();
+        
+        // Show success message
+        showSuccess('Sample resume loaded! Click "Start Analysis" to see AI insights.');
+        
+        // Scroll to the file list
+        fileListContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // Reset button after a delay
+        setTimeout(() => {
+            sampleBtn.innerHTML = originalBtnHtml;
+            sampleBtn.disabled = false;
+        }, 2000);
+        
+    } catch (error) {
+        console.error('Error loading sample resume:', error);
+        showError('Failed to load sample resume. Please try uploading your own file.');
+        
+        // Reset button
+        sampleBtn.innerHTML = originalBtnHtml;
+        sampleBtn.disabled = false;
+    }
+}
+
 // Multiple Candidates Handling Functions
 let candidatesData = [];
 let selectedCandidateIndex = 0;
@@ -5809,6 +5863,11 @@ document.addEventListener("DOMContentLoaded", async function() {
     document.getElementById("magic-btn").onclick = signIn;
     // Wire up Google Sign-In button
     document.getElementById("google-signin-btn").onclick = signInWithGoogle;
+    // Wire up Sample Resume button
+    const sampleResumeBtn = document.getElementById("sample-resume-btn");
+    if (sampleResumeBtn) {
+        sampleResumeBtn.onclick = loadSampleResume;
+    }
     document.getElementById('logout-btn').onclick = async function() {
         try {
             await supabase.auth.signOut();
