@@ -3217,6 +3217,17 @@ async function showMainApp() {
     await creditManager.initialize();
     updateUsageDisplay();
     updateJobDescriptionAccess();
+
+    // ADD THIS HERE - Wire up Sample Resume button after main app is shown
+    setTimeout(() => {
+        const sampleResumeBtn = document.getElementById("sample-resume-btn");
+        if (sampleResumeBtn) {
+            console.log('Sample resume button found, attaching handler');
+            sampleResumeBtn.onclick = loadSampleResume;
+        } else {
+            console.log('Sample resume button not found!');
+        }
+    }, 100);
 }
         
 function showAuthBox() {
@@ -5863,11 +5874,7 @@ document.addEventListener("DOMContentLoaded", async function() {
     document.getElementById("magic-btn").onclick = signIn;
     // Wire up Google Sign-In button
     document.getElementById("google-signin-btn").onclick = signInWithGoogle;
-    // Wire up Sample Resume button
-    const sampleResumeBtn = document.getElementById("sample-resume-btn");
-    if (sampleResumeBtn) {
-        sampleResumeBtn.onclick = loadSampleResume;
-    }
+    
     document.getElementById('logout-btn').onclick = async function() {
         try {
             await supabase.auth.signOut();
