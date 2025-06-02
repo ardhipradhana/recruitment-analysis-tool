@@ -1623,7 +1623,7 @@
                 <h3 class="text-lg font-semibold">Skills & Performance Radar</h3>
             </div>
             <div class="flex justify-center">
-                <div style="width: 400px; height: 400px;">
+                <div style="width: 600px; height: 500px;">
                     <canvas id="comparison-radar-chart"></canvas>
                 </div>
             </div>
@@ -4044,7 +4044,12 @@ function extractRadarChartData(selectedCandidates) {
             pointHoverBackgroundColor: '#fff',
             pointHoverBorderColor: color
         };
+
+        console.log(`Dataset for ${name}:`, dataset); // Debug log
+        return dataset;
     });
+
+    console.log('All datasets:', datasets); // Debug log
     
     return {
         labels: skillCategories,
@@ -4054,7 +4059,9 @@ function extractRadarChartData(selectedCandidates) {
 
 function getComparisonColorHex(index) {
     const colors = ['#3B82F6', '#10B981', '#8B5CF6']; // Blue, Green, Purple
-    return colors[index % colors.length];
+    const color = colors[index % colors.length];
+    console.log(`Candidate ${index} getting color:`, color); // Debug log
+    return color;
 }
 
 function extractCandidateScores(candidate) {
