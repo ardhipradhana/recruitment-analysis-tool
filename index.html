@@ -2946,7 +2946,7 @@ function toggleSaveCandidate(candidateIndex) {
             if (result.success) {
                 showSuccess('Candidate removed from saved list');
                 updateSavedCounter();
-                updateSaveButtonStates();
+                updateSpecificSaveButton(candidateIndex, false);
             } else {
                 showError(result.message);
             }
@@ -2961,13 +2961,35 @@ function toggleSaveCandidate(candidateIndex) {
         if (result.success) {
             showSuccess('Candidate saved successfully!');
             updateSavedCounter();
-            updateSaveButtonStates();
+            updateSpecificSaveButton(candidateIndex, true);
         } else {
             if (result.message === 'Candidate already saved') {
                 showWarning('This candidate is already in your saved list');
             } else {
                 showError(result.message);
             }
+        }
+    }
+}
+
+// New function to update specific button
+function updateSpecificSaveButton(candidateIndex, isSaved) {
+    // Find the button that was clicked using a more specific selector
+    const saveButtons = document.querySelectorAll('.save-candidate-btn');
+    const targetButton = Array.from(saveButtons).find(button => {
+        const onclickAttr = button.getAttribute('onclick');
+        return onclickAttr && onclickAttr.includes(`toggleSaveCandidate(${candidateIndex})`);
+    });
+    
+    if (targetButton) {
+        const icon = targetButton.querySelector('i');
+        
+        if (isSaved) {
+            targetButton.className = 'save-candidate-btn w-6 h-6 bg-green-500 hover:bg-green-600 text-white rounded-full flex items-center justify-center transition-colors shadow-sm';
+            targetButton.title = 'Remove from saved';
+        } else {
+            targetButton.className = 'save-candidate-btn w-6 h-6 bg-yellow-500 hover:bg-yellow-600 text-white rounded-full flex items-center justify-center transition-colors shadow-sm';
+            targetButton.title = 'Save candidate';
         }
     }
 }
