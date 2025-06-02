@@ -994,6 +994,10 @@
                 </div>
                 <div id="file-list" class="space-y-2 max-h-64 overflow-y-auto pr-2"></div>
             </div>
+
+            <div id="queue-info" class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg hidden">
+                <!-- Queue status will be inserted here -->
+            </div>
             
             <!-- Error Message -->
             <div id="error-message" class="p-4 mb-4 bg-red-50 border-l-4 border-red-500 rounded-lg flex items-start hidden">
@@ -3198,6 +3202,374 @@ class DataRetentionManager {
 // Initialize data retention manager
 const dataRetentionManager = new DataRetentionManager();
 
+// Memory Management for Sensitive Data
+class MemoryManager {
+    constructor() {
+        this.clearDelayTimer = null;
+        this.inactivityTimer = null;
+        this.inactivityDelay = 30 * 60 * 1000; // 30 minutes
+        this.navigationDelay = 10 * 1000; // 10 seconds
+        
+        // Track user activity
+        this.setupActivityTracking();
+    }
+
+    // Clear sensitive candidate data from memory
+    clearSensitiveData() {
+        try {
+            // Clear candidate data
+            if (window.candidatesData) {
+                console.log('Clearing sensitive candidate data from memory');
+                candidatesData = [];
+                selectedCandidateIndex = 0;
+                
+                // Clear any chart instances
+                if (window.comparisonChart) {
+                    window.comparisonChart.destroy();
+                    window.comparisonChart = null;
+                }
+                
+                // Clear any progress trackers
+                if (window.currentProgressTracker) {
+                    window.currentProgressTracker = null;
+                }
+                
+                // Clear session storage backup
+                sessionStorage.removeItem('analysisResults');
+                
+                console.log('Memory cleared successfully');
+            }
+        } catch (error) {
+            console.error('Error clearing sensitive data:', error);
+        }
+    }
+
+    // Schedule memory clearing with delay
+    scheduleDelayedClear(reason = 'navigation') {
+        console.log(`Scheduling memory clear in ${this.navigationDelay/1000}s due to: ${reason}`);
+        
+        // Clear any existing timer
+        if (this.clearDelayTimer) {
+            clearTimeout(this.clearDelayTimer);
+        }
+        
+        // Set new timer
+        this.clearDelayTimer = setTimeout(() => {
+            this.clearSensitiveData();
+            this.clearDelayTimer = null;
+        }, this.navigationDelay);
+    }
+
+    // Cancel scheduled clearing (if user comes back quickly)
+    cancelScheduledClear() {
+        if (this.clearDelayTimer) {
+            console.log('Canceling scheduled memory clear');
+            clearTimeout(this.clearDelayTimer);
+            this.clearDelayTimer = null;
+        }
+    }
+
+    // Setup inactivity tracking
+    setupActivityTracking() {
+        const activities = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+        
+        const resetInactivityTimer = () => {
+            // Clear existing timer
+            if (this.inactivityTimer) {
+                clearTimeout(this.inactivityTimer);
+            }
+            
+            // Set new inactivity timer
+            this.inactivityTimer = setTimeout(() => {
+                console.log('30 minutes of inactivity - clearing sensitive data');
+                this.clearSensitiveData();
+                showSuccess('Data cleared due to inactivity for security');
+            }, this.inactivityDelay);
+        };
+
+        // Add activity listeners
+        activities.forEach(activity => {
+            document.addEventListener(activity, resetInactivityTimer, true);
+        });
+
+        // Start initial timer
+        resetInactivityTimer();
+    }
+
+    // Force immediate clear (for logout, etc.)
+    forceClear(reason = 'manual') {
+        console.log(`Force clearing memory due to: ${reason}`);
+        
+        // Cancel any scheduled clearing
+        this.cancelScheduledClear();
+        
+        // Clear immediately
+        this.clearSensitiveData();
+    }
+}
+
+// Initialize memory manager
+const memoryManager = new MemoryManager();
+
+// Analysis Queue Management System
+class AnalysisQueueManager {
+    constructor() {
+        this.currentRequest = null;
+        this.queue = [];
+        this.isProcessing = false;
+    }
+
+    // Create request fingerprint for duplicate detection
+    createRequestFingerprint(files, jobDescription) {
+        const fileFingerprint = files.map(f => `${f.name}_${f.size}_${f.lastModified}`).sort().join('|');
+        const jdFingerprint = jobDescription.trim();
+        return `${fileFingerprint}::${jdFingerprint}`;
+    }
+
+    // Add analysis request to queue
+    async queueAnalysis(files, jobDescription = '') {
+        const fingerprint = this.createRequestFingerprint(files, jobDescription);
+        const hasJobDescription = jobDescription.length > 0;
+
+        // Check if identical request is already processing
+        if (this.currentRequest && this.currentRequest.fingerprint === fingerprint) {
+            showWarning('Identical analysis is already in progress. Please wait for it to complete.');
+            return { queued: false, reason: 'duplicate_current' };
+        }
+
+        // Check if identical request is already in queue
+        const duplicateInQueue = this.queue.find(req => req.fingerprint === fingerprint);
+        if (duplicateInQueue) {
+            showWarning('This exact analysis is already queued. Please wait for it to process.');
+            return { queued: false, reason: 'duplicate_queued' };
+        }
+
+        // Create queue item
+        const queueItem = {
+            id: 'queue_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+            files: [...files], // Clone files array
+            jobDescription: jobDescription,
+            hasJobDescription: hasJobDescription,
+            fingerprint: fingerprint,
+            timestamp: new Date().toISOString(),
+            creditType: hasJobDescription ? 'ULTRA' : 'PRO'
+        };
+
+        // If not currently processing, start immediately
+        if (!this.isProcessing) {
+            return await this.processRequest(queueItem);
+        }
+
+        // Add to queue
+        this.queue.push(queueItem);
+        
+        // Show user feedback about queuing
+        const queuePosition = this.queue.length;
+        const estimatedWait = queuePosition * 60; // Assume 1 minute per queued item
+        
+        showSuccess(`Analysis queued! Position ${queuePosition} in queue. Estimated wait: ${estimatedWait}s`);
+        this.updateQueueDisplay();
+
+        return { queued: true, position: queuePosition, queueItem: queueItem };
+    }
+
+    // Process a single request
+    async processRequest(queueItem) {
+        try {
+            this.isProcessing = true;
+            this.currentRequest = queueItem;
+
+            // Update UI to show current processing
+            this.updateProcessingDisplay(queueItem);
+
+            // Validate credits before processing
+            const creditCheck = await this.validateCredits(queueItem);
+            if (!creditCheck.valid) {
+                throw new Error(creditCheck.message);
+            }
+
+            // Call the actual analysis function
+            const result = await this.executeAnalysis(queueItem);
+
+            // Analysis completed successfully
+            this.currentRequest = null;
+            this.isProcessing = false;
+
+            // Process next item in queue
+            setTimeout(() => {
+                this.processNextInQueue();
+            }, 1000);
+
+            return { success: true, result: result };
+
+        } catch (error) {
+            console.error('Analysis failed:', error);
+            
+            // Clean up current request
+            this.currentRequest = null;
+            this.isProcessing = false;
+
+            // Show error to user
+            showError(`Analysis failed: ${error.message}`);
+
+            // Process next item in queue after delay
+            setTimeout(() => {
+                this.processNextInQueue();
+            }, 2000);
+
+            return { success: false, error: error.message };
+        }
+    }
+
+    // Process next item in queue
+    async processNextInQueue() {
+        if (this.queue.length === 0 || this.isProcessing) {
+            this.updateQueueDisplay();
+            return;
+        }
+
+        const nextItem = this.queue.shift();
+        showSuccess(`Starting queued analysis for ${nextItem.files.length} file(s)...`);
+        
+        await this.processRequest(nextItem);
+    }
+
+    // Validate credits for queued request
+    async validateCredits(queueItem) {
+        const filesCount = queueItem.files.length;
+        const hasJobDescription = queueItem.hasJobDescription;
+
+        if (hasJobDescription) {
+            if (!creditManager.canDoJobMatching()) {
+                return { valid: false, message: 'Job Description matching requires ULTRA credits. Please upgrade!' };
+            }
+            if (creditManager.ultraCredits < filesCount) {
+                return { valid: false, message: `Need ${filesCount} ULTRA credits, but only have ${creditManager.ultraCredits}` };
+            }
+        } else {
+            const totalCredits = creditManager.proCredits + creditManager.ultraCredits + 
+                               (creditManager.userTier === 'FREE' ? creditManager.getRemainingAnalyses() : 0);
+            if (totalCredits < filesCount) {
+                return { valid: false, message: `Need ${filesCount} credits but only have ${totalCredits}` };
+            }
+        }
+
+        return { valid: true };
+    }
+
+    // Execute the actual analysis
+    async executeAnalysis(queueItem) {
+        // Set global files variable for existing analysis function
+        window.files = queueItem.files;
+        
+        // Set job description
+        document.getElementById('job-description').value = queueItem.jobDescription;
+
+        // Call existing startAnalysis function but bypass queue
+        return await this.directAnalysis(queueItem);
+    }
+
+    // Direct analysis bypassing queue (modified startAnalysis)
+    async directAnalysis(queueItem) {
+        const formData = new FormData();
+        queueItem.files.forEach(file => {
+            formData.append('files', file);
+        });
+
+        formData.append('requestId', queueItem.id);
+        formData.append('expectedProcessingTime', Math.max(60, queueItem.files.length * 20));
+
+        if (queueItem.hasJobDescription) {
+            formData.append('jobDescription', queueItem.jobDescription);
+            formData.append('analysisType', 'ULTRA');
+        } else {
+            formData.append('analysisType', 'PRO');
+        }
+
+        const timeoutDuration = Math.max(120000, queueItem.files.length * 40000);
+
+        const response = await feedback.makeRequest(
+            'https://montpro.app.n8n.cloud/webhook/recruitment-analysis',
+            {
+                method: 'POST',
+                body: formData,
+                timeout: timeoutDuration,
+                retries: 1,
+                retryDelay: 5000
+            }
+        );
+
+        const contentType = response.headers.get("content-type");
+        const raw = await response.text();
+
+        if (!raw || raw.trim().length === 0) {
+            throw new Error("Empty response from server");
+        }
+
+        let data;
+        if (contentType && contentType.includes("application/json")) {
+            data = JSON.parse(raw);
+            if (data.requestId && data.requestId !== queueItem.id) {
+                throw new Error('Response mismatch - please try again');
+            }
+        } else {
+            throw new Error("Invalid content-type or response format");
+        }
+
+        return data;
+    }
+
+    // Update queue display in UI
+    updateQueueDisplay() {
+        const queueInfo = document.getElementById('queue-info');
+        if (!queueInfo) return;
+
+        if (this.queue.length === 0 && !this.isProcessing) {
+            queueInfo.classList.add('hidden');
+        } else {
+            queueInfo.classList.remove('hidden');
+            queueInfo.innerHTML = `
+                <div class="text-sm text-gray-600 flex items-center">
+                    <i class="fas fa-list mr-2"></i>
+                    ${this.isProcessing ? 'Processing...' : 'Queue empty'}
+                    ${this.queue.length > 0 ? ` | ${this.queue.length} queued` : ''}
+                </div>
+            `;
+        }
+    }
+
+    // Update processing display
+    updateProcessingDisplay(queueItem) {
+        showSuccess(`Processing ${queueItem.files.length} file(s)${queueItem.hasJobDescription ? ' with job matching' : ''}...`);
+    }
+
+    // Clear queue (for logout, etc.)
+    clearQueue() {
+        this.queue = [];
+        this.currentRequest = null;
+        this.isProcessing = false;
+        this.updateQueueDisplay();
+    }
+
+    // Get queue status
+    getStatus() {
+        return {
+            isProcessing: this.isProcessing,
+            currentRequest: this.currentRequest,
+            queueLength: this.queue.length,
+            queue: this.queue.map(item => ({
+                id: item.id,
+                fileCount: item.files.length,
+                hasJobDescription: item.hasJobDescription,
+                timestamp: item.timestamp
+            }))
+        };
+    }
+}
+
+// Initialize queue manager
+const analysisQueue = new AnalysisQueueManager();
+        
 // Saved Candidates Filter System
 class SavedCandidatesFilter {
     constructor() {
@@ -5224,159 +5596,23 @@ async function startAnalysis() {
         return;
     }
 
-    // Generate unique request ID to prevent duplicate processing
-    const requestId = 'req_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-    console.log('Starting analysis with request ID:', requestId);
-
-    // Store request ID to track this specific request
-    window.currentAnalysisRequest = requestId;
-
-    // Enhanced credit checking for mixed system
     const jobDescription = document.getElementById('job-description').value.trim();
-    const hasJobDescription = jobDescription.length > 0;
-    const filesCount = files.length;
-
-    // Check if user can perform the analysis
-    if (hasJobDescription) {
-        // Job matching analysis - requires ULTRA credits
-        if (!creditManager.canDoJobMatching()) {
-            showError('Job Description matching requires ULTRA credits. Upgrade to ULTRA or convert your PRO credits!');
-            setTimeout(() => {
-                showPricingPage();
-            }, 2000);
-            return;
-        }
     
-        if (creditManager.ultraCredits < filesCount) {
-            showError(`You need ${filesCount} ULTRA credits for job matching analysis, but only have ${creditManager.ultraCredits}. Buy more ULTRA credits or reduce the number of files.`);
-            setTimeout(() => {
-                showPricingPage();
-            }, 2000);
-            return;
-        }
-    } else {
-        // Basic analysis - can use PRO credits
-        const totalAvailableCredits = creditManager.proCredits + creditManager.ultraCredits + (creditManager.userTier === 'FREE' ? creditManager.getRemainingAnalyses() : 0);
+    // Queue the analysis request
+    const queueResult = await analysisQueue.queueAnalysis(files, jobDescription);
     
-        if (totalAvailableCredits < filesCount) {
-            const status = creditManager.getStatus();
-            if (status.isFreeTier) {
-                showError(`You have ${status.remaining} free analyses remaining, but want to analyze ${filesCount} resumes. Upgrade to get more credits.`);
-            } else {
-                showError(`You need ${filesCount} credits but only have ${totalAvailableCredits} total credits. Buy more credits or reduce files.`);
-            }
-            setTimeout(() => {
-                showPricingPage();
-            }, 2000);
-            return;
-        }
+    if (queueResult.queued) {
+        // Request was queued, show appropriate UI
+        showAnalysisLoading();
+    } else if (queueResult.success) {
+        // Request processed immediately and succeeded
+        showAnalysisLoading();
+        // The queue manager will handle showing results
+        setTimeout(() => {
+            showAnalysisResults(queueResult.result.data || queueResult.result);
+        }, 500);
     }
-
-    console.log('=== STARTING ANALYSIS ===');
-    console.log('Number of files:', files.length);
-
-    startButton.disabled = true;
-    hideError();
-    showAnalysisLoading();
-
-    try {
-        const formData = new FormData();
-        files.forEach(file => {
-            formData.append('files', file);
-        });
-
-        // Add request ID and timeout info
-        formData.append('requestId', requestId);
-        formData.append('expectedProcessingTime', Math.max(60, filesCount * 20)); // 20s per file minimum
-
-        // Add job description if provided
-        if (hasJobDescription) {
-            formData.append('jobDescription', jobDescription);
-            formData.append('analysisType', 'ULTRA');
-        } else {
-            formData.append('analysisType', 'PRO');
-        }
-
-        console.log('Sending request to backend with ID:');
-
-        // INCREASED timeout for multiple files
-        const timeoutDuration = Math.max(120000, filesCount * 40000); // 40s per file, min 2 minutes
-        console.log(`Setting timeout to ${timeoutDuration/1000} seconds for ${filesCount} files`);
-
-        // Use enhanced request method with retry logic
-        const response = await feedback.makeRequest(
-            'https://montpro.app.n8n.cloud/webhook/recruitment-analysis',
-            {
-                method: 'POST',
-                body: formData,
-                timeout: timeoutDuration, // Dynamic timeout
-                retries: 1, // REDUCED retries for long processes
-                retryDelay: 5000, // Longer delay between retries
-                onRetry: (attempt, maxAttempts, error) => {
-                    console.log(`Retry attempt ${attempt}/${maxAttempts} for request ${requestId}:`, error.message);
-                    document.getElementById('loading-step').textContent = `Retrying analysis... (${attempt}/${maxAttempts})`;
-                }
-            }
-        );
-
-        // Check if this response is for the current request (prevent race conditions)
-        if (window.currentAnalysisRequest !== requestId) {
-            console.log('Ignoring response for outdated request:', requestId);
-            return;
-        }
-
-        console.log('Response received, status:', response.status);
-
-        let data;
-        const contentType = response.headers.get("content-type");
-        const raw = await response.text();
-
-        console.log('Raw response text:', raw);
-
-        if (!raw || raw.trim().length === 0) {
-            throw new Error("Empty response from server");
-        }
-
-        if (contentType && contentType.includes("application/json")) {
-            data = JSON.parse(raw);
-
-            // Verify response matches our request
-            if (data.requestId && data.requestId !== requestId) {
-                console.log('Response ID mismatch. Expected:', requestId, 'Got:', data.requestId);
-                throw new Error('Response mismatch - please try again');
-            }
-            
-            console.log('Valid response received for request:', requestId);
-        } else {
-            throw new Error("Invalid content-type or response format");
-        }
-
-        sessionStorage.setItem('analysisResults', JSON.stringify(data));
-        showSuccess('Analysis completed successfully!');
-        showAnalysisResults(data);
-
-    } catch (err) {
-        console.error("Analysis failed:", err);
-        
-        if (window.currentAnalysisRequest === requestId) {
-            if (err.message.includes('timeout')) {
-                showError(`Analysis timed out after ${timeoutDuration/1000} seconds. For ${filesCount} files, this process can take up to ${Math.ceil(filesCount * 2)} minutes. Please try with fewer files or contact support@aapgrp.com if this persists.`, true);
-            } else if (err.message.includes('Network')) {
-                showError('Network error occurred. Please check your internet connection and try again.', true);
-            } else {
-                showError(`Analysis failed: ${err.message}. Please try again or contact support@aapgrp.com`, true);
-            }
-            
-            showRetryButton();
-        }
-        
-        hideAnalysisLoading();
-    } finally {
-        // Clean up request tracking
-        if (window.currentAnalysisRequest === requestId) {
-            window.currentAnalysisRequest = null;
-        }
-    }
+    // If queueResult.queued is false due to duplicate, user already got warning message
 }
 
 function showRetryButton() {
@@ -5476,6 +5712,8 @@ function hideAnalysisLoading() {
 }
 
 function showAnalysisResults(data) {
+    // Cancel any scheduled memory clearing since we're showing new results
+    memoryManager.cancelScheduledClear();
     // 🔍 TEMPORARY DEBUG - Remove after we understand the data structure
     console.log('=== FULL BACKEND DATA DEBUG ===');
     console.log('Complete data structure:', data);
@@ -7839,6 +8077,9 @@ document.addEventListener("DOMContentLoaded", async function() {
     
     document.getElementById('logout-btn').onclick = async function() {
         try {
+            // Force clear memory on logout
+            memoryManager.forceClear('logout');
+            
             await supabase.auth.signOut();
             showAuthBox();
         } catch (error) {
@@ -7977,6 +8218,9 @@ document.addEventListener("DOMContentLoaded", async function() {
 
     // Set up the "Analyze Another Resume" button handler
     document.getElementById('new-analysis-btn').addEventListener('click', function() {
+    // Schedule memory clear when leaving results
+    memoryManager.scheduleDelayedClear('new_analysis');
+        
     // Hide results, show upload interface
     document.getElementById('analysis-results').classList.add('hidden');
     document.getElementById('upload-interface').classList.remove('hidden');
