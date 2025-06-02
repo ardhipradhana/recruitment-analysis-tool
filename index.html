@@ -8295,6 +8295,33 @@ function loadAnalysisFromHistory(analysisId) {
         showError('Analysis data appears to be corrupted.');
         return;
     }
+
+    // FIX: Properly clear existing results before loading new ones
+    const analysisResults = document.getElementById('analysis-results');
+    if (analysisResults) {
+        // Clear all dynamic content inside analysis-results
+        const singleView = document.getElementById('single-candidate-view');
+        const multipleView = document.getElementById('multiple-candidates-view');
+        
+        if (singleView) {
+            // Clear any dynamically added sections (PRO/ULTRA sections)
+            const dynamicSections = singleView.querySelectorAll('.bg-white.rounded-xl.shadow-sm');
+            dynamicSections.forEach((section, index) => {
+                // Keep only the first 3 sections (overview, executive summary, core competencies)
+                if (index > 2) {
+                    section.remove();
+                }
+            });
+        }
+        
+        if (multipleView) {
+            // Clear candidate cards and details
+            const candidateCards = document.getElementById('candidate-cards');
+            const candidateDetail = document.getElementById('selected-candidate-detail');
+            if (candidateCards) candidateCards.innerHTML = '';
+            if (candidateDetail) candidateDetail.innerHTML = '';
+        }
+    }
     
     // Hide upload interface and show results
     document.getElementById('upload-interface').classList.add('hidden');
