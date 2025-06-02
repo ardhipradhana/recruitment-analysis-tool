@@ -1474,7 +1474,61 @@
                     Last updated: Never
                 </div>
 
+                <!-- Filter Section -->
                 <div class="mt-4 pt-3 border-t border-white/30">
+                    <div class="text-xs opacity-75 mb-2">Filters:</div>
+                    
+                    <!-- Keywords Search -->
+                    <input type="text" id="saved-keywords-filter" class="filter-input mb-3" 
+                           placeholder="Search names, titles, skills..." 
+                           style="width: 100%; padding: 6px 8px; border: 1px solid rgba(255,255,255,0.3); border-radius: 4px; background: rgba(255,255,255,0.1); color: white; font-size: 12px;">
+                    
+                    <!-- Score Range -->
+                    <div class="mb-3">
+                        <div class="text-xs opacity-75 mb-1">Score: <span id="saved-score-display">0</span>+</div>
+                        <input type="range" id="saved-score-range" class="score-range-slider" min="0" max="100" value="0" style="width: 100%;">
+                    </div>
+                    
+                    <!-- Advanced Filters Toggle -->
+                    <button id="toggle-advanced-filters" class="text-xs opacity-75 hover:opacity-100 mb-2 transition-opacity">
+                        <i class="fas fa-chevron-down mr-1"></i>Advanced Filters
+                    </button>
+                    
+                    <!-- Advanced Filters (hidden by default) -->
+                    <div id="advanced-filters" class="hidden">
+                        <!-- Date Saved Filter -->
+                        <div class="mb-2">
+                            <div class="text-xs opacity-75 mb-1">Date Saved:</div>
+                            <select id="saved-date-filter" class="filter-input text-xs" style="width: 100%; padding: 4px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); border-radius: 4px; color: white;">
+                                <option value="all">All Time</option>
+                                <option value="week">Last Week</option>
+                                <option value="month">Last Month</option>
+                                <option value="3months">Last 3 Months</option>
+                            </select>
+                        </div>
+                        
+                        <!-- PRO/ULTRA Analysis Toggle -->
+                        <div class="mb-2">
+                            <label class="flex items-center text-xs">
+                                <input type="checkbox" id="has-premium-analysis" class="mr-2">
+                                <span class="opacity-75">Has PRO/ULTRA Analysis</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Clear Filters Button -->
+                    <button id="clear-saved-filters" class="w-full py-1 px-2 bg-white/20 hover:bg-white/30 rounded text-xs transition-colors mb-3">
+                        <i class="fas fa-times mr-1"></i>Clear All Filters
+                    </button>
+                    
+                    <!-- Results Counter -->
+                    <div id="saved-filter-results" class="filter-results-count text-xs opacity-75 mb-3">
+                        Showing all candidates
+                    </div>
+                </div>
+                
+                <!-- Sort Section -->
+                <div class="mt-2 pt-3 border-t border-white/30">
                     <div class="text-xs opacity-75 mb-2">Sort by:</div>
                     <div class="flex gap-2">
                         <button id="saved-sort-score" class="sort-btn active px-2 py-1 bg-white/20 rounded text-xs hover:bg-white/30 transition-colors">
@@ -2987,6 +3041,133 @@ class SavedCandidatesManager {
     }
 }
 
+// Saved Candidates Filter System
+class SavedCandidatesFilter {
+    constructor() {
+        this.originalCandidates = [];
+        this.filteredCandidates = [];
+        this.activeFilters = {
+            keywords: '',
+            minScore: 0,
+            dateSaved: 'all',
+            hasPremiumAnalysis: false
+        };
+    }
+    
+    setCandidates(savedCandidates) {
+        this.originalCandidates = [...savedCandidates];
+        this.filteredCandidates = [...savedCandidates];
+        return this;
+    }
+    
+    applyKeywordsFilter(query) {
+        this.activeFilters.keywords = query.toLowerCase();
+        this.updateFilteredResults();
+        return this;
+    }
+    
+    applyScoreFilter(minScore) {
+        this.activeFilters.minScore = parseInt(minScore);
+        this.updateFilteredResults();
+        return this;
+    }
+    
+    applyDateFilter(dateRange) {
+        this.activeFilters.dateSaved = dateRange;
+        this.updateFilteredResults();
+        return this;
+    }
+    
+    applyPremiumAnalysisFilter(hasPremium) {
+        this.activeFilters.hasPremiumAnalysis = hasPremium;
+        this.updateFilteredResults();
+        return this;
+    }
+    
+    updateFilteredResults() {
+        this.filteredCandidates = this.originalCandidates.filter(savedItem => {
+            const candidate = savedItem.candidate;
+            
+            // Keywords filter
+            if (this.activeFilters.keywords) {
+                const searchFields = [
+                    candidate.candidateName || '',
+                    candidate.executiveSummary || '',
+                    (candidate.coreCompetencies || '').toString(),
+                    extractTitleFromSummary(candidate) || ''
+                ].join(' ').toLowerCase();
+                
+                if (!searchFields.includes(this.activeFilters.keywords)) {
+                    return false;
+                }
+            }
+            
+            // Score filter
+            const candidateScore = parseInt(candidate.candidateScore) || 0;
+            if (candidateScore < this.activeFilters.minScore) {
+                return false;
+            }
+            
+            // Date filter
+            if (this.activeFilters.dateSaved !== 'all') {
+                const savedDate = new Date(savedItem.timestamp);
+                const now = new Date();
+                const daysDiff = (now - savedDate) / (1000 * 60 * 60 * 24);
+                
+                switch (this.activeFilters.dateSaved) {
+                    case 'week':
+                        if (daysDiff > 7) return false;
+                        break;
+                    case 'month':
+                        if (daysDiff > 30) return false;
+                        break;
+                    case '3months':
+                        if (daysDiff > 90) return false;
+                        break;
+                }
+            }
+            
+            // Premium analysis filter
+            if (this.activeFilters.hasPremiumAnalysis) {
+                const hasPremium = candidate.roleAlignment || candidate.educationCertifications || 
+                                 candidate.communication || candidate.redFlags || 
+                                 candidate.strategicRecommendations || candidate.candidateScorecard;
+                if (!hasPremium) return false;
+            }
+            
+            return true;
+        });
+        
+        return this;
+    }
+    
+    getFilteredCandidates() {
+        return this.filteredCandidates;
+    }
+    
+    getFilterStats() {
+        return {
+            total: this.originalCandidates.length,
+            filtered: this.filteredCandidates.length,
+            hidden: this.originalCandidates.length - this.filteredCandidates.length
+        };
+    }
+    
+    clearAllFilters() {
+        this.activeFilters = {
+            keywords: '',
+            minScore: 0,
+            dateSaved: 'all',
+            hasPremiumAnalysis: false
+        };
+        this.updateFilteredResults();
+        return this;
+    }
+}
+
+// Initialize saved candidates filter
+const savedCandidatesFilter = new SavedCandidatesFilter();
+
 // Initialize saved candidates manager
 const savedCandidatesManager = new SavedCandidatesManager();
 
@@ -3152,6 +3333,9 @@ function loadSavedCandidatesData() {
         emptyState.classList.add('hidden');
         overview.classList.remove('hidden');
         
+        // Initialize filter with candidates
+        savedCandidatesFilter.setCandidates(savedCandidates);
+        
         // Update summary
         document.getElementById('total-saved-candidates').textContent = savedCandidates.length;
         const lastSaved = savedCandidates[0]?.timestamp;
@@ -3160,6 +3344,9 @@ function loadSavedCandidatesData() {
         
         // Generate saved candidate cards
         generateSavedCandidateCards(savedCandidates);
+        
+        // Setup filters
+        setupSavedCandidatesFilters();
         
         // Show first candidate by default
         if (savedCandidates.length > 0) {
@@ -3376,6 +3563,142 @@ function removeSavedCandidate(candidateId) {
             showError(result.message);
         }
     }
+}
+
+function setupSavedCandidatesFilters() {
+    // Keywords search
+    const keywordsInput = document.getElementById('saved-keywords-filter');
+    if (keywordsInput) {
+        keywordsInput.addEventListener('input', debounce((e) => {
+            handleSavedKeywordsFilter(e.target.value);
+        }, 300));
+    }
+    
+    // Score range
+    const scoreRange = document.getElementById('saved-score-range');
+    const scoreDisplay = document.getElementById('saved-score-display');
+    if (scoreRange && scoreDisplay) {
+        scoreRange.addEventListener('input', (e) => {
+            const value = e.target.value;
+            scoreDisplay.textContent = value;
+            handleSavedScoreFilter(value);
+        });
+    }
+    
+    // Advanced filters toggle
+    const toggleAdvanced = document.getElementById('toggle-advanced-filters');
+    const advancedFilters = document.getElementById('advanced-filters');
+    if (toggleAdvanced && advancedFilters) {
+        toggleAdvanced.addEventListener('click', () => {
+            const isHidden = advancedFilters.classList.contains('hidden');
+            if (isHidden) {
+                advancedFilters.classList.remove('hidden');
+                toggleAdvanced.innerHTML = '<i class="fas fa-chevron-up mr-1"></i>Advanced Filters';
+            } else {
+                advancedFilters.classList.add('hidden');
+                toggleAdvanced.innerHTML = '<i class="fas fa-chevron-down mr-1"></i>Advanced Filters';
+            }
+        });
+    }
+    
+    // Date filter
+    const dateFilter = document.getElementById('saved-date-filter');
+    if (dateFilter) {
+        dateFilter.addEventListener('change', (e) => {
+            handleSavedDateFilter(e.target.value);
+        });
+    }
+    
+    // Premium analysis filter
+    const premiumAnalysisFilter = document.getElementById('has-premium-analysis');
+    if (premiumAnalysisFilter) {
+        premiumAnalysisFilter.addEventListener('change', (e) => {
+            handleSavedPremiumFilter(e.target.checked);
+        });
+    }
+    
+    // Clear filters button
+    const clearFilters = document.getElementById('clear-saved-filters');
+    if (clearFilters) {
+        clearFilters.addEventListener('click', clearSavedFilters);
+    }
+}
+
+function handleSavedKeywordsFilter(query) {
+    savedCandidatesFilter.applyKeywordsFilter(query);
+    updateSavedCandidatesDisplay();
+}
+
+function handleSavedScoreFilter(minScore) {
+    savedCandidatesFilter.applyScoreFilter(minScore);
+    updateSavedCandidatesDisplay();
+}
+
+function handleSavedDateFilter(dateRange) {
+    savedCandidatesFilter.applyDateFilter(dateRange);
+    updateSavedCandidatesDisplay();
+}
+
+function handleSavedPremiumFilter(hasPremium) {
+    savedCandidatesFilter.applyPremiumAnalysisFilter(hasPremium);
+    updateSavedCandidatesDisplay();
+}
+
+function clearSavedFilters() {
+    savedCandidatesFilter.clearAllFilters();
+    
+    // Reset UI elements
+    document.getElementById('saved-keywords-filter').value = '';
+    document.getElementById('saved-score-range').value = 0;
+    document.getElementById('saved-score-display').textContent = 0;
+    document.getElementById('saved-date-filter').value = 'all';
+    document.getElementById('has-premium-analysis').checked = false;
+    
+    updateSavedCandidatesDisplay();
+    showSuccess('All filters cleared!');
+}
+
+function updateSavedCandidatesDisplay() {
+    const filteredCandidates = savedCandidatesFilter.getFilteredCandidates();
+    const stats = savedCandidatesFilter.getFilterStats();
+    
+    // Update candidate cards with filtered results
+    generateFilteredSavedCandidateCards(filteredCandidates);
+    
+    // Update results counter
+    const resultsElement = document.getElementById('saved-filter-results');
+    if (resultsElement) {
+        if (stats.filtered === stats.total) {
+            resultsElement.textContent = `Showing all ${stats.total} candidates`;
+        } else {
+            resultsElement.textContent = `Showing ${stats.filtered} of ${stats.total} candidates`;
+        }
+    }
+    
+    // Auto-select first candidate if available
+    if (filteredCandidates.length > 0) {
+        showSavedCandidateDetail(0, filteredCandidates);
+    } else {
+        // Show empty state in detail view
+        const detailContainer = document.getElementById('selected-saved-candidate-detail');
+        detailContainer.innerHTML = `
+            <div class="bg-white rounded-xl shadow-sm p-6 text-center">
+                <i class="fas fa-search text-gray-300 text-4xl mb-4"></i>
+                <h3 class="text-lg font-medium text-gray-600 mb-2">No candidates match your filters</h3>
+                <p class="text-gray-500">Try adjusting your filter criteria</p>
+            </div>
+        `;
+    }
+}
+
+function generateFilteredSavedCandidateCards(filteredCandidates) {
+    const cardsContainer = document.getElementById('saved-candidate-cards');
+    cardsContainer.innerHTML = '';
+    
+    filteredCandidates.forEach((savedItem, index) => {
+        const card = createSavedCandidateCard(savedItem, index);
+        cardsContainer.appendChild(card);
+    });
 }
         
 // Initialize history manager
