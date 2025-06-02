@@ -1588,6 +1588,57 @@
     </div>
 </div>
 
+<!-- Comparison Page -->
+<div id="comparison-page" class="max-w-7xl mx-auto p-6 support-page-hidden">
+    <header class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-4">Candidate Comparison</h1>
+        <p class="text-gray-600">Side-by-side analysis of your selected candidates</p>
+    </header>
+
+    <!-- Comparison Content -->
+    <div id="comparison-content">
+        <!-- Candidates Overview Bar -->
+        <div class="bg-white rounded-xl shadow-sm p-4 mb-6">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-4" id="comparison-candidates-list">
+                    <!-- Candidate chips will be inserted here -->
+                </div>
+                <div class="flex items-center gap-3">
+                    <button id="clear-comparison-btn" class="px-4 py-2 text-gray-600 hover:text-red-600 transition-colors">
+                        <i class="fas fa-times mr-2"></i>Clear Selection
+                    </button>
+                    <button id="export-comparison-btn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                        <i class="fas fa-download mr-2"></i>Export Comparison
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Spider Chart Section -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <div class="flex items-center mb-4">
+                <i class="fas fa-chart-radar text-purple-500 mr-3"></i>
+                <h3 class="text-lg font-semibold">Skills & Performance Radar</h3>
+            </div>
+            <div class="flex justify-center">
+                <canvas id="comparison-radar-chart" width="500" height="500"></canvas>
+            </div>
+        </div>
+
+        <!-- Side-by-Side Comparison -->
+        <div class="grid gap-6" id="side-by-side-comparison" style="grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));">
+            <!-- Candidate comparison cards will be inserted here -->
+        </div>
+    </div>
+    
+    <!-- Back Button -->
+    <div class="text-center mt-8">
+        <button id="back-from-comparison" class="px-6 py-2 text-gray-600 hover:text-gray-800 transition-colors">
+            <i class="fas fa-arrow-left mr-2"></i>Back to Saved Candidates
+        </button>
+    </div>
+</div>
+
 <!-- 1. Add the loading UI section right after your upload-interface section -->
 <div id="analysis-loading" class="hidden">
     <div class="bg-white rounded-xl shadow-sm p-8 mb-8 text-center">
@@ -3836,16 +3887,56 @@ function showComparisonView() {
     
     console.log('Opening comparison view for:', selectedCandidates.map(item => item.candidate.candidateName));
     
-    // Hide saved candidates view
+    // Hide all other pages
     hideAllPages();
     
-    // Show comparison view (we'll build this next)
-    showSuccess(`Comparison view for ${selectedCandidates.length} candidates - coming in next step!`);
+    // Show comparison page
+    const comparisonPage = document.getElementById('comparison-page');
+    if (comparisonPage) {
+        comparisonPage.style.display = 'block';
+        comparisonPage.classList.remove('support-page-hidden');
+    }
     
-    // For now, just log the selected candidates
+    // Load comparison data
+    loadComparisonData(selectedCandidates);
+}
+
+function loadComparisonData(selectedCandidates) {
+    // Generate candidates overview chips
+    generateCandidateChips(selectedCandidates);
+    
+    // Generate spider chart
+    generateComparisonRadarChart(selectedCandidates);
+    
+    // Generate side-by-side comparison
+    generateSideBySideComparison(selectedCandidates);
+    
+    showSuccess(`Comparing ${selectedCandidates.length} candidates`);
+}
+
+function generateCandidateChips(selectedCandidates) {
+    const container = document.getElementById('comparison-candidates-list');
+    container.innerHTML = '';
+    
     selectedCandidates.forEach((savedItem, index) => {
-        console.log(`Candidate ${index + 1}:`, savedItem.candidate.candidateName, 'Score:', savedItem.candidate.candidateScore);
+        const candidate = savedItem.candidate;
+        const name = candidate.candidateName || `Candidate ${index + 1}`;
+        const score = parseInt(candidate.candidateScore) || 75;
+        
+        const chip = document.createElement('div');
+        chip.className = 'flex items-center bg-gray-100 rounded-full px-3 py-2';
+        chip.innerHTML = `
+            <div class="w-3 h-3 rounded-full mr-2 bg-${getComparisonColor(index)}-500"></div>
+            <span class="text-sm font-medium">${name}</span>
+            <span class="ml-2 text-xs bg-gray-200 px-2 py-1 rounded-full">${score}</span>
+        `;
+        container.appendChild(chip);
     });
+}
+
+function getComparisonColor(index) {
+    const colors = ['blue', 'green', 'purple'];
+    return colors[index % colors.length];
 }
         
 // Initialize history manager
@@ -4103,6 +4194,7 @@ function hideAllPages() {
     const termsPage = document.getElementById('terms-page');
     const privacyPage = document.getElementById('privacy-page');
     const savedCandidatesPage = document.getElementById('saved-candidates-page');
+    const comparisonPage = document.getElementById('comparison-page');
     
     if (supportPage) supportPage.style.display = 'none';
     if (faqPage) faqPage.style.display = 'none';
@@ -4111,6 +4203,10 @@ function hideAllPages() {
     if (savedCandidatesPage) {
         savedCandidatesPage.style.display = 'none';
         savedCandidatesPage.classList.add('support-page-hidden');
+    }
+    if (comparisonPage) {
+        comparisonPage.style.display = 'none';
+        comparisonPage.classList.add('support-page-hidden');
     }
 }
 
@@ -6990,6 +7086,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Back from saved candidates
     document.getElementById('back-from-saved').addEventListener('click', hideAllSupportPages);
     document.getElementById('back-to-analysis-from-empty').addEventListener('click', hideAllSupportPages);
+
+    // Back from comparison
+    document.getElementById('back-from-comparison').addEventListener('click', () => {
+        hideAllPages();
+        showSavedCandidatesView();
+    });
 
     // REPLACE your existing upgrade button listener with this:
     document.getElementById('upgrade-professional-btn').addEventListener('click', async function() {
