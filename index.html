@@ -5744,6 +5744,9 @@ function loadAnalysisFromHistory(analysisId) {
         return;
     }
     
+    // Hide upload interface and show results
+    document.getElementById('upload-interface').classList.add('hidden');
+    
     // Load the analysis data
     candidatesData = analysis.candidates;
     selectedCandidateIndex = analysis.metadata?.selectedCandidateIndex || 0;
