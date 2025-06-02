@@ -7735,35 +7735,50 @@ function showSingleCandidateView(data) {
     document.getElementById('multiple-candidates-view').classList.add('hidden');
     document.getElementById('single-candidate-view').classList.remove('hidden');
     
-    // Use existing single candidate display logic
-    if (data.candidateName) {
-        const nameElement = document.getElementById('candidate-name');
-        if (nameElement) {
-            nameElement.textContent = sanitizeText(data.candidateName);
+    // Update candidate name safely
+    const nameElement = document.getElementById('candidate-name');
+    if (nameElement && data.candidateName) {
+        nameElement.textContent = sanitizeText(data.candidateName);
+    }
+    
+    // Update score safely
+    if (data.candidateScore) {
+        const scoreValue = parseInt(data.candidateScore);
+        const scoreElement = document.getElementById('candidate-score');
+        const scoreCircle = document.querySelector('.score-circle');
+        
+        if (scoreElement) {
+            scoreElement.textContent = `${scoreValue}`;
+        }
+        if (scoreCircle) {
+            scoreCircle.style.setProperty('--score-percent', `${scoreValue}%`);
         }
     }
     
-    if (data.candidateScore) {
-        const scoreValue = parseInt(data.candidateScore);
-        document.getElementById('candidate-score').textContent = `${scoreValue}`;
-        document.querySelector('.score-circle').style.setProperty('--score-percent', `${scoreValue}%`);
-    }
-    
-    if (data.executiveSummary) {
-        document.getElementById('executive-summary').innerHTML = `<p>${data.executiveSummary}</p>`;
+    // Update executive summary safely
+    const executiveSummaryElement = document.getElementById('executive-summary');
+    if (executiveSummaryElement && data.executiveSummary) {
+        executiveSummaryElement.innerHTML = `<p>${sanitizeText(data.executiveSummary)}</p>`;
     }
 
-    // ADD PROFESSIONAL-ONLY SECTIONS
+    // Update core competencies safely
+    const competenciesElement = document.getElementById('core-competencies');
+    if (competenciesElement && data.coreCompetencies) {
+        competenciesElement.innerHTML = generateCompetenciesHTML(data.coreCompetencies);
+    }
+    
+    // Determine analysis type and user status
     const userStatus = creditManager.getStatus();
-    const jobDescription = document.getElementById('job-description').value.trim();
+    const jobDescriptionElement = document.getElementById('job-description');
+    const jobDescription = jobDescriptionElement ? jobDescriptionElement.value.trim() : '';
     const hasJobDescription = jobDescription.length > 0;
-    const hasUltraAnalysis = data.roleAlignment || data.educationCertifications || data.communication || data.redFlags || data.strategicRecommendations || data.candidateScorecard;
 
     console.log('=== showSingleCandidateView DEBUG ===');
     console.log('Job description:', `"${jobDescription}"`);
     console.log('hasJobDescription:', hasJobDescription);
     console.log('userStatus.isFreeTier:', userStatus.isFreeTier);
     
+    // Add appropriate sections based on analysis type and user tier
     if (hasJobDescription) {
         // ULTRA analysis used
         console.log('TAKING ULTRA PATH - Job description provided');
@@ -7782,14 +7797,17 @@ function showSingleCandidateView(data) {
     }
     console.log('=== END showSingleCandidateView DEBUG ===');
     
-    if (data.coreCompetencies) {
-        const skillsContainer = document.getElementById('core-competencies');
-        skillsContainer.innerHTML = generateCompetenciesHTML(data.coreCompetencies);
+    // Update analysis date safely
+    const analysisDateElement = document.getElementById('analysis-date');
+    if (analysisDateElement) {
+        const today = new Date();
+        analysisDateElement.textContent = today.toLocaleDateString();
     }
-    
-    const today = new Date();
-    document.getElementById('analysis-date').textContent = today.toLocaleDateString();
 
+    // Set dynamic analysis time
+    setDynamicAnalysisTime();
+
+    // Update user tier badge
     updateUserTierBadge();
 }
 
