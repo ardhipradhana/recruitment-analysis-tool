@@ -3916,86 +3916,88 @@ function generatePDF(data) {
     doc.setFontSize(12);
     doc.setFont(undefined, 'normal');
     doc.setTextColor(grayColor[0], grayColor[1], grayColor[2]);
-    doc.text(data.title, 20, yPosition); // Now using dynamic title
+    doc.text(data.title, 20, yPosition);
     
     if (data.isMultiple) {
         doc.text(`Candidate ${data.candidateNumber} of ${data.totalCandidates}`, 140, yPosition);
     }
     
-    yPosition += 15; // 15 spacing before Executive Summary
+    yPosition += 15;
     
-    // Executive Summary Section
-    doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
-    doc.setFontSize(14);
-    doc.setFont(undefined, 'bold');
-    doc.text('Executive Summary', 20, yPosition);
-    
-    yPosition += 10;
-    doc.setFontSize(10);
-    doc.setFont(undefined, 'normal');
-    doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
-    
-    // Split long text into multiple lines with proper margins
-    const summaryLines = doc.splitTextToSize(data.executiveSummary, 170); // Keep 20px margins (210-20-20=170)
-    doc.text(summaryLines, 20, yPosition);
-    yPosition += summaryLines.length * 5 + 6; // Reduced spacing before Core Competencies (from 10 to 6)
-    
-    // Core Competencies Section - Enhanced with bullet formatting
-    doc.setFontSize(14);
-    doc.setFont(undefined, 'bold');
-    doc.text('Core Competencies', 20, yPosition);
-    
-    yPosition += 10;
-    doc.setFontSize(10);
-    doc.setFont(undefined, 'normal');
-    
-    // Handle competencies with better formatting and optimized page usage
-    if (data.coreCompetencies && typeof data.coreCompetencies === 'string') {
-        // Split by bullet points or line breaks
-        const competencies = data.coreCompetencies
-            .split(/[•\n]/)
-            .map(item => item.replace(/^[-•]\s*/, '').trim())
-            .filter(item => item.length > 0);
+    // Helper function to add sections
+    function addSection(title, content, isRequired = true) {
+        if (!isRequired && !content) return;
         
-        competencies.forEach((competency, index) => {
-            if (competency.length > 0) {
-                // Calculate space needed for this competency
-                const competencyLines = doc.splitTextToSize(competency, 165); // Keep 20px left + 5px for bullet + 20px right margins
-                const competencyHeight = competencyLines.length * 5 + 2;
-                
-                // More aggressive page usage - only break if really necessary
-                // Leave space for footer (15) + some buffer (5) = 20
-                if (yPosition + competencyHeight > 280) {
-                    // Not enough space, start a new page
-                    doc.addPage();
-                    yPosition = 20;
-                }
-                
-                // Add bullet point
-                doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-                doc.circle(22, yPosition - 1, 1, 'F');
-                
-                // Add competency text with proper wrapping
-                doc.text(competencyLines, 27, yPosition);
-                yPosition += competencyHeight; // Tighter spacing between bullet points
-            }
-        });
-    } else {
-        const competenciesText = 'Core competencies data available in detailed view.';
-        const competenciesLines = doc.splitTextToSize(competenciesText, 170);
-        doc.text(competenciesLines, 20, yPosition);
-        yPosition += competenciesLines.length * 5;
+        // Check if we need a new page
+        const estimatedHeight = 25 + (content ? Math.ceil(content.length / 80) * 5 : 5);
+        if (yPosition + estimatedHeight > 280) {
+            doc.addPage();
+            yPosition = 20;
+        }
+        
+        // Section title
+        doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
+        doc.setFontSize(14);
+        doc.setFont(undefined, 'bold');
+        doc.text(title, 20, yPosition);
+        
+        yPosition += 10;
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'normal');
+        
+        // Section content
+        if (content) {
+            const lines = doc.splitTextToSize(content, 170);
+            doc.text(lines, 20, yPosition);
+            yPosition += lines.length * 5 + 10;
+        } else {
+            doc.text('No data available.', 20, yPosition);
+            yPosition += 15;
+        }
     }
     
-    // Ensure footer has enough space but use more of the page
-    if (yPosition > 275) {
-        doc.addPage();
-        yPosition = 275; // Position footer near bottom of new page
-    } else {
-        yPosition = Math.max(yPosition + 10, 275); // Minimal gap before footer
+    // Add all sections
+    addSection('Executive Summary', data.executiveSummary, true);
+    addSection('Core Competencies', data.coreCompetencies, true);
+    
+    // Detect and add PRO/ULTRA sections
+    const candidateData = candidatesData && candidatesData.length > 0 ? 
+        (data.isMultiple ? candidatesData[data.candidateNumber - 1] : candidatesData[0]) : null;
+    
+    if (candidateData) {
+        if (candidateData.roleAlignment) {
+            addSection('Role Alignment & Potential Fit', candidateData.roleAlignment, false);
+        }
+        
+        if (candidateData.educationCertifications) {
+            addSection('Education & Certifications', candidateData.educationCertifications, false);
+        }
+        
+        if (candidateData.communication) {
+            addSection('Communication & Presentation Quality', candidateData.communication, false);
+        }
+        
+        if (candidateData.redFlags) {
+            addSection('Red Flags & Risk Analysis', candidateData.redFlags, false);
+        }
+        
+        if (candidateData.strategicRecommendations) {
+            addSection('Strategic Recommendations', candidateData.strategicRecommendations, false);
+        }
+        
+        if (candidateData.candidateScorecard) {
+            addSection('Detailed Candidate Scorecard', candidateData.candidateScorecard, false);
+        }
     }
     
     // Footer
+    if (yPosition > 275) {
+        doc.addPage();
+        yPosition = 275;
+    } else {
+        yPosition = Math.max(yPosition + 10, 275);
+    }
+    
     doc.setFontSize(8);
     doc.setTextColor(grayColor[0], grayColor[1], grayColor[2]);
     doc.text('This analysis is provided for recruitment guidance only.', 20, yPosition);
