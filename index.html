@@ -4091,6 +4091,194 @@ function extractCandidateScores(candidate) {
     
     return scores;
 }
+
+function generateSideBySideComparison(selectedCandidates) {
+    const container = document.getElementById('side-by-side-comparison');
+    container.innerHTML = '';
+    
+    selectedCandidates.forEach((savedItem, index) => {
+        const candidate = savedItem.candidate;
+        const comparisonCard = createComparisonCard(candidate, savedItem, index);
+        container.appendChild(comparisonCard);
+    });
+}
+
+function createComparisonCard(candidate, savedItem, index) {
+    const card = document.createElement('div');
+    card.className = 'bg-white rounded-xl shadow-sm border-2 border-gray-200';
+    
+    const name = candidate.candidateName || `Candidate ${index + 1}`;
+    const title = extractTitleFromSummary(candidate) || 'Professional';
+    const score = parseInt(candidate.candidateScore) || 75;
+    const color = getComparisonColor(index);
+    const scores = extractCandidateScores(candidate);
+    
+    card.innerHTML = `
+        <!-- Card Header -->
+        <div class="bg-${color}-50 border-b-2 border-${color}-200 p-4">
+            <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center">
+                    <div class="w-4 h-4 rounded-full bg-${color}-500 mr-3"></div>
+                    <h3 class="text-lg font-bold text-gray-800">${name}</h3>
+                </div>
+                <div class="text-right">
+                    <div class="text-2xl font-bold text-${color}-600">${score}</div>
+                    <div class="text-xs text-gray-500">Overall Score</div>
+                </div>
+            </div>
+            <p class="text-sm text-gray-600">${title}</p>
+            <p class="text-xs text-gray-500 mt-1">Saved: ${savedItem.savedDate}</p>
+        </div>
+        
+        <!-- Scores Section -->
+        <div class="p-4 border-b border-gray-100">
+            <h4 class="text-sm font-semibold text-gray-700 mb-3">Skill Breakdown</h4>
+            <div class="grid grid-cols-2 gap-3">
+                ${createScoreItem('Technical', scores.technical, color)}
+                ${createScoreItem('Communication', scores.communication, color)}
+                ${createScoreItem('Leadership', scores.leadership, color)}
+                ${createScoreItem('Experience', scores.experience, color)}
+                ${createScoreItem('Education', scores.education, color)}
+            </div>
+        </div>
+        
+        <!-- Executive Summary -->
+        <div class="p-4 border-b border-gray-100">
+            <h4 class="text-sm font-semibold text-gray-700 mb-2">Executive Summary</h4>
+            <p class="text-xs text-gray-600 line-clamp-4">${candidate.executiveSummary ? 
+                (candidate.executiveSummary.length > 200 ? 
+                    candidate.executiveSummary.substring(0, 200) + '...' : 
+                    candidate.executiveSummary) : 
+                'No summary available'}</p>
+        </div>
+        
+        <!-- Core Competencies -->
+        <div class="p-4 border-b border-gray-100">
+            <h4 class="text-sm font-semibold text-gray-700 mb-2">Top Skills</h4>
+            <div class="flex flex-wrap gap-1">
+                ${generateTopSkillsForComparison(candidate.coreCompetencies, color)}
+            </div>
+        </div>
+        
+        <!-- PRO/ULTRA Analysis Indicators -->
+        <div class="p-4">
+            <h4 class="text-sm font-semibold text-gray-700 mb-2">Analysis Depth</h4>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+                ${createAnalysisIndicator('Role Alignment', candidate.roleAlignment)}
+                ${createAnalysisIndicator('Education', candidate.educationCertifications)}
+                ${createAnalysisIndicator('Communication', candidate.communication)}
+                ${createAnalysisIndicator('Red Flags', candidate.redFlags)}
+                ${createAnalysisIndicator('Recommendations', candidate.strategicRecommendations)}
+                ${createAnalysisIndicator('Scorecard', candidate.candidateScorecard)}
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="p-4 bg-gray-50 rounded-b-xl">
+            <div class="flex gap-2">
+                <button onclick="viewFullCandidate('${savedItem.id}')" class="flex-1 px-3 py-2 bg-${color}-600 text-white rounded-lg text-xs hover:bg-${color}-700 transition-colors">
+                    <i class="fas fa-eye mr-1"></i>View Full
+                </button>
+                <button onclick="removeSavedCandidate('${savedItem.id}')" class="px-3 py-2 bg-red-500 text-white rounded-lg text-xs hover:bg-red-600 transition-colors">
+                    <i class="fas fa-trash mr-1"></i>Remove
+                </button>
+            </div>
+        </div>
+    `;
+    
+    return card;
+}
+
+function createScoreItem(label, score, color) {
+    return `
+        <div class="flex justify-between items-center">
+            <span class="text-xs text-gray-600">${label}</span>
+            <div class="flex items-center">
+                <div class="w-12 h-2 bg-gray-200 rounded-full mr-2">
+                    <div class="h-2 bg-${color}-500 rounded-full" style="width: ${score}%"></div>
+                </div>
+                <span class="text-xs font-medium text-gray-700">${score}</span>
+            </div>
+        </div>
+    `;
+}
+
+function generateTopSkillsForComparison(competencies, color) {
+    const skills = extractAndFormatSkills(competencies);
+    return skills.slice(0, 6).map(skill => 
+        `<span class="px-2 py-1 bg-${color}-100 text-${color}-800 rounded-full text-xs">${skill}</span>`
+    ).join('');
+}
+
+function createAnalysisIndicator(label, hasData) {
+    const icon = hasData ? 'fa-check text-green-500' : 'fa-times text-gray-400';
+    return `
+        <div class="flex items-center">
+            <i class="fas ${icon} mr-2"></i>
+            <span class="text-gray-600">${label}</span>
+        </div>
+    `;
+}
+
+function viewFullCandidate(candidateId) {
+    // Navigate back to saved candidates and show this specific candidate
+    hideAllPages();
+    showSavedCandidatesView();
+    
+    setTimeout(() => {
+        // Find and show the specific candidate
+        const savedCandidates = savedCandidatesManager.getSavedCandidates();
+        const candidateIndex = savedCandidates.findIndex(item => item.id === candidateId);
+        if (candidateIndex !== -1) {
+            showSavedCandidateDetail(candidateIndex, savedCandidates);
+            showSuccess('Showing full candidate details');
+        }
+    }, 300);
+}
+
+function loadComparisonData(selectedCandidates) {
+    // Generate candidates overview chips
+    generateCandidateChips(selectedCandidates);
+    
+    // Generate spider chart
+    generateComparisonRadarChart(selectedCandidates);
+    
+    // Generate side-by-side comparison
+    generateSideBySideComparison(selectedCandidates);
+    
+    // Setup comparison action buttons
+    setupComparisonActions();
+    
+    showSuccess(`Comparing ${selectedCandidates.length} candidates`);
+}
+
+function setupComparisonActions() {
+    // Clear comparison button
+    const clearBtn = document.getElementById('clear-comparison-btn');
+    if (clearBtn) {
+        clearBtn.onclick = () => {
+            if (confirm('Clear all selected candidates and return to saved candidates view?')) {
+                candidateComparison.clearSelections();
+                hideAllPages();
+                showSavedCandidatesView();
+                showSuccess('Comparison cleared');
+            }
+        };
+    }
+    
+    // Export comparison button
+    const exportBtn = document.getElementById('export-comparison-btn');
+    if (exportBtn) {
+        exportBtn.onclick = () => {
+            exportComparison();
+        };
+    }
+}
+
+function exportComparison() {
+    // Placeholder for export functionality
+    showSuccess('Export comparison feature - coming in next step!');
+}
         
 // Initialize history manager
 const historyManager = new AnalysisHistory();
