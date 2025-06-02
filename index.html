@@ -1623,7 +1623,9 @@
                 <h3 class="text-lg font-semibold">Skills & Performance Radar</h3>
             </div>
             <div class="flex justify-center">
-                <canvas id="comparison-radar-chart" width="500" height="500"></canvas>
+                <div style="width: 400px; height: 400px;">
+                    <canvas id="comparison-radar-chart"></canvas>
+                </div>
             </div>
         </div>
 
@@ -4009,12 +4011,12 @@ function generateComparisonRadarChart(selectedCandidates) {
 function extractRadarChartData(selectedCandidates) {
     // Define the 6 skill categories we want to compare
     const skillCategories = [
-        'Technical Skills',
+        'Overall Score',
         'Communication',
         'Leadership', 
         'Experience',
         'Education',
-        'Overall Score'
+        'Technical Skills'
     ];
     
     const datasets = selectedCandidates.map((savedItem, index) => {
