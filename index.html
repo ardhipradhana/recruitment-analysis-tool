@@ -5075,21 +5075,19 @@ function createCandidateCard(candidate, index) {
         .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
         .join(' ');
     
-    card.innerHTML = `
-        <div class="mini-card-header">
-            <div class="mini-card-info">
+        card.innerHTML = `
+        <div class="mini-card-header relative">
+            <button class="save-candidate-btn absolute -top-1 -right-1 w-7 h-7 bg-yellow-500 hover:bg-yellow-600 text-white rounded-full flex items-center justify-center transition-colors z-10 shadow-sm" 
+                    onclick="event.stopPropagation(); toggleSaveCandidate(${index})" 
+                    title="Save candidate">
+                <i class="fas fa-bookmark text-xs"></i>
+            </button>
+            <div class="mini-card-info pr-8">
                 <h4>${name}</h4>
                 <p>${title}</p>
             </div>
-            <div class="flex items-center gap-2">
-                <button class="save-candidate-btn absolute top-2 right-2 w-8 h-8 bg-yellow-500 hover:bg-yellow-600 text-white rounded-full flex items-center justify-center transition-colors z-10" 
-                        onclick="event.stopPropagation(); toggleSaveCandidate(${index})" 
-                        title="Save candidate">
-                    <i class="fas fa-bookmark text-xs"></i>
-                </button>
-                <div class="mini-score-ring" style="--score: ${score}%;">
-                    <span class="mini-score-text">${score}</span>
-                </div>
+            <div class="mini-score-ring" style="--score: ${score}%;">
+                <span class="mini-score-text">${score}</span>
             </div>
         </div>
         <div class="mini-skills">
