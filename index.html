@@ -3690,11 +3690,11 @@ function showAnalysisResults(data) {
     // Show the results footer
     document.getElementById('results-footer').classList.remove('hidden');
 
-    // Set up PDF download after showing results
-    setupDownloadPDF();
-
-    // Set up export options
-    setupExportOptions();
+    // Set up PDF download after showing results - with cleanup
+    setTimeout(() => {
+        setupDownloadPDF();
+        setupExportOptions();
+    }, 100);
 
     // ✨ NEW: Auto-save to history
     saveCurrentAnalysisToHistory();
