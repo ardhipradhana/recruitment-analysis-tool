@@ -1455,7 +1455,75 @@
     </div>
 </div>
 
-    <!-- 1. Add the loading UI section right after your upload-interface section -->
+<!-- Saved Candidates Page -->
+<div id="saved-candidates-page" class="max-w-6xl mx-auto p-6 support-page-hidden">
+    <header class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-4">Saved Candidates</h1>
+        <p class="text-gray-600">Your shortlisted candidates for comparison and review</p>
+    </header>
+
+    <!-- Saved Candidates Overview (similar to multiple candidates layout) -->
+    <div id="saved-candidates-overview" class="candidates-overview">
+        <!-- Saved Candidates Sidebar -->
+        <div class="candidates-sidebar">
+            <!-- Summary Header -->
+            <div class="candidate-summary">
+                <div class="text-2xl font-bold mb-1" id="total-saved-candidates">0</div>
+                <div class="text-sm opacity-90">Saved Candidates</div>
+                <div class="mt-3 text-xs opacity-75" id="saved-last-updated">
+                    Last updated: Never
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-white/30">
+                    <div class="text-xs opacity-75 mb-2">Sort by:</div>
+                    <div class="flex gap-2">
+                        <button id="saved-sort-score" class="sort-btn active px-2 py-1 bg-white/20 rounded text-xs hover:bg-white/30 transition-colors">
+                            Score ↓
+                        </button>
+                        <button id="saved-sort-name" class="sort-btn px-2 py-1 bg-white/20 rounded text-xs hover:bg-white/30 transition-colors">
+                            Name
+                        </button>
+                        <button id="saved-sort-date" class="sort-btn px-2 py-1 bg-white/20 rounded text-xs hover:bg-white/30 transition-colors">
+                            Date Saved
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Saved Candidate Cards Grid -->
+            <div class="candidate-grid" id="saved-candidate-cards">
+                <!-- Cards will be dynamically inserted here -->
+            </div>
+        </div>
+
+        <!-- Detailed View -->
+        <div class="candidate-detail-view">
+            <div id="selected-saved-candidate-detail">
+                <!-- Selected candidate details will be shown here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Empty State -->
+    <div id="saved-candidates-empty" class="text-center py-16 hidden">
+        <i class="fas fa-bookmark text-gray-300 text-6xl mb-6"></i>
+        <h3 class="text-xl font-semibold text-gray-600 mb-2">No Saved Candidates Yet</h3>
+        <p class="text-gray-500 mb-6">Start analyzing candidates and save the promising ones for comparison</p>
+        <button id="back-to-analysis-from-empty" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            <i class="fas fa-upload mr-2"></i>
+            Start Analyzing Candidates
+        </button>
+    </div>
+    
+    <!-- Back Button -->
+    <div class="text-center mt-8">
+        <button id="back-from-saved" class="px-6 py-2 text-gray-600 hover:text-gray-800 transition-colors">
+            <i class="fas fa-arrow-left mr-2"></i>Back to Analysis
+        </button>
+    </div>
+</div>
+
+<!-- 1. Add the loading UI section right after your upload-interface section -->
 <div id="analysis-loading" class="hidden">
     <div class="bg-white rounded-xl shadow-sm p-8 mb-8 text-center">
         <div class="mb-6">
@@ -3055,8 +3123,259 @@ function updateSaveButtonStates() {
 
 function showSavedCandidatesView() {
     console.log('Opening saved candidates view...');
-    showSuccess('Saved candidates view - functionality coming in next step!');
-    // Placeholder for now - we'll build the full view next
+    
+    // Hide all other pages/content
+    hideAllPages();
+    
+    // Show saved candidates page
+    const savedCandidatesPage = document.getElementById('saved-candidates-page');
+    if (savedCandidatesPage) {
+        savedCandidatesPage.style.display = 'block';
+        savedCandidatesPage.classList.remove('support-page-hidden');
+    }
+    
+    // Load and display saved candidates
+    loadSavedCandidatesData();
+}
+
+function loadSavedCandidatesData() {
+    const savedCandidates = savedCandidatesManager.getSavedCandidates();
+    const emptyState = document.getElementById('saved-candidates-empty');
+    const overview = document.getElementById('saved-candidates-overview');
+    
+    if (savedCandidates.length === 0) {
+        // Show empty state
+        emptyState.classList.remove('hidden');
+        overview.classList.add('hidden');
+    } else {
+        // Show candidates
+        emptyState.classList.add('hidden');
+        overview.classList.remove('hidden');
+        
+        // Update summary
+        document.getElementById('total-saved-candidates').textContent = savedCandidates.length;
+        const lastSaved = savedCandidates[0]?.timestamp;
+        document.getElementById('saved-last-updated').textContent = 
+            lastSaved ? `Last updated: ${new Date(lastSaved).toLocaleDateString()}` : 'Last updated: Never';
+        
+        // Generate saved candidate cards
+        generateSavedCandidateCards(savedCandidates);
+        
+        // Show first candidate by default
+        if (savedCandidates.length > 0) {
+            showSavedCandidateDetail(0, savedCandidates);
+        }
+    }
+}
+
+function generateSavedCandidateCards(savedCandidates) {
+    const cardsContainer = document.getElementById('saved-candidate-cards');
+    cardsContainer.innerHTML = '';
+    
+    savedCandidates.forEach((savedItem, index) => {
+        const card = createSavedCandidateCard(savedItem, index);
+        cardsContainer.appendChild(card);
+    });
+}
+
+function createSavedCandidateCard(savedItem, index) {
+    const candidate = savedItem.candidate;
+    const card = document.createElement('div');
+    card.className = `candidate-mini-card ${index === 0 ? 'active' : ''}`;
+    card.onclick = () => showSavedCandidateDetail(index, savedCandidatesManager.getSavedCandidates());
+    
+    // Extract and format top 3 skills for preview
+    const topSkills = extractAndFormatSkills(candidate.coreCompetencies);
+    
+    const score = parseInt(candidate.candidateScore) || 75;
+    const name = candidate.candidateName || `Candidate ${index + 1}`;
+    const title = extractTitleFromSummary(candidate) || 'Professional';
+    
+    card.innerHTML = `
+        <div class="mini-card-header">
+            <div class="mini-card-info">
+                <h4>${name}</h4>
+                <p>${title}</p>
+                <div class="text-xs text-gray-500 mt-1">
+                    Saved: ${savedItem.savedDate}
+                </div>
+            </div>
+            <div class="flex items-start gap-1">
+                <button class="remove-saved-btn w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-colors shadow-sm" 
+                        onclick="event.stopPropagation(); removeSavedCandidate('${savedItem.id}')" 
+                        title="Remove from saved">
+                    <i class="fas fa-times text-xs"></i>
+                </button>
+                <div class="mini-score-ring" style="--score: ${score}%;">
+                    <span class="mini-score-text">${score}</span>
+                </div>
+            </div>
+        </div>
+        <div class="mini-skills">
+            ${topSkills.map(skill => `<span class="mini-skill-tag">${skill}</span>`).join('')}
+        </div>
+    `;
+    
+    return card;
+}
+
+function showSavedCandidateDetail(index, savedCandidates) {
+    const savedItem = savedCandidates[index];
+    const candidate = savedItem.candidate;
+    
+    // Update active card
+    document.querySelectorAll('#saved-candidate-cards .candidate-mini-card').forEach((card, i) => {
+        if (i === index) {
+            card.classList.add('active');
+        } else {
+            card.classList.remove('active');
+        }
+    });
+    
+    // Generate detailed view
+    const detailContainer = document.getElementById('selected-saved-candidate-detail');
+    detailContainer.innerHTML = generateSavedCandidateDetailHTML(candidate, savedItem, index);
+}
+
+function generateSavedCandidateDetailHTML(candidate, savedItem, index) {
+    const score = parseInt(candidate.candidateScore) || 75;
+    const name = candidate.candidateName || `Candidate ${index + 1}`;
+    const title = extractTitleFromSummary(candidate) || 'Professional';
+    
+    let detailHTML = `
+        <!-- Candidate Overview -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <div class="flex flex-col md:flex-row justify-between items-center md:items-start gap-6">
+                <div>
+                    <div class="flex items-center mb-2">
+                        <h2 class="text-2xl font-bold text-gray-800">${name}</h2>
+                        <span class="ml-2 px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded">
+                            <i class="fas fa-bookmark mr-1"></i>Saved
+                        </span>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-2 mt-2">
+                        <span class="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-md">${title}</span>
+                        <span class="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-md">Saved: ${savedItem.savedDate}</span>
+                        <span class="text-xs bg-green-50 text-green-700 px-2 py-1 rounded-md">Original: ${savedItem.metadata.originalAnalysisDate}</span>
+                    </div>
+                </div>
+                
+                <div class="text-center relative">
+                    <button class="remove-saved-btn absolute -top-2 -right-2 w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-colors z-10" 
+                            onclick="removeSavedCandidate('${savedItem.id}')" 
+                            title="Remove from saved">
+                        <i class="fas fa-times text-sm"></i>
+                    </button>
+                    <div class="score-circle" style="--score-percent: ${score}%">
+                        <div class="score-label">Score</div>
+                        <div class="score-value">${score}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Executive Summary -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <div class="flex items-center mb-4">
+                <i class="fas fa-file-alt text-blue-500 mr-3"></i>
+                <h3 class="text-lg font-semibold">Executive Summary</h3>
+            </div>
+            <div class="text-gray-700">
+                ${candidate.executiveSummary ? `<p>${candidate.executiveSummary}</p>` : '<p>Executive summary not available.</p>'}
+            </div>
+        </div>
+        
+        <!-- Core Competencies -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <div class="flex items-center mb-4">
+                <i class="fas fa-brain text-blue-500 mr-3"></i>
+                <h3 class="text-lg font-semibold">Core Competencies</h3>
+            </div>
+            <div class="text-gray-700">
+                ${generateCompetenciesHTML(candidate.coreCompetencies)}
+            </div>
+        </div>
+    `;
+    
+    // Add PRO/ULTRA sections if they exist in the candidate data
+    if (candidate.roleAlignment) {
+        detailHTML += createPremiumSectionHTML(
+            'fas fa-crosshairs',
+            'Role Alignment & Potential Fit',
+            candidate.roleAlignment,
+            'text-purple-600',
+            'PRO'
+        );
+    }
+    
+    if (candidate.educationCertifications) {
+        detailHTML += createPremiumSectionHTML(
+            'fas fa-graduation-cap',
+            'Education & Certifications',
+            candidate.educationCertifications,
+            'text-green-600',
+            'PRO'
+        );
+    }
+    
+    if (candidate.communication) {
+        detailHTML += createPremiumSectionHTML(
+            'fas fa-comments',
+            'Communication & Presentation Quality',
+            candidate.communication,
+            'text-blue-600',
+            'PRO'
+        );
+    }
+    
+    if (candidate.redFlags) {
+        detailHTML += createPremiumSectionHTML(
+            'fas fa-exclamation-triangle',
+            'Red Flags & Risk Analysis',
+            candidate.redFlags,
+            'text-red-600',
+            'PRO'
+        );
+    }
+    
+    if (candidate.strategicRecommendations) {
+        detailHTML += createPremiumSectionHTML(
+            'fas fa-lightbulb',
+            'Strategic Recommendations',
+            candidate.strategicRecommendations,
+            'text-green-600',
+            'PRO'
+        );
+    }
+    
+    if (candidate.candidateScorecard) {
+        detailHTML += createPremiumSectionHTML(
+            'fas fa-chart-bar',
+            'Detailed Candidate Scorecard',
+            candidate.candidateScorecard,
+            'text-purple-600',
+            'PRO'
+        );
+    }
+    
+    return detailHTML;
+}
+
+function removeSavedCandidate(candidateId) {
+    if (confirm('Are you sure you want to remove this candidate from your saved list?')) {
+        const result = savedCandidatesManager.removeCandidate(candidateId);
+        
+        if (result.success) {
+            showSuccess('Candidate removed from saved list');
+            updateSavedCounter();
+            
+            // Reload the saved candidates view
+            loadSavedCandidatesData();
+        } else {
+            showError(result.message);
+        }
+    }
 }
         
 // Initialize history manager
@@ -6192,6 +6511,10 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('back-from-faq').addEventListener('click', hideAllSupportPages);
     document.getElementById('back-from-terms').addEventListener('click', hideAllSupportPages);
     document.getElementById('back-from-privacy').addEventListener('click', hideAllSupportPages);
+
+    // Back from saved candidates
+    document.getElementById('back-from-saved').addEventListener('click', hideAllSupportPages);
+    document.getElementById('back-to-analysis-from-empty').addEventListener('click', hideAllSupportPages);
 
     // REPLACE your existing upgrade button listener with this:
     document.getElementById('upgrade-professional-btn').addEventListener('click', async function() {
