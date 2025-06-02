@@ -36,6 +36,8 @@
         .drag-area.active {
             border-color: #3b82f6;
             background-color: #f0f9ff;
+            transform: scale(1.02); /* Add subtle scale */
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
         }
         
         .file-item {
@@ -570,14 +572,129 @@
         transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
         border-radius: 12px;
+        overflow: hidden;
     }
 
-    .montpro-notification.show { transform: translateX(0); }
-    .montpro-notification.success { background: linear-gradient(135deg, #10b981, #059669); }
-    .montpro-notification.error { background: linear-gradient(135deg, #ef4444, #dc2626); }
-    .montpro-notification.warning { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .montpro-notification.show { 
+        transform: translateX(0);
+        animation: successBounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+    
+    .montpro-notification.success { 
+        background: linear-gradient(135deg, #10b981, #059669);
+        position: relative;
+    }
+
+    .montpro-notification.success::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        animation: shimmerSuccess 2s ease-in-out;
+    }
+                                                                                        
+    .montpro-notification.error { 
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        animation: errorShake 0.5s ease-in-out;
+    }
+    
+    .montpro-notification.warning { 
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+    }
+    
     .montpro-notification.info { 
-    background: linear-gradient(135deg, #3b82f6, #2563eb); 
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+    }
+
+    /* Success Animation Keyframes */
+    @keyframes successBounce {
+        0% { 
+            transform: translateX(calc(100% + 20px)) scale(0.8);
+            opacity: 0;
+        }
+        50% { 
+            transform: translateX(-10px) scale(1.05);
+            opacity: 1;
+        }
+        70% { 
+            transform: translateX(5px) scale(0.98);
+        }
+        100% { 
+            transform: translateX(0) scale(1);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes shimmerSuccess {
+        0% { left: -100%; }
+        50% { left: 100%; }
+        100% { left: 100%; }
+    }
+    
+    @keyframes errorShake {
+        0%, 100% { transform: translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
+        20%, 40%, 60%, 80% { transform: translateX(3px); }
+    }
+    
+    /* Animated Checkmark for Success */
+    .success-checkmark {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        position: relative;
+        margin-right: 8px;
+        animation: checkmarkPulse 0.6s ease-in-out;
+    }
+    
+    .success-checkmark::after {
+        content: '✓';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-weight: bold;
+        font-size: 12px;
+        animation: checkmarkAppear 0.3s ease-in-out 0.2s both;
+    }
+    
+    @keyframes checkmarkPulse {
+        0% { transform: scale(0); }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); }
+    }
+    
+    @keyframes checkmarkAppear {
+        0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+        100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    }
+    
+    /* Enhanced button success states */
+    .btn-success-pulse {
+        animation: successPulse 0.6s ease-in-out;
+    }
+    
+    @keyframes successPulse {
+        0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+        70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+        100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    @keyframes slideOut {
+        0% { 
+            transform: translateX(0) scale(1);
+            opacity: 1;
+        }
+        100% { 
+            transform: translateX(calc(100% + 20px)) scale(0.9);
+            opacity: 0;
+        }
     }
 
     .field-error-shake {
@@ -1900,40 +2017,61 @@
     }
     
     showNotification(message, type = 'info', duration = 5000) {
-        const notification = document.createElement('div');
-        notification.className = `montpro-notification ${type} text-white p-4`;
-        
-        const icons = {
-            success: 'fa-check-circle',
-            error: 'fa-exclamation-circle',
-            warning: 'fa-exclamation-triangle',
-            info: 'fa-info-circle'
-        };
-        
-        notification.innerHTML = `
-            <div class="flex items-start">
-                <i class="fas ${icons[type]} text-xl mr-3 mt-0.5"></i>
-                <div class="flex-1">
-                    <div class="text-sm">${message}</div>
-                </div>
-                <button class="ml-3 text-white/70 hover:text-white" onclick="this.parentElement.parentElement.remove()">
-                    <i class="fas fa-times"></i>
-                </button>
+    const notification = document.createElement('div');
+    notification.className = `montpro-notification ${type} text-white p-4`;
+    
+    const icons = {
+        success: 'success-checkmark',
+        error: 'fa-exclamation-circle',
+        warning: 'fa-exclamation-triangle',
+        info: 'fa-info-circle'
+    };
+    
+    const iconHtml = type === 'success' 
+        ? '<div class="success-checkmark"></div>'
+        : `<i class="fas ${icons[type]} text-xl mr-3 mt-0.5"></i>`;
+    
+    notification.innerHTML = `
+        <div class="flex items-start">
+            ${iconHtml}
+            <div class="flex-1">
+                <div class="text-sm font-medium">${message}</div>
             </div>
-        `;
+            <button class="ml-3 text-white/70 hover:text-white transition-colors" onclick="this.parentElement.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Trigger entrance animation
+    requestAnimationFrame(() => {
+        notification.classList.add('show');
         
-        document.body.appendChild(notification);
-        requestAnimationFrame(() => notification.classList.add('show'));
-        
-        if (duration > 0) {
-            setTimeout(() => {
-                notification.classList.remove('show');
-                setTimeout(() => notification.remove(), 400);
-            }, duration);
+        // Add success pulse to relevant buttons
+        if (type === 'success') {
+            this.pulseSuccessButtons();
         }
+    });
+    
+    if (duration > 0) {
+        setTimeout(() => {
+            notification.style.animation = 'slideOut 0.3s ease-in-out forwards';
+            setTimeout(() => notification.remove(), 300);
+        }, duration);
     }
-    // Add these methods inside your MontProFeedback class
+}
 
+// Add this method to the MontProFeedback class
+pulseSuccessButtons() {
+    const buttons = document.querySelectorAll('.btn-primary, .save-candidate-btn');
+    buttons.forEach(btn => {
+        btn.classList.add('btn-success-pulse');
+        setTimeout(() => btn.classList.remove('btn-success-pulse'), 600);
+    });
+}
+    
 validateFile(file, options = {}) {
     const {
         maxSize = 10 * 1024 * 1024, // 10MB default
