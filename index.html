@@ -1630,7 +1630,7 @@
         </div>
 
         <!-- Side-by-Side Comparison -->
-        <div class="grid gap-6" id="side-by-side-comparison" style="grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));">
+        <div class="grid gap-6 mt-8" id="side-by-side-comparison" style="grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));">
             <!-- Candidate comparison cards will be inserted here -->
         </div>
     </div>
@@ -4097,6 +4097,9 @@ function extractCandidateScores(candidate) {
     Object.keys(scores).forEach(key => {
         scores[key] = Math.max(0, Math.min(100, scores[key]));
     });
+
+    // Debug log for the scores
+    console.log(`Scores for ${candidate.candidateName}:`, scores);
     
     return scores;
 }
