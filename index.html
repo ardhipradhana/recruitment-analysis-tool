@@ -4013,11 +4013,11 @@ function extractRadarChartData(selectedCandidates) {
     // Define the 6 skill categories we want to compare
     const skillCategories = [
         'Overall Score',
+        'Experience Relevance',
+        'Skills Fit', 
         'Communication',
-        'Leadership', 
-        'Experience',
-        'Education',
-        'Technical Skills'
+        'Leadership Potential',
+        'Risk Profile'
     ];
     
     const datasets = selectedCandidates.map((savedItem, index) => {
@@ -4032,26 +4032,21 @@ function extractRadarChartData(selectedCandidates) {
             label: name,
             data: [
                 scores.overall,
+                scores.experienceRelevance,
+                scores.skillsFit,
                 scores.communication,
-                scores.leadership,
-                scores.experience,
-                scores.education,
-                scores.technical
+                scores.leadershipPotential,
+                scores.riskProfile
             ],
             borderColor: color,
-            backgroundColor: 'transparent', // Add transparency
+            backgroundColor: 'transparent',
             pointBackgroundColor: color,
             pointBorderColor: '#fff',
             pointHoverBackgroundColor: '#fff',
             pointHoverBorderColor: color,
             borderWidth: 3
         };
-
-        console.log(`Dataset for ${name}:`, dataset); // Debug log
-        return dataset;
     });
-
-    console.log('All datasets:', datasets); // Debug log
     
     return {
         labels: skillCategories,
@@ -4069,12 +4064,12 @@ function getComparisonColorHex(index) {
 function extractCandidateScores(candidate) {
     // Extract scores from candidateScorecard or generate based on available data
     let scores = {
-        technical: 75,
+        overall: parseInt(candidate.candidateScore) || 75,
+        experienceRelevance: 75,
+        skillsFit: 75,
         communication: 75,
-        leadership: 75,
-        experience: 75,
-        education: 75,
-        overall: parseInt(candidate.candidateScore) || 75
+        leadershipPotential: 75,
+        riskProfile: 75
     };
     
     // Try to extract from detailed scorecard if available
@@ -4082,17 +4077,17 @@ function extractCandidateScores(candidate) {
         const scorecard = candidate.candidateScorecard;
         
         // Look for score patterns in the scorecard text
-        const technicalMatch = scorecard.match(/technical[^0-9]*(\d+)/i);
+        const experienceMatch = scorecard.match(/experience\s+relevance[^0-9]*(\d+)/i);
+        const skillsMatch = scorecard.match(/skills?\s+fit[^0-9]*(\d+)/i);
         const communicationMatch = scorecard.match(/communication[^0-9]*(\d+)/i);
-        const leadershipMatch = scorecard.match(/leadership[^0-9]*(\d+)/i);
-        const experienceMatch = scorecard.match(/experience[^0-9]*(\d+)/i);
-        const educationMatch = scorecard.match(/education[^0-9]*(\d+)/i);
+        const leadershipMatch = scorecard.match(/leadership\s+potential[^0-9]*(\d+)/i);
+        const riskMatch = scorecard.match(/risk\s+profile[^0-9]*(\d+)/i);
         
-        if (technicalMatch) scores.technical = parseInt(technicalMatch[1]);
+        if (experienceMatch) scores.experienceRelevance = parseInt(experienceMatch[1]);
+        if (skillsMatch) scores.skillsFit = parseInt(skillsMatch[1]);
         if (communicationMatch) scores.communication = parseInt(communicationMatch[1]);
-        if (leadershipMatch) scores.leadership = parseInt(leadershipMatch[1]);
-        if (experienceMatch) scores.experience = parseInt(experienceMatch[1]);
-        if (educationMatch) scores.education = parseInt(educationMatch[1]);
+        if (leadershipMatch) scores.leadershipPotential = parseInt(leadershipMatch[1]);
+        if (riskMatch) scores.riskProfile = parseInt(riskMatch[1]);
     }
     
     // Ensure scores are within valid range
@@ -4100,9 +4095,6 @@ function extractCandidateScores(candidate) {
         scores[key] = Math.max(0, Math.min(100, scores[key]));
     });
 
-    // Debug log for the scores
-    console.log(`Scores for ${candidate.candidateName}:`, scores);
-    
     return scores;
 }
 
