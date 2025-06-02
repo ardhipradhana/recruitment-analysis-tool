@@ -1673,12 +1673,12 @@
             </div>
         </div>
         
-        <div class="text-center text-sm text-gray-500 space-y-3">
-            <div class="flex items-center justify-center">
-                <div class="w-4 h-4 bg-green-500 rounded-full mr-2 flex items-center justify-center">
-                    <i class="fas fa-check text-white text-xs"></i>
-                </div>
-                <span>Document uploaded successfully</span>
+        <div class="text-center text-sm text-gray-500 space-y-3" id="loading-checklist">
+    <div class="flex items-center justify-center">
+        <div class="w-4 h-4 bg-green-500 rounded-full mr-2 flex items-center justify-center">
+            <i class="fas fa-check text-white text-xs"></i>
+        </div>
+        <span>Document uploaded successfully</span>
             </div>
             <div class="flex items-center justify-center">
                 <div class="w-4 h-4 bg-green-500 rounded-full mr-2 flex items-center justify-center">
@@ -1690,7 +1690,7 @@
                 <div class="w-4 h-4 bg-blue-500 rounded-full mr-2 flex items-center justify-center animate-pulse">
                     <div class="w-2 h-2 bg-white rounded-full"></div>
                 </div>
-                <span>Skills and experience analysis in progress</span>
+                <span id="current-analysis-step">Skills and experience analysis in progress</span>
             </div>
             <div class="flex items-center justify-center opacity-50">
                 <div class="w-4 h-4 border border-gray-300 rounded-full mr-2"></div>
@@ -5630,8 +5630,17 @@ function showAnalysisLoading() {
     document.getElementById('upload-interface').classList.add('hidden');
     document.getElementById('analysis-loading').classList.remove('hidden');
     
-    // Create enhanced progress tracker
-    const steps = [
+    // Calculate realistic timing based on file count
+    const fileCount = files.length;
+    const baseTimePerFile = 25000; // 25 seconds per file (average of 20-30s)
+    const totalEstimatedTime = fileCount * baseTimePerFile;
+    const bufferTime = Math.min(15000, fileCount * 5000); // Extra buffer time
+    const totalTimeWithBuffer = totalEstimatedTime + bufferTime;
+    
+    console.log(`Loading animation for ${fileCount} files - estimated ${totalEstimatedTime/1000}s + ${bufferTime/1000}s buffer`);
+    
+    // Dynamic steps based on file count
+    const baseSteps = [
         'Uploading files...',
         'Extracting text content...',
         'Analyzing qualifications...',
@@ -5640,60 +5649,117 @@ function showAnalysisLoading() {
         'Generating final results...'
     ];
     
+    // Add extra steps for multiple files
+    const steps = [...baseSteps];
+    if (fileCount > 1) {
+        steps.splice(3, 0, `Processing ${fileCount} candidate profiles...`);
+        steps.splice(5, 0, 'Cross-referencing candidate data...');
+    }
+    if (fileCount >= 3) {
+        steps.splice(6, 0, 'Optimizing comparison metrics...');
+    }
+    
+    // Create enhanced progress tracker
     const progressTracker = feedback.createProgressTracker('analysis-loading', {
-        title: 'AI Analysis in Progress',
+        title: `AI Analysis in Progress (${fileCount} file${fileCount > 1 ? 's' : ''})`,
         steps: steps,
         showPercentage: true,
         showTimeEstimate: true
     });
     
-    // Enhanced progress simulation
-    const baseTime = 2000; // 2 seconds per step base
-    const timePerFile = 1500; // 1.5 seconds per additional file
-    const totalTime = baseTime * steps.length + (files.length - 1) * timePerFile;
-    
+    // Realistic progress simulation
     let currentStep = 0;
     let progress = 0;
+    const startTime = Date.now();
+    
+    // Progress phases with realistic timing
+    const phases = [
+        { step: 0, targetProgress: 15, duration: 3000 }, // Upload phase
+        { step: 1, targetProgress: 25, duration: fileCount * 2000 }, // Text extraction
+        { step: 2, targetProgress: 45, duration: fileCount * 6000 }, // Main analysis
+        { step: 3, targetProgress: 65, duration: fileCount * 5000 }, // Skills processing
+        { step: 4, targetProgress: 80, duration: fileCount * 4000 }, // Evaluation
+        { step: 5, targetProgress: 95, duration: fileCount * 3000 }, // Final generation
+    ];
+    
+    // Add phases for extra steps
+    if (fileCount > 1) {
+        phases.splice(3, 0, { step: 3, targetProgress: 55, duration: fileCount * 3000 });
+        phases.splice(5, 0, { step: 5, targetProgress: 75, duration: fileCount * 2000 });
+    }
+    if (fileCount >= 3) {
+        phases.push({ step: phases.length, targetProgress: 98, duration: fileCount * 1000 });
+    }
+    
+    let currentPhase = 0;
+    let phaseStartTime = Date.now();
+    let phaseStartProgress = 0;
     
     const updateProgress = () => {
-        if (progress < 100) {
-            // More realistic progress increments
-            const increment = Math.floor(Math.random() * 4) + 1; // 1-4% increments
-            progress = Math.min(progress + increment, 100);
+        const now = Date.now();
+        const elapsedTotal = now - startTime;
+        
+        // Check if we should move to next phase
+        if (currentPhase < phases.length) {
+            const phase = phases[currentPhase];
+            const phaseElapsed = now - phaseStartTime;
+            const phaseProgress = Math.min(phaseElapsed / phase.duration, 1);
             
-            // Update step based on progress
-            const newStep = Math.floor((progress / 100) * steps.length);
-            if (newStep !== currentStep && newStep < steps.length) {
-                currentStep = newStep;
+            // Calculate progress within current phase
+            const phaseProgressRange = phase.targetProgress - phaseStartProgress;
+            progress = phaseStartProgress + (phaseProgressRange * phaseProgress);
+            
+            // Update step if changed
+            if (phase.step !== currentStep) {
+                currentStep = phase.step;
             }
             
-            // Update progress display
-            progressTracker.update(currentStep, steps[currentStep], progress);
-            
-            // Also update the existing progress elements for compatibility
-            const progressBar = document.getElementById('progress-bar-fill');
-            const percentText = document.getElementById('loading-percent');
-            const stepText = document.getElementById('loading-step');
-            
-            if (progressBar) progressBar.style.width = `${progress}%`;
-            if (percentText) percentText.textContent = `${progress}%`;
-            if (stepText) stepText.textContent = steps[currentStep] || 'Processing...';
-            
-            // Dynamic timing - slower at start, faster near end
-            const baseInterval = (totalTime / 100) * (1.8 - progress/100);
+            // Move to next phase when current is complete
+            if (phaseProgress >= 1 && currentPhase < phases.length - 1) {
+                currentPhase++;
+                phaseStartTime = now;
+                phaseStartProgress = progress;
+            }
+        }
+        
+        // Ensure progress doesn't exceed 98% until actual completion
+        progress = Math.min(progress, 98);
+        
+        // Update progress display
+        progressTracker.update(currentStep, steps[currentStep] || 'Processing...', Math.round(progress));
+        
+        // Also update the existing progress elements for compatibility
+        const progressBar = document.getElementById('progress-bar-fill');
+        const percentText = document.getElementById('loading-percent');
+        const stepText = document.getElementById('loading-step');
+        
+        if (progressBar) progressBar.style.width = `${Math.round(progress)}%`;
+        if (percentText) percentText.textContent = `${Math.round(progress)}%`;
+        if (stepText) stepText.textContent = steps[currentStep] || 'Processing...';
+        
+        // Continue updating if not complete and not timed out
+        if (progress < 98 && elapsedTotal < totalTimeWithBuffer * 1.2) {
+            // Dynamic timing based on remaining work
+            const remainingPhases = phases.length - currentPhase;
+            const baseInterval = remainingPhases > 0 ? 200 : 500;
             const randomVariation = baseInterval * (0.8 + Math.random() * 0.4);
             
             setTimeout(updateProgress, randomVariation);
         }
     };
     
-    // Start the enhanced progress
+    // Start the realistic progress simulation
     updateProgress();
     
     // Store tracker for cleanup
     window.currentProgressTracker = progressTracker;
+    
+    // Show time estimate to user
+    const estimateMinutes = Math.ceil(totalEstimatedTime / 60000);
+    setTimeout(() => {
+        showSuccess(`Estimated processing time: ${estimateMinutes} minute${estimateMinutes > 1 ? 's' : ''} for ${fileCount} file${fileCount > 1 ? 's' : ''}`);
+    }, 1000);
 }
-
 function hideAnalysisLoading() {
     document.getElementById('analysis-loading').classList.add('hidden');
     
