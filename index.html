@@ -1542,6 +1542,17 @@
                         </button>
                     </div>
                 </div>
+
+                <!-- Compare Button (add this after the sort section) -->
+                <div class="mt-4 pt-3 border-t border-white/30">
+                    <button id="compare-selected-btn" class="w-full py-2 px-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed" disabled>
+                        <i class="fas fa-balance-scale mr-2"></i>
+                        <span id="compare-btn-text">Compare Selected (0)</span>
+                    </button>
+                    <div class="text-xs text-center text-white/70 mt-1">
+                        Select 2-3 candidates to compare
+                    </div>
+                </div>
             </div>
 
             <!-- Saved Candidate Cards Grid -->
@@ -3165,6 +3176,96 @@ class SavedCandidatesFilter {
     }
 }
 
+// Candidate Comparison Management System
+class CandidateComparison {
+    constructor() {
+        this.selectedCandidates = new Set();
+        this.maxSelections = 3;
+    }
+    
+    toggleSelection(candidateId) {
+        if (this.selectedCandidates.has(candidateId)) {
+            this.selectedCandidates.delete(candidateId);
+        } else {
+            if (this.selectedCandidates.size >= this.maxSelections) {
+                return { success: false, message: `Maximum ${this.maxSelections} candidates can be selected for comparison` };
+            }
+            this.selectedCandidates.add(candidateId);
+        }
+        
+        this.updateCompareButton();
+        return { success: true, count: this.selectedCandidates.size };
+    }
+    
+    clearSelections() {
+        this.selectedCandidates.clear();
+        this.updateCompareButton();
+        this.updateCheckboxes();
+    }
+    
+    getSelectedCandidates() {
+        const savedCandidates = savedCandidatesManager.getSavedCandidates();
+        return savedCandidates.filter(savedItem => 
+            this.selectedCandidates.has(savedItem.id)
+        );
+    }
+    
+    canCompare() {
+        return this.selectedCandidates.size >= 2;
+    }
+    
+    updateCompareButton() {
+        const compareBtn = document.getElementById('compare-selected-btn');
+        const compareBtnText = document.getElementById('compare-btn-text');
+        
+        if (compareBtn && compareBtnText) {
+            const count = this.selectedCandidates.size;
+            compareBtnText.textContent = `Compare Selected (${count})`;
+            
+            if (this.canCompare()) {
+                compareBtn.disabled = false;
+                compareBtn.className = 'w-full py-2 px-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors';
+            } else {
+                compareBtn.disabled = true;
+                compareBtn.className = 'w-full py-2 px-3 bg-gray-400 cursor-not-allowed text-white rounded-lg transition-colors';
+            }
+        }
+    }
+    
+    updateCheckboxes() {
+        const checkboxes = document.querySelectorAll('.candidate-selection-checkbox');
+        checkboxes.forEach(checkbox => {
+            const candidateId = checkbox.getAttribute('data-candidate-id');
+            checkbox.checked = this.selectedCandidates.has(candidateId);
+        });
+    }
+}
+
+// Initialize comparison manager
+const candidateComparison = new CandidateComparison();
+
+// Selection toggle function
+function toggleCandidateSelection(candidateId) {
+    const result = candidateComparison.toggleSelection(candidateId);
+    
+    if (!result.success) {
+        showWarning(result.message);
+        // Uncheck the checkbox that was just clicked
+        const checkbox = document.querySelector(`[data-candidate-id="${candidateId}"]`);
+        if (checkbox) checkbox.checked = false;
+    } else {
+        if (result.count === 1) {
+            showSuccess('Candidate selected for comparison');
+        } else if (result.count === 2) {
+            showSuccess('2 candidates selected - ready to compare!');
+        } else if (result.count === 3) {
+            showSuccess('3 candidates selected - maximum reached');
+        } else {
+            showSuccess('Candidate removed from comparison');
+        }
+    }
+}
+
 // Initialize saved candidates filter
 const savedCandidatesFilter = new SavedCandidatesFilter();
 
@@ -3369,7 +3470,7 @@ function createSavedCandidateCard(savedItem, index) {
     const candidate = savedItem.candidate;
     const card = document.createElement('div');
     card.className = `candidate-mini-card ${index === 0 ? 'active' : ''}`;
-    card.onclick = () => showSavedCandidateDetail(index, savedCandidatesManager.getSavedCandidates());
+    card.onclick = () => showSavedCandidateDetail(index, savedCandidatesFilter.getFilteredCandidates());
     
     // Extract and format top 3 skills for preview
     const topSkills = extractAndFormatSkills(candidate.coreCompetencies);
@@ -3379,8 +3480,17 @@ function createSavedCandidateCard(savedItem, index) {
     const title = extractTitleFromSummary(candidate) || 'Professional';
     
     card.innerHTML = `
-        <div class="mini-card-header">
-            <div class="mini-card-info">
+        <div class="mini-card-header relative">
+            <!-- Selection Checkbox -->
+            <div class="absolute top-1 left-1 z-10">
+                <input type="checkbox" 
+                       class="candidate-selection-checkbox w-4 h-4 text-blue-600 bg-white border-gray-300 rounded focus:ring-blue-500" 
+                       data-candidate-id="${savedItem.id}"
+                       onclick="event.stopPropagation(); toggleCandidateSelection('${savedItem.id}')"
+                       title="Select for comparison">
+            </div>
+            
+            <div class="mini-card-info pl-6">
                 <h4>${name}</h4>
                 <p>${title}</p>
                 <div class="text-xs text-gray-500 mt-1">
@@ -3622,6 +3732,16 @@ function setupSavedCandidatesFilters() {
     if (clearFilters) {
         clearFilters.addEventListener('click', clearSavedFilters);
     }
+
+    // Compare button
+    const compareBtn = document.getElementById('compare-selected-btn');
+    if (compareBtn) {
+        compareBtn.addEventListener('click', () => {
+            if (candidateComparison.canCompare()) {
+                showComparisonView();
+            }
+        });
+    }
 }
 
 function handleSavedKeywordsFilter(query) {
@@ -3689,6 +3809,11 @@ function updateSavedCandidatesDisplay() {
             </div>
         `;
     }
+
+    // Restore checkbox states after filtering
+    setTimeout(() => {
+        candidateComparison.updateCheckboxes();
+    }, 50);
 }
 
 function generateFilteredSavedCandidateCards(filteredCandidates) {
@@ -3698,6 +3823,28 @@ function generateFilteredSavedCandidateCards(filteredCandidates) {
     filteredCandidates.forEach((savedItem, index) => {
         const card = createSavedCandidateCard(savedItem, index);
         cardsContainer.appendChild(card);
+    });
+}
+
+function showComparisonView() {
+    const selectedCandidates = candidateComparison.getSelectedCandidates();
+    
+    if (selectedCandidates.length < 2) {
+        showError('Please select at least 2 candidates to compare');
+        return;
+    }
+    
+    console.log('Opening comparison view for:', selectedCandidates.map(item => item.candidate.candidateName));
+    
+    // Hide saved candidates view
+    hideAllPages();
+    
+    // Show comparison view (we'll build this next)
+    showSuccess(`Comparison view for ${selectedCandidates.length} candidates - coming in next step!`);
+    
+    // For now, just log the selected candidates
+    selectedCandidates.forEach((savedItem, index) => {
+        console.log(`Candidate ${index + 1}:`, savedItem.candidate.candidateName, 'Score:', savedItem.candidate.candidateScore);
     });
 }
         
