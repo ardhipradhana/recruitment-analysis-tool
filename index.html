@@ -4281,9 +4281,189 @@ function setupComparisonActions() {
     }
 }
 
-function exportComparison() {
-    // Placeholder for export functionality
-    showSuccess('Export comparison feature - coming in next step!');
+async function exportComparison() {
+    const exportBtn = document.getElementById('export-comparison-btn');
+    const originalHtml = exportBtn.innerHTML;
+    
+    try {
+        // Show loading state
+        exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generating PDF...';
+        exportBtn.disabled = true;
+        
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        // Colors
+        const primaryColor = [59, 130, 246];
+        const grayColor = [107, 114, 128];
+        const darkColor = [31, 41, 55];
+        
+        let yPosition = 20;
+        
+        // Header
+        doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+        doc.roundedRect(15, yPosition, 180, 35, 5, 5, 'F');
+        
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(18);
+        doc.setFont(undefined, 'bold');
+        doc.text('MontPro Candidate Comparison', 20, yPosition + 15);
+        
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'normal');
+        doc.text(`Generated on ${new Date().toLocaleDateString()}`, 20, yPosition + 25);
+        
+        // Candidate names in header
+        const selectedCandidates = candidateComparison.getSelectedCandidates();
+        const candidateNames = selectedCandidates.map(item => 
+            item.candidate.candidateName || 'Unnamed Candidate'
+        ).join(' vs ');
+        doc.text(`Comparing: ${candidateNames}`, 20, yPosition + 32);
+        
+        yPosition += 50;
+        
+        // Capture spider chart as image
+        const canvas = document.getElementById('comparison-radar-chart');
+        if (canvas && window.comparisonChart) {
+            try {
+                // Convert chart to image
+                const chartImage = canvas.toDataURL('image/png', 1.0);
+                
+                // Add chart to PDF (centered)
+                const chartWidth = 120;
+                const chartHeight = 90;
+                const chartX = (210 - chartWidth) / 2; // Center on A4 page
+                
+                doc.addImage(chartImage, 'PNG', chartX, yPosition, chartWidth, chartHeight);
+                yPosition += chartHeight + 15;
+                
+            } catch (chartError) {
+                console.error('Error capturing chart:', chartError);
+                // Add fallback text if chart capture fails
+                doc.setFontSize(12);
+                doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
+                doc.text('Spider Chart (Could not capture)', 20, yPosition);
+                yPosition += 20;
+            }
+        }
+        
+        // Add candidate comparison details
+        selectedCandidates.forEach((savedItem, index) => {
+            const candidate = savedItem.candidate;
+            const name = candidate.candidateName || `Candidate ${index + 1}`;
+            const title = extractTitleFromSummary(candidate) || 'Professional';
+            const score = parseInt(candidate.candidateScore) || 75;
+            const scores = extractCandidateScores(candidate);
+            
+            // Check if we need a new page
+            if (yPosition > 200) {
+                doc.addPage();
+                yPosition = 20;
+            }
+            
+            // Candidate header
+            doc.setFontSize(14);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
+            doc.text(`${name} (Score: ${score})`, 20, yPosition);
+            
+            yPosition += 8;
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'normal');
+            doc.setTextColor(grayColor[0], grayColor[1], grayColor[2]);
+            doc.text(title, 20, yPosition);
+            
+            yPosition += 12;
+            
+            // Skill scores
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
+            doc.text('Skill Breakdown:', 20, yPosition);
+            
+            yPosition += 8;
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(9);
+            
+            const skillData = [
+                [`Experience Relevance: ${scores.experienceRelevance}`, `Skills Fit: ${scores.skillsFit}`],
+                [`Communication: ${scores.communication}`, `Leadership Potential: ${scores.leadershipPotential}`],
+                [`Risk Profile: ${scores.riskProfile}`, '']
+            ];
+            
+            skillData.forEach(row => {
+                doc.text(row[0], 25, yPosition);
+                if (row[1]) doc.text(row[1], 110, yPosition);
+                yPosition += 6;
+            });
+            
+            yPosition += 5;
+            
+            // Executive Summary
+            if (candidate.executiveSummary) {
+                doc.setFont(undefined, 'bold');
+                doc.text('Executive Summary:', 20, yPosition);
+                yPosition += 8;
+                
+                doc.setFont(undefined, 'normal');
+                const summaryLines = doc.splitTextToSize(
+                    candidate.executiveSummary.length > 300 ? 
+                    candidate.executiveSummary.substring(0, 300) + '...' : 
+                    candidate.executiveSummary, 
+                    170
+                );
+                doc.text(summaryLines, 20, yPosition);
+                yPosition += summaryLines.length * 5 + 8;
+            }
+            
+            // Top Skills
+            doc.setFont(undefined, 'bold');
+            doc.text('Top Skills:', 20, yPosition);
+            yPosition += 8;
+            
+            doc.setFont(undefined, 'normal');
+            const topSkills = extractAndFormatSkills(candidate.coreCompetencies);
+            const skillsText = topSkills.slice(0, 6).join(', ');
+            const skillsLines = doc.splitTextToSize(skillsText, 170);
+            doc.text(skillsLines, 20, yPosition);
+            yPosition += skillsLines.length * 5 + 15;
+        });
+        
+        // Footer
+        const pageCount = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(8);
+            doc.setTextColor(grayColor[0], grayColor[1], grayColor[2]);
+            doc.text('Generated by MontPro Recruitment Analysis Tool', 20, 285);
+            doc.text(`Page ${i} of ${pageCount}`, 180, 285);
+        }
+        
+        // Save the PDF
+        const fileName = `MontPro_Comparison_${selectedCandidates.length}candidates_${new Date().toISOString().split('T')[0]}.pdf`;
+        doc.save(fileName);
+        
+        // Success state
+        exportBtn.innerHTML = '<i class="fas fa-check mr-2"></i>Downloaded!';
+        showSuccess('Comparison exported successfully!');
+        
+        setTimeout(() => {
+            exportBtn.innerHTML = originalHtml;
+            exportBtn.disabled = false;
+        }, 2000);
+        
+    } catch (error) {
+        console.error('Comparison export failed:', error);
+        
+        // Error state
+        exportBtn.innerHTML = '<i class="fas fa-exclamation-circle mr-2"></i>Failed';
+        showError('Failed to export comparison. Please try again.');
+        
+        setTimeout(() => {
+            exportBtn.innerHTML = originalHtml;
+            exportBtn.disabled = false;
+        }, 3000);
+    }
 }
         
 // Initialize history manager
