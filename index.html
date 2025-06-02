@@ -1630,7 +1630,7 @@
         </div>
 
         <!-- Side-by-Side Comparison -->
-        <div class="grid gap-6 mt-8" id="side-by-side-comparison" style="grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));">
+        <div class="grid gap-6 mt-12" id="side-by-side-comparison" style="grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));">
             <!-- Candidate comparison cards will be inserted here -->
         </div>
     </div>
@@ -3996,12 +3996,13 @@ function generateComparisonRadarChart(selectedCandidates) {
             },
             elements: {
                 line: {
-                    borderWidth: 2,
-                    fill: true
+                    borderWidth: 3,  // Thicker lines
+                    fill: false,     // Remove fill to see overlapping lines better
+                    tension: 0.1
                 },
                 point: {
                     borderWidth: 2,
-                    radius: 4
+                    radius: 5       // Slightly bigger points
                 }
             }
         }
@@ -4038,11 +4039,12 @@ function extractRadarChartData(selectedCandidates) {
                 scores.overall
             ],
             borderColor: color,
-            backgroundColor: color + '20', // Add transparency
+            backgroundColor: 'transparent', // Add transparency
             pointBackgroundColor: color,
             pointBorderColor: '#fff',
             pointHoverBackgroundColor: '#fff',
-            pointHoverBorderColor: color
+            pointHoverBorderColor: color,
+            borderWidth: 3
         };
 
         console.log(`Dataset for ${name}:`, dataset); // Debug log
