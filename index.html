@@ -4023,7 +4023,7 @@ function setupExportOptions() {
     // Toggle dropdown
     newExportBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        const dropdown = document.getElementById('export-dropdown'); // Get fresh reference
+        const dropdown = document.getElementById('export-dropdown');
         dropdown.classList.toggle('hidden');
     });
 
@@ -4033,28 +4033,35 @@ function setupExportOptions() {
         if (dropdown) dropdown.classList.add('hidden');
     });
 
-    // Set up dropdown option listeners with fresh references
+    // Clean up dropdown option listeners too
     setTimeout(() => {
         const exportCsv = document.getElementById('export-csv');
         const copyResults = document.getElementById('copy-results');
         const emailResults = document.getElementById('email-results');
 
+        // Clone each dropdown option to remove existing listeners
         if (exportCsv) {
-            exportCsv.addEventListener('click', () => {
+            const newExportCsv = exportCsv.cloneNode(true);
+            exportCsv.parentNode.replaceChild(newExportCsv, exportCsv);
+            newExportCsv.addEventListener('click', () => {
                 exportToCSV();
                 document.getElementById('export-dropdown').classList.add('hidden');
             });
         }
 
         if (copyResults) {
-            copyResults.addEventListener('click', () => {
+            const newCopyResults = copyResults.cloneNode(true);
+            copyResults.parentNode.replaceChild(newCopyResults, copyResults);
+            newCopyResults.addEventListener('click', () => {
                 copyToClipboard();
                 document.getElementById('export-dropdown').classList.add('hidden');
             });
         }
 
         if (emailResults) {
-            emailResults.addEventListener('click', () => {
+            const newEmailResults = emailResults.cloneNode(true);
+            emailResults.parentNode.replaceChild(newEmailResults, emailResults);
+            newEmailResults.addEventListener('click', () => {
                 emailResults_();
                 document.getElementById('export-dropdown').classList.add('hidden');
             });
