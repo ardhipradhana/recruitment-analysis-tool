@@ -1836,16 +1836,19 @@
 <div id="analysis-loading" class="hidden">
     <div class="bg-white rounded-xl shadow-sm p-8 mb-8 text-center">
         <div class="mb-6">
+            <!-- Enhanced loading animation -->
             <div class="w-24 h-24 mx-auto mb-6 flex items-center justify-center relative">
                 <!-- Outer ring animation -->
                 <div class="absolute inset-0 border-4 border-blue-100 rounded-full"></div>
                 <div class="absolute inset-0 border-4 border-transparent border-t-blue-500 rounded-full animate-spin"></div>
                 
-                <!-- Inner icon -->
-                <i class="fas fa-robot text-blue-500 text-3xl"></i>
+                <!-- Inner icon with subtle pulse -->
+                <i class="fas fa-brain text-blue-500 text-3xl animate-pulse"></i>
             </div>
-            <h2 class="text-xl font-semibold text-gray-800 mb-2">AI Analyzing Resume</h2>
-            <p class="text-gray-600 typingEffect">Processing candidate information</p>
+            
+            <!-- NEW: Engaging headlines -->
+            <h2 class="text-xl font-semibold text-gray-800 mb-2">🔍 Uncovering Hidden Talent...</h2>
+            <p class="text-gray-600 typingEffect">Our AI is reading between the lines to find what others miss</p>
         </div>
         
         <div class="max-w-md mx-auto mb-8">
@@ -1858,29 +1861,40 @@
             </div>
         </div>
         
+        <!-- NEW: Exciting step descriptions -->
         <div class="text-center text-sm text-gray-500 space-y-3" id="loading-checklist">
-    <div class="flex items-center justify-center">
-        <div class="w-4 h-4 bg-green-500 rounded-full mr-2 flex items-center justify-center">
-            <i class="fas fa-check text-white text-xs"></i>
-        </div>
-        <span>Document uploaded successfully</span>
+            <div class="flex items-center justify-center">
+                <div class="w-4 h-4 bg-green-500 rounded-full mr-2 flex items-center justify-center">
+                    <i class="fas fa-check text-white text-xs"></i>
+                </div>
+                <span>Resume received and secured</span>
             </div>
             <div class="flex items-center justify-center">
                 <div class="w-4 h-4 bg-green-500 rounded-full mr-2 flex items-center justify-center">
                     <i class="fas fa-check text-white text-xs"></i>
                 </div>
-                <span>Text extraction complete</span>
+                <span>Smart text extraction complete</span>
             </div>
             <div class="flex items-center justify-center">
                 <div class="w-4 h-4 bg-blue-500 rounded-full mr-2 flex items-center justify-center animate-pulse">
                     <div class="w-2 h-2 bg-white rounded-full"></div>
                 </div>
-                <span id="current-analysis-step">Skills and experience analysis in progress</span>
+                <span id="current-analysis-step">🧠 Analyzing experience patterns and skill depth</span>
             </div>
             <div class="flex items-center justify-center opacity-50">
                 <div class="w-4 h-4 border border-gray-300 rounded-full mr-2"></div>
-                <span>Generating outputs</span>
+                <span>🎯 Calculating compatibility scores</span>
             </div>
+            <div class="flex items-center justify-center opacity-50">
+                <div class="w-4 h-4 border border-gray-300 rounded-full mr-2"></div>
+                <span>📊 Generating insights report</span>
+            </div>
+        </div>
+        
+        <!-- NEW: Anticipation builder -->
+        <div class="mt-8 p-4 bg-blue-50 rounded-lg">
+            <p class="text-sm text-blue-700 font-medium">💡 Pro Tip</p>
+            <p class="text-xs text-blue-600 mt-1">While we analyze, our AI is discovering skills and experiences that traditional keyword searches miss entirely.</p>
         </div>
     </div>
 </div>
