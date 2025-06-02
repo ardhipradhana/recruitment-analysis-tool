@@ -4010,38 +4010,56 @@ function generatePDF(data) {
 function setupExportOptions() {
     const exportBtn = document.getElementById('export-btn');
     const exportDropdown = document.getElementById('export-dropdown');
-    const exportCsv = document.getElementById('export-csv');
-    const copyResults = document.getElementById('copy-results');
-    const emailResults = document.getElementById('email-results');
+    
+    if (!exportBtn || !exportDropdown) {
+        console.error('Export elements not found!');
+        return;
+    }
+
+    // Remove existing listeners by cloning the main button
+    const newExportBtn = exportBtn.cloneNode(true);
+    exportBtn.parentNode.replaceChild(newExportBtn, exportBtn);
 
     // Toggle dropdown
-    exportBtn.addEventListener('click', (e) => {
+    newExportBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        exportDropdown.classList.toggle('hidden');
+        const dropdown = document.getElementById('export-dropdown'); // Get fresh reference
+        dropdown.classList.toggle('hidden');
     });
 
     // Close dropdown when clicking outside
     document.addEventListener('click', () => {
-        exportDropdown.classList.add('hidden');
+        const dropdown = document.getElementById('export-dropdown');
+        if (dropdown) dropdown.classList.add('hidden');
     });
 
-    // Export to CSV
-    exportCsv.addEventListener('click', () => {
-        exportToCSV();
-        exportDropdown.classList.add('hidden');
-    });
+    // Set up dropdown option listeners with fresh references
+    setTimeout(() => {
+        const exportCsv = document.getElementById('export-csv');
+        const copyResults = document.getElementById('copy-results');
+        const emailResults = document.getElementById('email-results');
 
-    // Copy to clipboard
-    copyResults.addEventListener('click', () => {
-        copyToClipboard();
-        exportDropdown.classList.add('hidden');
-    });
+        if (exportCsv) {
+            exportCsv.addEventListener('click', () => {
+                exportToCSV();
+                document.getElementById('export-dropdown').classList.add('hidden');
+            });
+        }
 
-    // Email results
-    emailResults.addEventListener('click', () => {
-        emailResults_();
-        exportDropdown.classList.add('hidden');
-    });
+        if (copyResults) {
+            copyResults.addEventListener('click', () => {
+                copyToClipboard();
+                document.getElementById('export-dropdown').classList.add('hidden');
+            });
+        }
+
+        if (emailResults) {
+            emailResults.addEventListener('click', () => {
+                emailResults_();
+                document.getElementById('export-dropdown').classList.add('hidden');
+            });
+        }
+    }, 50);
 }
 
 function exportToCSV() {
