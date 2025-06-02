@@ -3963,6 +3963,34 @@ function showAnalysisResults(data) {
     useAnalysisCredit();
 }
 
+function showAnalysisResultsFromHistory(data) {
+    // Same as showAnalysisResults but WITHOUT useAnalysisCredit() call
+    console.log('=== showAnalysisResultsFromHistory called ===');
+    
+    hideAnalysisLoading();
+    document.getElementById('analysis-results').classList.remove('hidden');
+    
+    // Use the existing multiple candidates handler
+    showMultipleCandidatesResults(data);
+
+    // Show the action buttons
+    document.getElementById('analysis-actions').classList.remove('hidden');
+
+    // Show the results footer
+    document.getElementById('results-footer').classList.remove('hidden');
+
+    // Set up PDF download after showing results
+    setupDownloadPDF();
+
+    // Set up export options
+    setupExportOptions();
+
+    // Save to history (this is fine for loaded analyses)
+    saveCurrentAnalysisToHistory();
+
+    // NOTE: NO useAnalysisCredit() call here since this is from history
+}
+
 // ADD this new function right after showAnalysisResults
 async function useAnalysisCredit() {
     try {
@@ -6088,13 +6116,13 @@ function loadAnalysisFromHistory(analysisId) {
     candidatesData = analysis.candidates;
     selectedCandidateIndex = analysis.metadata?.selectedCandidateIndex || 0;
     
-    // Show the results
-    showAnalysisResults(analysis.candidates);
-
+    // Show results WITHOUT calling useAnalysisCredit (since this is from history)
+    showAnalysisResultsFromHistory(analysis.candidates);
+    
     // Re-setup export functionality for loaded analysis
     setupDownloadPDF();
     setupExportOptions();
-
+    
     // Update save button states for loaded candidates
     setTimeout(() => {
         updateSaveButtonStates();
