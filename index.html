@@ -2923,7 +2923,7 @@ class SavedCandidatesManager {
 const savedCandidatesManager = new SavedCandidatesManager();
 
 // Toggle save candidate function
-function toggleSaveCandidate(candidateIndex) {
+function toggleSaveCandidate(candidateIndex, event) {
     const candidate = candidatesData[candidateIndex];
     
     if (!candidate) {
@@ -2946,7 +2946,12 @@ function toggleSaveCandidate(candidateIndex) {
             if (result.success) {
                 showSuccess('Candidate removed from saved list');
                 updateSavedCounter();
-                setTimeout(() => updateSaveButtonStates(), 100);
+                // Direct button update for removal
+                const clickedButton = event.target.closest('.save-candidate-btn');
+                if (clickedButton) {
+                    clickedButton.className = 'save-candidate-btn w-6 h-6 bg-yellow-500 hover:bg-yellow-600 text-white rounded-full flex items-center justify-center transition-colors shadow-sm';
+                    clickedButton.title = 'Save candidate';
+                }
             } else {
                 showError(result.message);
             }
@@ -2961,7 +2966,12 @@ function toggleSaveCandidate(candidateIndex) {
         if (result.success) {
             showSuccess('Candidate saved successfully!');
             updateSavedCounter();
-            setTimeout(() => updateSaveButtonStates(), 100);
+            // Direct button update instead of updateSaveButtonStates
+            const clickedButton = event.target.closest('.save-candidate-btn');
+            if (clickedButton) {
+                clickedButton.className = 'save-candidate-btn w-6 h-6 bg-green-500 hover:bg-green-600 text-white rounded-full flex items-center justify-center transition-colors shadow-sm';
+                clickedButton.title = 'Remove from saved';
+            }
         } else {
             if (result.message === 'Candidate already saved') {
                 showWarning('This candidate is already in your saved list');
@@ -5126,7 +5136,7 @@ function createCandidateCard(candidate, index) {
                 <div class="flex items-start gap-1">
                     <button class="save-candidate-btn w-6 h-6 bg-yellow-500 hover:bg-yellow-600 text-white rounded-full flex items-center justify-center transition-colors shadow-sm" 
                             data-candidate-index="${index}"
-                            onclick="event.stopPropagation(); toggleSaveCandidate(${index})" 
+                            onclick="event.stopPropagation(); toggleSaveCandidate(${index}, event)"
                             title="Save candidate">
                         <i class="fas fa-bookmark text-xs"></i>
                     </button>
