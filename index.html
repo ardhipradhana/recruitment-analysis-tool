@@ -2995,16 +2995,22 @@ function updateSaveButtonStates() {
             const icon = button.querySelector('i');
             
             if (isAlreadySaved) {
-                button.className = button.className.replace('bg-yellow-500 hover:bg-yellow-600', 'bg-green-500 hover:bg-green-600');
+                button.className = 'save-candidate-btn w-6 h-6 bg-green-500 hover:bg-green-600 text-white rounded-full flex items-center justify-center transition-colors shadow-sm';
                 icon.className = 'fas fa-bookmark text-xs';
                 button.title = 'Remove from saved';
             } else {
-                button.className = button.className.replace('bg-green-500 hover:bg-green-600', 'bg-yellow-500 hover:bg-yellow-600');
+                button.className = 'save-candidate-btn w-6 h-6 bg-yellow-500 hover:bg-yellow-600 text-white rounded-full flex items-center justify-center transition-colors shadow-sm';
                 icon.className = 'fas fa-bookmark text-xs';
                 button.title = 'Save candidate';
             }
         }
     });
+}
+
+function showSavedCandidatesView() {
+    console.log('Opening saved candidates view...');
+    showSuccess('Saved candidates view - functionality coming in next step!');
+    // Placeholder for now - we'll build the full view next
 }
         
 // Initialize history manager
@@ -5076,24 +5082,26 @@ function createCandidateCard(candidate, index) {
         .join(' ');
     
         card.innerHTML = `
-        <div class="mini-card-header relative">
-            <button class="save-candidate-btn absolute -top-1 -right-1 w-7 h-7 bg-yellow-500 hover:bg-yellow-600 text-white rounded-full flex items-center justify-center transition-colors z-10 shadow-sm" 
-                    onclick="event.stopPropagation(); toggleSaveCandidate(${index})" 
-                    title="Save candidate">
-                <i class="fas fa-bookmark text-xs"></i>
-            </button>
-            <div class="mini-card-info pr-8">
-                <h4>${name}</h4>
-                <p>${title}</p>
+            <div class="mini-card-header">
+                <div class="mini-card-info">
+                    <h4>${name}</h4>
+                    <p>${title}</p>
+                </div>
+                <div class="flex items-start gap-1">
+                    <button class="save-candidate-btn w-6 h-6 bg-yellow-500 hover:bg-yellow-600 text-white rounded-full flex items-center justify-center transition-colors shadow-sm" 
+                            onclick="event.stopPropagation(); toggleSaveCandidate(${index})" 
+                            title="Save candidate">
+                        <i class="fas fa-bookmark text-xs"></i>
+                    </button>
+                    <div class="mini-score-ring" style="--score: ${score}%;">
+                        <span class="mini-score-text">${score}</span>
+                    </div>
+                </div>
             </div>
-            <div class="mini-score-ring" style="--score: ${score}%;">
-                <span class="mini-score-text">${score}</span>
+            <div class="mini-skills">
+                ${topSkills.map(skill => `<span class="mini-skill-tag">${skill}</span>`).join('')}
             </div>
-        </div>
-        <div class="mini-skills">
-            ${topSkills.map(skill => `<span class="mini-skill-tag">${skill}</span>`).join('')}
-        </div>
-    `;
+        `;
     
     return card;
 }
@@ -6063,8 +6071,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Saved candidates button
     document.getElementById('saved-candidates-btn').addEventListener('click', function() {
-        console.log('Saved candidates button clicked - functionality coming next!');
-        showSuccess('Saved candidates view - coming in next step!');
+        showSavedCandidatesView();
     });
 
     // Add to your DOMContentLoaded
