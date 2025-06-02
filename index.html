@@ -2812,6 +2812,201 @@ class CandidateFilter {
     }
 }
 
+// Saved Candidates Management System
+class SavedCandidatesManager {
+    constructor() {
+        this.storageKey = 'montpro_saved_candidates';
+        this.maxSavedCandidates = 100; // Reasonable limit
+    }
+
+    // Save a candidate
+    saveCandidate(candidate, analysisMetadata = {}) {
+        try {
+            const savedItem = {
+                id: this.generateId(),
+                timestamp: new Date().toISOString(),
+                savedDate: new Date().toLocaleDateString(),
+                candidate: candidate,
+                metadata: {
+                    originalAnalysisDate: analysisMetadata.analysisDate || new Date().toLocaleDateString(),
+                    ...analysisMetadata
+                }
+            };
+
+            let savedCandidates = this.getSavedCandidates();
+            
+            // Check if candidate already exists (by name and executive summary)
+            const exists = savedCandidates.some(item => 
+                item.candidate.candidateName === candidate.candidateName &&
+                item.candidate.executiveSummary === candidate.executiveSummary
+            );
+
+            if (exists) {
+                return { success: false, message: 'Candidate already saved' };
+            }
+
+            // Add new item to beginning
+            savedCandidates.unshift(savedItem);
+
+            // Limit saved candidates
+            if (savedCandidates.length > this.maxSavedCandidates) {
+                savedCandidates = savedCandidates.slice(0, this.maxSavedCandidates);
+            }
+
+            localStorage.setItem(this.storageKey, JSON.stringify(savedCandidates));
+            console.log('Candidate saved:', savedItem.id);
+            return { success: true, message: 'Candidate saved successfully', id: savedItem.id };
+
+        } catch (error) {
+            console.error('Failed to save candidate:', error);
+            return { success: false, message: 'Failed to save candidate' };
+        }
+    }
+
+    // Remove a saved candidate
+    removeCandidate(candidateId) {
+        try {
+            let savedCandidates = this.getSavedCandidates();
+            const originalLength = savedCandidates.length;
+            
+            savedCandidates = savedCandidates.filter(item => item.id !== candidateId);
+            
+            if (savedCandidates.length === originalLength) {
+                return { success: false, message: 'Candidate not found' };
+            }
+
+            localStorage.setItem(this.storageKey, JSON.stringify(savedCandidates));
+            return { success: true, message: 'Candidate removed from saved list' };
+
+        } catch (error) {
+            console.error('Failed to remove candidate:', error);
+            return { success: false, message: 'Failed to remove candidate' };
+        }
+    }
+
+    // Get all saved candidates
+    getSavedCandidates() {
+        try {
+            const saved = localStorage.getItem(this.storageKey);
+            return saved ? JSON.parse(saved) : [];
+        } catch (error) {
+            console.error('Failed to retrieve saved candidates:', error);
+            return [];
+        }
+    }
+
+    // Check if candidate is saved
+    isCandidateSaved(candidate) {
+        const savedCandidates = this.getSavedCandidates();
+        return savedCandidates.some(item => 
+            item.candidate.candidateName === candidate.candidateName &&
+            item.candidate.executiveSummary === candidate.executiveSummary
+        );
+    }
+
+    // Generate unique ID
+    generateId() {
+        return 'saved_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    }
+
+    // Get statistics
+    getSavedStats() {
+        const saved = this.getSavedCandidates();
+        return {
+            totalSaved: saved.length,
+            lastSaved: saved[0]?.timestamp || null
+        };
+    }
+}
+
+// Initialize saved candidates manager
+const savedCandidatesManager = new SavedCandidatesManager();
+
+// Toggle save candidate function
+function toggleSaveCandidate(candidateIndex) {
+    const candidate = candidatesData[candidateIndex];
+    
+    if (!candidate) {
+        showError('Candidate data not found');
+        return;
+    }
+
+    const isAlreadySaved = savedCandidatesManager.isCandidateSaved(candidate);
+    
+    if (isAlreadySaved) {
+        // Find and remove the saved candidate
+        const savedCandidates = savedCandidatesManager.getSavedCandidates();
+        const savedItem = savedCandidates.find(item => 
+            item.candidate.candidateName === candidate.candidateName &&
+            item.candidate.executiveSummary === candidate.executiveSummary
+        );
+        
+        if (savedItem) {
+            const result = savedCandidatesManager.removeCandidate(savedItem.id);
+            if (result.success) {
+                showSuccess('Candidate removed from saved list');
+                updateSavedCounter();
+                updateSaveButtonStates();
+            } else {
+                showError(result.message);
+            }
+        }
+    } else {
+        // Save the candidate
+        const result = savedCandidatesManager.saveCandidate(candidate, {
+            analysisDate: new Date().toLocaleDateString(),
+            candidateIndex: candidateIndex
+        });
+        
+        if (result.success) {
+            showSuccess('Candidate saved successfully!');
+            updateSavedCounter();
+            updateSaveButtonStates();
+        } else {
+            if (result.message === 'Candidate already saved') {
+                showWarning('This candidate is already in your saved list');
+            } else {
+                showError(result.message);
+            }
+        }
+    }
+}
+
+// Update saved counter in header
+function updateSavedCounter() {
+    const stats = savedCandidatesManager.getSavedStats();
+    const counterElement = document.getElementById('saved-count');
+    
+    if (stats.totalSaved > 0) {
+        counterElement.textContent = stats.totalSaved;
+        counterElement.classList.remove('hidden');
+    } else {
+        counterElement.classList.add('hidden');
+    }
+}
+
+// Update save button states (filled vs outline)
+function updateSaveButtonStates() {
+    const saveButtons = document.querySelectorAll('.save-candidate-btn');
+    
+    saveButtons.forEach((button, index) => {
+        if (candidatesData[index]) {
+            const isAlreadySaved = savedCandidatesManager.isCandidateSaved(candidatesData[index]);
+            const icon = button.querySelector('i');
+            
+            if (isAlreadySaved) {
+                button.className = button.className.replace('bg-yellow-500 hover:bg-yellow-600', 'bg-green-500 hover:bg-green-600');
+                icon.className = 'fas fa-bookmark text-xs';
+                button.title = 'Remove from saved';
+            } else {
+                button.className = button.className.replace('bg-green-500 hover:bg-green-600', 'bg-yellow-500 hover:bg-yellow-600');
+                icon.className = 'fas fa-bookmark text-xs';
+                button.title = 'Save candidate';
+            }
+        }
+    });
+}
+        
 // Initialize history manager
 const historyManager = new AnalysisHistory();
     // More methods will be added in next steps...
@@ -5864,6 +6059,15 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // History button
     document.getElementById('history-btn').addEventListener('click', showHistoryModal);
+
+    // Update saved counter on page load
+    updateSavedCounter();
+
+    // Saved candidates button
+    document.getElementById('saved-candidates-btn').addEventListener('click', function() {
+        console.log('Saved candidates button clicked - functionality coming next!');
+        showSuccess('Saved candidates view - coming in next step!');
+    });
 
     // Add to your DOMContentLoaded
     document.getElementById('history-search')?.addEventListener('input', debounce((e) => {
