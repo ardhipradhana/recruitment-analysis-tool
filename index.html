@@ -3632,11 +3632,16 @@ function hideAllPages() {
     const faqPage = document.getElementById('faq-page');
     const termsPage = document.getElementById('terms-page');
     const privacyPage = document.getElementById('privacy-page');
+    const savedCandidatesPage = document.getElementById('saved-candidates-page');
     
     if (supportPage) supportPage.style.display = 'none';
     if (faqPage) faqPage.style.display = 'none';
     if (termsPage) termsPage.style.display = 'none';
     if (privacyPage) privacyPage.style.display = 'none';
+    if (savedCandidatesPage) {
+        savedCandidatesPage.style.display = 'none';
+        savedCandidatesPage.classList.add('support-page-hidden');
+    }
 }
 
 function hideAllSupportPages() {
