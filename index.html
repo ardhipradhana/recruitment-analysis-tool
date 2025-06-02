@@ -3107,6 +3107,97 @@ class SavedCandidatesManager {
     }
 }
 
+// Data Retention Cleanup System
+class DataRetentionManager {
+    constructor() {
+        this.savedCandidatesKey = 'montpro_saved_candidates';
+        this.maxSavedCandidateAge = 6 * 30 * 24 * 60 * 60 * 1000; // 6 months in milliseconds
+    }
+
+    // Run cleanup on app startup
+    performStartupCleanup() {
+        console.log('Running data retention cleanup...');
+        
+        const cleanupResults = {
+            savedCandidatesRemoved: 0,
+            analysisHistoryAlreadyLimited: true // This is already handled by your existing 50-item limit
+        };
+
+        // Clean up old saved candidates
+        cleanupResults.savedCandidatesRemoved = this.cleanupOldSavedCandidates();
+
+        // Log results
+        if (cleanupResults.savedCandidatesRemoved > 0) {
+            console.log(`Cleanup completed: ${cleanupResults.savedCandidatesRemoved} old saved candidates removed`);
+        } else {
+            console.log('Cleanup completed: No old data to remove');
+        }
+
+        return cleanupResults;
+    }
+
+    cleanupOldSavedCandidates() {
+        try {
+            const savedCandidates = JSON.parse(localStorage.getItem(this.savedCandidatesKey) || '[]');
+            const now = Date.now();
+            const cutoffDate = now - this.maxSavedCandidateAge;
+
+            // Filter out candidates older than 6 months
+            const filteredCandidates = savedCandidates.filter(savedItem => {
+                const savedTime = new Date(savedItem.timestamp).getTime();
+                return savedTime > cutoffDate;
+            });
+
+            const removedCount = savedCandidates.length - filteredCandidates.length;
+
+            // Save the filtered list back to localStorage
+            if (removedCount > 0) {
+                localStorage.setItem(this.savedCandidatesKey, JSON.stringify(filteredCandidates));
+                
+                // Show user notification about cleanup
+                setTimeout(() => {
+                    if (removedCount > 0) {
+                        showSuccess(`Cleaned up ${removedCount} saved candidate${removedCount > 1 ? 's' : ''} older than 6 months`);
+                    }
+                }, 2000); // Delay to avoid interfering with login flow
+            }
+
+            return removedCount;
+
+        } catch (error) {
+            console.error('Error during saved candidates cleanup:', error);
+            return 0;
+        }
+    }
+
+    // Get cleanup statistics for user
+    getCleanupStats() {
+        try {
+            const savedCandidates = JSON.parse(localStorage.getItem(this.savedCandidatesKey) || '[]');
+            const now = Date.now();
+            const cutoffDate = now - this.maxSavedCandidateAge;
+
+            const oldCandidates = savedCandidates.filter(savedItem => {
+                const savedTime = new Date(savedItem.timestamp).getTime();
+                return savedTime <= cutoffDate;
+            });
+
+            return {
+                totalSavedCandidates: savedCandidates.length,
+                candidatesNearExpiry: oldCandidates.length,
+                cleanupDate: new Date(cutoffDate).toLocaleDateString()
+            };
+
+        } catch (error) {
+            console.error('Error getting cleanup stats:', error);
+            return { totalSavedCandidates: 0, candidatesNearExpiry: 0, cleanupDate: 'Unknown' };
+        }
+    }
+}
+
+// Initialize data retention manager
+const dataRetentionManager = new DataRetentionManager();
+
 // Saved Candidates Filter System
 class SavedCandidatesFilter {
     constructor() {
@@ -3427,6 +3518,7 @@ function updateSpecificSaveButton(candidateIndex, isSaved) {
 
 // Update saved counter in header
 function updateSavedCounter() {
+    // Update counter after any potential cleanup
     const stats = savedCandidatesManager.getSavedStats();
     const counterElement = document.getElementById('saved-count');
     
@@ -4942,6 +5034,9 @@ async function showMainApp() {
     await creditManager.initialize();
     updateUsageDisplay();
     updateJobDescriptionAccess();
+
+    // Perform data retention cleanup
+    dataRetentionManager.performStartupCleanup();
 
     // ADD THIS HERE - Wire up Sample Resume button after main app is shown
     setTimeout(() => {
