@@ -3030,15 +3030,12 @@ function updateSaveButtonStates() {
     saveButtons.forEach((button, index) => {
         if (candidatesData[index]) {
             const isAlreadySaved = savedCandidatesManager.isCandidateSaved(candidatesData[index]);
-            const icon = button.querySelector('i');
             
             if (isAlreadySaved) {
                 button.className = 'save-candidate-btn w-6 h-6 bg-green-500 hover:bg-green-600 text-white rounded-full flex items-center justify-center transition-colors shadow-sm';
-                icon.className = 'fas fa-bookmark text-xs';
                 button.title = 'Remove from saved';
             } else {
                 button.className = 'save-candidate-btn w-6 h-6 bg-yellow-500 hover:bg-yellow-600 text-white rounded-full flex items-center justify-center transition-colors shadow-sm';
-                icon.className = 'fas fa-bookmark text-xs';
                 button.title = 'Save candidate';
             }
         }
@@ -6086,6 +6083,11 @@ function loadAnalysisFromHistory(analysisId) {
     // Re-setup export functionality for loaded analysis
     setupDownloadPDF();
     setupExportOptions();
+
+    // Update save button states for loaded candidates
+    setTimeout(() => {
+        updateSaveButtonStates();
+    }, 200);
     
     // Close the modal
     document.getElementById('history-modal').classList.add('hidden');
