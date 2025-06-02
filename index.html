@@ -1630,7 +1630,7 @@
         </div>
 
         <!-- Side-by-Side Comparison -->
-        <div class="grid gap-6 mt-20" id="side-by-side-comparison" style="grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));">
+        <div class="grid gap-6 mt-24" id="side-by-side-comparison" style="grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));">
             <!-- Candidate comparison cards will be inserted here -->
         </div>
     </div>
@@ -4012,12 +4012,12 @@ function generateComparisonRadarChart(selectedCandidates) {
 function extractRadarChartData(selectedCandidates) {
     // Define the 6 skill categories we want to compare
     const skillCategories = [
-        'Technical Skills',
+        'Overall Score',
         'Communication',
         'Leadership', 
         'Experience',
         'Education',
-        'Overall Score'
+        'Technical Skills'
     ];
     
     const datasets = selectedCandidates.map((savedItem, index) => {
@@ -4031,12 +4031,12 @@ function extractRadarChartData(selectedCandidates) {
         return {
             label: name,
             data: [
-                scores.technical,
+                scores.overall,
                 scores.communication,
                 scores.leadership,
                 scores.experience,
                 scores.education,
-                scores.overall
+                scores.technical
             ],
             borderColor: color,
             backgroundColor: 'transparent', // Add transparency
