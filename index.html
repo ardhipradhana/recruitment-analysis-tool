@@ -5753,6 +5753,10 @@ function loadAnalysisFromHistory(analysisId) {
     
     // Show the results
     showAnalysisResults(analysis.candidates);
+
+    // Re-setup export functionality for loaded analysis
+    setupDownloadPDF();
+    setupExportOptions();
     
     // Close the modal
     document.getElementById('history-modal').classList.add('hidden');
