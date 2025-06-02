@@ -3357,7 +3357,18 @@ class AnalysisQueueManager {
 
         // If not currently processing, start immediately
         if (!this.isProcessing) {
-            return await this.processRequest(queueItem);
+            // Show loading animation before processing
+            showAnalysisLoading();
+            const result = await this.processRequest(queueItem);
+            
+            // Show results if successful
+            if (result.success) {
+                setTimeout(() => {
+                    showAnalysisResults(result.result);
+                }, 500);
+            }
+            
+            return result;
         }
 
         // Add to queue
@@ -5601,18 +5612,8 @@ async function startAnalysis() {
     // Queue the analysis request
     const queueResult = await analysisQueue.queueAnalysis(files, jobDescription);
     
-    if (queueResult.queued) {
-        // Request was queued, show appropriate UI
-        showAnalysisLoading();
-    } else if (queueResult.success) {
-        // Request processed immediately and succeeded
-        showAnalysisLoading();
-        // The queue manager will handle showing results
-        setTimeout(() => {
-            showAnalysisResults(queueResult.result.data || queueResult.result);
-        }, 500);
-    }
-    // If queueResult.queued is false due to duplicate, user already got warning message
+    // The queueAnalysis method now handles showing loading animation and results
+    // No need to call showAnalysisLoading() or showAnalysisResults() here
 }
 
 function showRetryButton() {
