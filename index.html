@@ -2924,14 +2924,21 @@ const savedCandidatesManager = new SavedCandidatesManager();
 
 // Toggle save candidate function
 function toggleSaveCandidate(candidateIndex) {
+    console.log('=== TOGGLE SAVE DEBUG ===');
+    console.log('candidateIndex:', candidateIndex);
+    console.log('candidatesData length:', candidatesData.length);
+    console.log('candidate at index:', candidatesData[candidateIndex]);
+    
     const candidate = candidatesData[candidateIndex];
     
     if (!candidate) {
+        console.error('No candidate found at index:', candidateIndex);
         showError('Candidate data not found');
         return;
     }
 
     const isAlreadySaved = savedCandidatesManager.isCandidateSaved(candidate);
+    console.log('isAlreadySaved:', isAlreadySaved);
     
     if (isAlreadySaved) {
         // Find and remove the saved candidate
@@ -2946,22 +2953,25 @@ function toggleSaveCandidate(candidateIndex) {
             if (result.success) {
                 showSuccess('Candidate removed from saved list');
                 updateSavedCounter();
-                updateSpecificSaveButton(candidateIndex, false);
+                setTimeout(() => updateSaveButtonStates(), 100);
             } else {
                 showError(result.message);
             }
         }
     } else {
         // Save the candidate
+        console.log('Attempting to save candidate:', candidate.candidateName);
         const result = savedCandidatesManager.saveCandidate(candidate, {
             analysisDate: new Date().toLocaleDateString(),
             candidateIndex: candidateIndex
         });
         
+        console.log('Save result:', result);
+        
         if (result.success) {
             showSuccess('Candidate saved successfully!');
             updateSavedCounter();
-            updateSpecificSaveButton(candidateIndex, true);
+            setTimeout(() => updateSaveButtonStates(), 100);
         } else {
             if (result.message === 'Candidate already saved') {
                 showWarning('This candidate is already in your saved list');
@@ -2970,6 +2980,8 @@ function toggleSaveCandidate(candidateIndex) {
             }
         }
     }
+    
+    console.log('=== END DEBUG ===');
 }
 
 // New function to update specific button
