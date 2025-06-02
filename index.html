@@ -2924,21 +2924,14 @@ const savedCandidatesManager = new SavedCandidatesManager();
 
 // Toggle save candidate function
 function toggleSaveCandidate(candidateIndex) {
-    console.log('=== TOGGLE SAVE DEBUG ===');
-    console.log('candidateIndex:', candidateIndex);
-    console.log('candidatesData length:', candidatesData.length);
-    console.log('candidate at index:', candidatesData[candidateIndex]);
-    
     const candidate = candidatesData[candidateIndex];
     
     if (!candidate) {
-        console.error('No candidate found at index:', candidateIndex);
         showError('Candidate data not found');
         return;
     }
 
     const isAlreadySaved = savedCandidatesManager.isCandidateSaved(candidate);
-    console.log('isAlreadySaved:', isAlreadySaved);
     
     if (isAlreadySaved) {
         // Find and remove the saved candidate
@@ -2960,13 +2953,10 @@ function toggleSaveCandidate(candidateIndex) {
         }
     } else {
         // Save the candidate
-        console.log('Attempting to save candidate:', candidate.candidateName);
         const result = savedCandidatesManager.saveCandidate(candidate, {
             analysisDate: new Date().toLocaleDateString(),
             candidateIndex: candidateIndex
         });
-        
-        console.log('Save result:', result);
         
         if (result.success) {
             showSuccess('Candidate saved successfully!');
@@ -2980,8 +2970,6 @@ function toggleSaveCandidate(candidateIndex) {
             }
         }
     }
-    
-    console.log('=== END DEBUG ===');
 }
 
 // New function to update specific button
@@ -3037,31 +3025,22 @@ function updateSavedCounter() {
 
 // Update save button states (filled vs outline)
 function updateSaveButtonStates() {
-    console.log('=== UPDATE BUTTON STATES DEBUG ===');
     const saveButtons = document.querySelectorAll('.save-candidate-btn');
-    console.log('Found save buttons:', saveButtons.length);
-    console.log('candidatesData length:', candidatesData.length);
     
-    saveButtons.forEach((button, index) => {
-        console.log(`Checking button ${index} for candidate:`, candidatesData[index]?.candidateName);
-        
-        if (candidatesData[index]) {
-            const isAlreadySaved = savedCandidatesManager.isCandidateSaved(candidatesData[index]);
-            console.log(`Button ${index} - isAlreadySaved:`, isAlreadySaved);
+    // Only update buttons for candidates that exist
+    for (let i = 0; i < candidatesData.length; i++) {
+        if (saveButtons[i] && candidatesData[i]) {
+            const isAlreadySaved = savedCandidatesManager.isCandidateSaved(candidatesData[i]);
             
             if (isAlreadySaved) {
-                console.log(`Setting button ${index} to GREEN (saved state)`);
-                button.className = 'save-candidate-btn w-6 h-6 bg-green-500 hover:bg-green-600 text-white rounded-full flex items-center justify-center transition-colors shadow-sm';
-                button.title = 'Remove from saved';
+                saveButtons[i].className = 'save-candidate-btn w-6 h-6 bg-green-500 hover:bg-green-600 text-white rounded-full flex items-center justify-center transition-colors shadow-sm';
+                saveButtons[i].title = 'Remove from saved';
             } else {
-                console.log(`Setting button ${index} to YELLOW (unsaved state)`);
-                button.className = 'save-candidate-btn w-6 h-6 bg-yellow-500 hover:bg-yellow-600 text-white rounded-full flex items-center justify-center transition-colors shadow-sm';
-                button.title = 'Save candidate';
+                saveButtons[i].className = 'save-candidate-btn w-6 h-6 bg-yellow-500 hover:bg-yellow-600 text-white rounded-full flex items-center justify-center transition-colors shadow-sm';
+                saveButtons[i].title = 'Save candidate';
             }
         }
-    });
-    
-    console.log('=== END UPDATE BUTTON STATES DEBUG ===');
+    }
 }
 
 function showSavedCandidatesView() {
