@@ -2974,12 +2974,26 @@ function toggleSaveCandidate(candidateIndex) {
 
 // New function to update specific button
 function updateSpecificSaveButton(candidateIndex, isSaved) {
-    // Find the button that was clicked using a more specific selector
-    const saveButtons = document.querySelectorAll('.save-candidate-btn');
-    const targetButton = Array.from(saveButtons).find(button => {
+    // Try multiple approaches to find the correct button
+    
+    // Approach 1: Find by onclick attribute
+    let targetButton = Array.from(document.querySelectorAll('.save-candidate-btn')).find(button => {
         const onclickAttr = button.getAttribute('onclick');
         return onclickAttr && onclickAttr.includes(`toggleSaveCandidate(${candidateIndex})`);
     });
+    
+    // Approach 2: If not found, try by position (fallback)
+    if (!targetButton) {
+        const saveButtons = document.querySelectorAll('.save-candidate-btn');
+        targetButton = saveButtons[candidateIndex];
+    }
+    
+    // Approach 3: If still not found, find by data attribute (we'll add this)
+    if (!targetButton) {
+        targetButton = document.querySelector(`[data-candidate-index="${candidateIndex}"]`);
+    }
+    
+    console.log(`Updating button for candidate ${candidateIndex}, found:`, !!targetButton);
     
     if (targetButton) {
         const icon = targetButton.querySelector('i');
@@ -2991,6 +3005,8 @@ function updateSpecificSaveButton(candidateIndex, isSaved) {
             targetButton.className = 'save-candidate-btn w-6 h-6 bg-yellow-500 hover:bg-yellow-600 text-white rounded-full flex items-center justify-center transition-colors shadow-sm';
             targetButton.title = 'Save candidate';
         }
+    } else {
+        console.error(`Could not find save button for candidate ${candidateIndex}`);
     }
 }
 
@@ -5111,6 +5127,7 @@ function createCandidateCard(candidate, index) {
                 </div>
                 <div class="flex items-start gap-1">
                     <button class="save-candidate-btn w-6 h-6 bg-yellow-500 hover:bg-yellow-600 text-white rounded-full flex items-center justify-center transition-colors shadow-sm" 
+                            data-candidate-index="${index}"
                             onclick="event.stopPropagation(); toggleSaveCandidate(${index})" 
                             title="Save candidate">
                         <i class="fas fa-bookmark text-xs"></i>
