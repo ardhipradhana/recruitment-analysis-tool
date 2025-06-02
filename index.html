@@ -3037,21 +3037,31 @@ function updateSavedCounter() {
 
 // Update save button states (filled vs outline)
 function updateSaveButtonStates() {
+    console.log('=== UPDATE BUTTON STATES DEBUG ===');
     const saveButtons = document.querySelectorAll('.save-candidate-btn');
+    console.log('Found save buttons:', saveButtons.length);
+    console.log('candidatesData length:', candidatesData.length);
     
     saveButtons.forEach((button, index) => {
+        console.log(`Checking button ${index} for candidate:`, candidatesData[index]?.candidateName);
+        
         if (candidatesData[index]) {
             const isAlreadySaved = savedCandidatesManager.isCandidateSaved(candidatesData[index]);
+            console.log(`Button ${index} - isAlreadySaved:`, isAlreadySaved);
             
             if (isAlreadySaved) {
+                console.log(`Setting button ${index} to GREEN (saved state)`);
                 button.className = 'save-candidate-btn w-6 h-6 bg-green-500 hover:bg-green-600 text-white rounded-full flex items-center justify-center transition-colors shadow-sm';
                 button.title = 'Remove from saved';
             } else {
+                console.log(`Setting button ${index} to YELLOW (unsaved state)`);
                 button.className = 'save-candidate-btn w-6 h-6 bg-yellow-500 hover:bg-yellow-600 text-white rounded-full flex items-center justify-center transition-colors shadow-sm';
                 button.title = 'Save candidate';
             }
         }
     });
+    
+    console.log('=== END UPDATE BUTTON STATES DEBUG ===');
 }
 
 function showSavedCandidatesView() {
