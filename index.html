@@ -3146,7 +3146,7 @@ class PaymentHandler {
         this.serverUrl = 'https://montpro.app.n8n.cloud/webhook/create-payment'; // Your n8n webhook URL
     }
 
-    async createPayment(amount, credits, userEmail) {
+    async createPayment(amount, credits, userEmail, creditType) {
         try {
             console.log('Creating payment request...');
             
