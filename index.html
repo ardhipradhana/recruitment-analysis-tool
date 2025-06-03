@@ -6029,6 +6029,23 @@ function handleFiles(selectedFiles) {
     // Add valid files to the list
     files = [...files, ...validFiles];
     updateFileList();
+
+    // ✨ NEW: Auto-scroll to start button
+        setTimeout(() => {
+            const startButton = document.getElementById('start-button');
+            if (startButton && files.length > 0) {
+                startButton.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center' 
+                });
+                
+                // Optional: Add a subtle pulse effect to draw attention
+                startButton.classList.add('animate-pulse');
+                setTimeout(() => {
+                    startButton.classList.remove('animate-pulse');
+                }, 2000);
+            }
+        }, 500); // Small delay for better UX
 }
 
 function updateFileList() {
