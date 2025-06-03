@@ -90,75 +90,76 @@
         
         .auth-form {
             background: linear-gradient(145deg, #ffffff, #f9fafb);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.8);
         }
         .score-circle {
-        width: 100px;
-        height: 100px;
-        border-radius: 50%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        background: conic-gradient(#3b82f6 0%, #3b82f6 var(--score-percent), #e2e8f0 var(--score-percent), #e2e8f0 100%);
-        position: relative;
-    }
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: conic-gradient(#3b82f6 0%, #3b82f6 var(--score-percent), #e2e8f0 var(--score-percent), #e2e8f0 100%);
+            position: relative;
+        }
     
-    .score-circle::before {
-        content: '';
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        background-color: white;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-    }
+        .score-circle::before {
+            content: '';
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: white;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .score-value {
+            position: relative;
+            z-index: 1;
+            font-weight: bold;
+            font-size: 28px;
+            color: #1e40af;
+            order: 2;
+        }
+        
+        .score-label {
+            position: relative;
+            z-index: 1;
+            font-size: 14px;
+            color: #64748b;
+            order: 1;
+            margin-bottom: 2px;
+        }
+        
+        /* Typing effect for loading animation */
+        .typingEffect::after {
+            content: '...';
+            animation: dots 1.5s infinite;
+            display: inline-block;
+            width: 24px;
+        }
     
-    .score-value {
-        position: relative;
-        z-index: 1;
-        font-weight: bold;
-        font-size: 28px;
-        color: #1e40af;
-        order: 2;
-    }
-    
-    .score-label {
-        position: relative;
-        z-index: 1;
-        font-size: 14px;
-        color: #64748b;
-        order: 1;
-        margin-bottom: 2px;
-    }
-    
-    /* Typing effect for loading animation */
-    .typingEffect::after {
-        content: '...';
-        animation: dots 1.5s infinite;
-        display: inline-block;
-        width: 24px;
-    }
-    
-    @keyframes dots {
-        0%, 20% { content: '.'; }
-        40% { content: '..'; }
-        60%, 100% { content: '...'; }
-    }
-    
-    /* Loading shimmer effect */
-    @keyframes shimmer {
-        0% { background-position: -1000px 0; }
-        100% { background-position: 1000px 0; }
-    }
-    
-    .loading-shimmer {
-        background: linear-gradient(90deg, #f3f4f6 0%, #e5e7eb 50%, #f3f4f6 100%);
-        background-size: 1000px 100%;
-        animation: shimmer 2s infinite linear;
-    }
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+        
+        /* Loading shimmer effect */
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+        
+        .loading-shimmer {
+            background: linear-gradient(90deg, #f3f4f6 0%, #e5e7eb 50%, #f3f4f6 100%);
+            background-size: 1000px 100%;
+            animation: shimmer 2s infinite linear;
+        }
         
 /* Background Animation Styles */
 .animated-background {
