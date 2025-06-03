@@ -6131,11 +6131,207 @@ async function startAnalysis() {
 
     const jobDescription = document.getElementById('job-description').value.trim();
     
-    // Queue the analysis request
-    const queueResult = await analysisQueue.queueAnalysis(files, jobDescription);
+    // NEW: Check for large batch processing
+    if (files.length > 5) {
+        const batchCount = Math.ceil(files.length / 5);
+        const confirmMessage = `You're about to process ${files.length} files in ${batchCount} batches of 5. This may take several minutes. Proceed?`;
+        
+        if (!confirm(confirmMessage)) {
+            return;
+        }
+        
+        // Process in batches
+        await processBatchAnalysis(files, jobDescription);
+    } else {
+        // Use existing queue system for small batches
+        const queueResult = await analysisQueue.queueAnalysis(files, jobDescription);
+    }
+}
+
+async function processBatchAnalysis(allFiles, jobDescription) {
+    const batchSize = 5;
+    const batches = [];
     
-    // The queueAnalysis method now handles showing loading animation and results
-    // No need to call showAnalysisLoading() or showAnalysisResults() here
+    // Split files into batches of 5
+    for (let i = 0; i < allFiles.length; i += batchSize) {
+        batches.push(allFiles.slice(i, i + batchSize));
+    }
+    
+    const totalBatches = batches.length;
+    let allCandidates = [];
+    let successfulBatches = 0;
+    let failedBatches = 0;
+    
+    // Show initial loading
+    showBatchAnalysisLoading(totalBatches);
+    
+    // Process each batch
+    for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+        const currentBatch = batches[batchIndex];
+        const batchNumber = batchIndex + 1;
+        
+        try {
+            // Update progress
+            updateBatchProgress(batchNumber, totalBatches, 'processing');
+            
+            // Process this batch using existing logic
+            const batchResult = await processSingleBatch(currentBatch, jobDescription, batchNumber);
+            
+            // Add successful results to the main list
+            if (batchResult && Array.isArray(batchResult)) {
+                allCandidates = [...allCandidates, ...batchResult];
+                successfulBatches++;
+                updateBatchProgress(batchNumber, totalBatches, 'completed');
+                showSuccess(`Batch ${batchNumber} completed - ${batchResult.length} candidates added`);
+            }
+            
+        } catch (error) {
+            console.error(`Batch ${batchNumber} failed:`, error);
+            failedBatches++;
+            updateBatchProgress(batchNumber, totalBatches, 'failed');
+            showError(`Batch ${batchNumber} failed - continuing with remaining batches`);
+        }
+        
+        // Small delay between batches to avoid overwhelming the backend
+        if (batchIndex < batches.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+    }
+    
+    // Show final results
+    if (allCandidates.length > 0) {
+        candidatesData = allCandidates;
+        hideAnalysisLoading();
+        showAnalysisResults(allCandidates);
+        
+        showSuccess(`Batch processing complete! ${successfulBatches}/${totalBatches} batches successful. ${allCandidates.length} candidates analyzed.`);
+    } else {
+        hideAnalysisLoading();
+        showError('All batches failed. Please try again with smaller groups.');
+    }
+}
+
+function showBatchAnalysisLoading(totalBatches) {
+    document.getElementById('upload-interface').classList.add('hidden');
+    document.getElementById('analysis-loading').classList.remove('hidden');
+    
+    // Update the loading UI for batch processing
+    const loadingTitle = document.querySelector('#analysis-loading h2');
+    if (loadingTitle) {
+        loadingTitle.textContent = `Processing ${totalBatches} Batches`;
+    }
+    
+    const loadingDescription = document.querySelector('#analysis-loading p');
+    if (loadingDescription) {
+        loadingDescription.textContent = 'Processing files in batches of 5. Please keep this tab open.';
+    }
+    
+    // Reset progress bar
+    const progressBar = document.getElementById('progress-bar-fill');
+    if (progressBar) {
+        progressBar.style.width = '0%';
+    }
+    
+    const progressText = document.getElementById('loading-step');
+    if (progressText) {
+        progressText.textContent = 'Starting batch processing...';
+    }
+    
+    const progressPercent = document.getElementById('loading-percent');
+    if (progressPercent) {
+        progressPercent.textContent = '0%';
+    }
+}
+
+function updateBatchProgress(currentBatch, totalBatches, status) {
+    const progressPercent = Math.round((currentBatch / totalBatches) * 100);
+    
+    // Update progress bar
+    const progressBar = document.getElementById('progress-bar-fill');
+    if (progressBar) {
+        progressBar.style.width = `${progressPercent}%`;
+    }
+    
+    // Update progress text
+    const progressText = document.getElementById('loading-step');
+    if (progressText) {
+        if (status === 'processing') {
+            progressText.textContent = `Processing batch ${currentBatch} of ${totalBatches}...`;
+        } else if (status === 'completed') {
+            progressText.textContent = `Batch ${currentBatch} of ${totalBatches} completed`;
+        } else if (status === 'failed') {
+            progressText.textContent = `Batch ${currentBatch} of ${totalBatches} failed - continuing...`;
+        }
+    }
+    
+    // Update percentage
+    const progressPercentElement = document.getElementById('loading-percent');
+    if (progressPercentElement) {
+        progressPercentElement.textContent = `${progressPercent}%`;
+    }
+}
+
+async function processSingleBatch(batchFiles, jobDescription, batchNumber) {
+    // Create FormData for this batch
+    const formData = new FormData();
+    batchFiles.forEach(file => {
+        formData.append('files', file);
+    });
+
+    formData.append('requestId', `batch_${batchNumber}_${Date.now()}`);
+    formData.append('expectedProcessingTime', Math.max(60, batchFiles.length * 20));
+
+    if (jobDescription && jobDescription.length > 0) {
+        formData.append('jobDescription', jobDescription);
+        formData.append('analysisType', 'ULTRA');
+    } else {
+        formData.append('analysisType', 'PRO');
+    }
+
+    // Use existing request handler with timeout
+    const timeoutDuration = Math.max(120000, batchFiles.length * 40000);
+
+    const response = await feedback.makeRequest(
+        'https://montpro.app.n8n.cloud/webhook/recruitment-analysis',
+        {
+            method: 'POST',
+            body: formData,
+            timeout: timeoutDuration,
+            retries: 1,
+            retryDelay: 5000
+        }
+    );
+
+    const contentType = response.headers.get("content-type");
+    const raw = await response.text();
+
+    if (!raw || raw.trim().length === 0) {
+        throw new Error(`Batch ${batchNumber}: Empty response from server`);
+    }
+
+    let data;
+    if (contentType && contentType.includes("application/json")) {
+        data = JSON.parse(raw);
+    } else {
+        throw new Error(`Batch ${batchNumber}: Invalid response format`);
+    }
+
+    // Extract candidates array from response (same logic as your existing code)
+    if (Array.isArray(data)) {
+        return data;
+    } else if (data && Array.isArray(data.candidates)) {
+        return data.candidates.map(item => item.json || item);
+    } else if (data && Array.isArray(data.data)) {
+        return data.data;
+    } else if (data && typeof data === 'object') {
+        for (let key in data) {
+            if (Array.isArray(data[key]) && data[key].length > 0) {
+                return data[key].map(item => item.json || item);
+            }
+        }
+    }
+
+    throw new Error(`Batch ${batchNumber}: Could not extract candidates from response`);
 }
 
 function showRetryButton() {
