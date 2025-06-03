@@ -6174,16 +6174,44 @@ async function startAnalysis() {
         const batchCount = Math.ceil(files.length / 5);
         const confirmMessage = `You're about to process ${files.length} files in ${batchCount} batches of 5. This may take several minutes. Proceed?`;
         
-        if (!confirm(confirmMessage)) {
-            return;
-        }
-        
-        // Process in batches
-        await processBatchAnalysis(files, jobDescription);
+        // Show custom confirmation modal
+        await showBatchConfirmation(files.length, batchCount, jobDescription);
     } else {
         // Use existing queue system for small batches
         const queueResult = await analysisQueue.queueAnalysis(files, jobDescription);
     }
+}
+
+function showBatchConfirmation(fileCount, batchCount, jobDescription) {
+    return new Promise((resolve, reject) => {
+        const modal = document.getElementById('batch-confirm-modal');
+        const message = document.getElementById('batch-confirm-message');
+        const cancelBtn = document.getElementById('batch-confirm-cancel');
+        const proceedBtn = document.getElementById('batch-confirm-proceed');
+        
+        // Set the message
+        message.textContent = `You're about to process ${fileCount} files in ${batchCount} batches of 5. This may take several minutes.`;
+        
+        // Show modal
+        modal.classList.remove('hidden');
+        
+        // Handle cancel
+        cancelBtn.onclick = () => {
+            modal.classList.add('hidden');
+            reject('User cancelled');
+        };
+        
+        // Handle proceed
+        proceedBtn.onclick = async () => {
+            modal.classList.add('hidden');
+            try {
+                await processBatchAnalysis(files, jobDescription);
+                resolve();
+            } catch (error) {
+                reject(error);
+            }
+        };
+    });
 }
 
 async function processBatchAnalysis(allFiles, jobDescription) {
