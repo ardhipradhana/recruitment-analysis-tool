@@ -1053,7 +1053,7 @@
     <div id="main-app" class="max-w-5xl mx-auto p-6" style="display: none;">
         <!-- Header with Logo and Logout button -->
         <header class="flex justify-between items-center mb-8 pb-4 border-b border-gray-200">
-            <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-4 cursor-pointer hover:opacity-80 transition-opacity" onclick="goToHome()">
                 <img src="MontPro_logo_with_words-removebg-preview.png" alt="MontPro Logo" class="h-12 w-auto" />
                 <h1 class="text-2xl font-bold text-gray-800">Recruitment Engine</h1>
             </div>
@@ -9819,6 +9819,22 @@ function loadAnalysisFromHistory(analysisId) {
     document.getElementById('history-modal').classList.add('hidden');
     
     showSuccess('Analysis loaded from history!');
+}
+
+function goToHome() {
+    // Hide all other pages/content
+    hideAllPages();
+    
+    // Show main app with upload interface
+    document.getElementById('main-app').style.display = 'block';
+    document.getElementById('upload-interface').classList.remove('hidden');
+    document.getElementById('analysis-results').classList.add('hidden');
+    
+    // Clear files and reset UI
+    files = [];
+    updateFileList();
+    hideError();
+    hideStatus();
 }
 
 // Event Listeners for History
