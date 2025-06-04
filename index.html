@@ -6287,6 +6287,7 @@ const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 // Global variables
 let files = [];
+window.files = files;
 let fileInput;
 let dragArea;
 let fileListContainer;
@@ -10456,6 +10457,12 @@ document.addEventListener("DOMContentLoaded", async function() {
             // Trigger input event to show counter
             jobDescriptionTextarea.dispatchEvent(new Event('input'));
         }
+    }
+
+    // Initialize files array if undefined
+    if (typeof files === 'undefined' || !files) {
+        files = [];
+        window.files = files;
     }
 
     // ---- File Handling and Analysis Logic ----
