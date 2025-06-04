@@ -10206,6 +10206,12 @@ function exportSavedCandidates() {
 function goToHome() {
     // Hide all other pages/content
     hideAllPages();
+
+    // Reset main-app width to normal
+    const mainApp = document.getElementById('main-app');
+    mainApp.classList.add('max-w-7xl');
+    mainApp.style.maxWidth = '';
+    mainApp.style.width = '';
     
     // Show main app with upload interface
     document.getElementById('main-app').style.display = 'block';
