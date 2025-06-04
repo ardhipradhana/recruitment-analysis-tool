@@ -6959,6 +6959,9 @@ async function startAnalysis() {
     }
 
     const jobDescription = document.getElementById('job-description').value.trim();
+
+    // Show loading animation immediately
+    showAnalysisLoading();
     
     // NEW: Check for large batch processing
     if (files.length > 5) {
@@ -10211,6 +10214,19 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // History button
     document.getElementById('history-btn').addEventListener('click', showHistoryModal);
+    // Ensure history button works after any dynamic updates
+    function setupHistoryButton() {
+        const historyBtn = document.getElementById('history-btn');
+        if (historyBtn) {
+            // Remove existing listeners and add fresh one
+            const newHistoryBtn = historyBtn.cloneNode(true);
+            historyBtn.parentNode.replaceChild(newHistoryBtn, historyBtn);
+            newHistoryBtn.addEventListener('click', showHistoryModal);
+        }
+    }
+    
+    // Call after main app is shown
+    setTimeout(setupHistoryButton, 500);
 
     // History button in saved candidates page header
     const historyBtnSaved = document.getElementById('history-btn-saved');
@@ -10222,7 +10238,9 @@ document.addEventListener('DOMContentLoaded', function() {
     updateSavedCounter();
 
     // Saved candidates button
-    document.getElementById('saved-candidates-btn').addEventListener('click', function() {
+    document.getElementById('saved-candidates-btn').addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
         showSavedCandidatesView();
     });
 
