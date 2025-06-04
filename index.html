@@ -8374,11 +8374,32 @@ function showMultipleCandidatesView() {
     document.getElementById('single-candidate-view').classList.add('hidden');
     document.getElementById('multiple-candidates-view').classList.remove('hidden');
     
-    // Update summary
-    document.getElementById('total-candidates').textContent = candidatesData.length;
-    document.getElementById('analysis-timestamp').textContent = 
-        `Analysis completed on ${new Date().toLocaleDateString()}`;
-
+    // 🏆 RESULTS OVERVIEW - Enhanced with achievement feeling
+    const totalCandidates = candidatesData.length;
+    const totalCandidatesElement = document.getElementById('total-candidates');
+    const timestampElement = document.getElementById('analysis-timestamp');
+    
+    // Show immediate achievement message
+    showSuccess(`🏆 Analysis Complete! Found ${totalCandidates} candidates - Here are your top performers!`);
+    
+    // Animate the candidate count
+    let currentCount = 0;
+    const countInterval = setInterval(() => {
+        currentCount++;
+        totalCandidatesElement.textContent = currentCount;
+        
+        if (currentCount >= totalCandidates) {
+            clearInterval(countInterval);
+            
+            // Add achievement emphasis
+            totalCandidatesElement.style.transform = 'scale(1.1)';
+            setTimeout(() => {
+                totalCandidatesElement.style.transform = 'scale(1)';
+            }, 200);
+        }
+    }, 100);
+    
+    timestampElement.textContent = `Analysis completed on ${new Date().toLocaleDateString()}`;
     // Add filter controls to sidebar
     addFilterControlsToSidebar();
     
@@ -8397,10 +8418,166 @@ function generateCandidateCards() {
     const cardsContainer = document.getElementById('candidate-cards');
     cardsContainer.innerHTML = '';
     
+    // Sort candidates by score for spotlight effect
+    const sortedCandidates = [...candidatesData].sort((a, b) => 
+        (parseInt(b.candidateScore) || 0) - (parseInt(a.candidateScore) || 0)
+    );
+    
+    // 👑 TOP CANDIDATE SPOTLIGHT
+    const topCandidate = sortedCandidates[0];
+    const topScore = parseInt(topCandidate.candidateScore) || 0;
+    
+    setTimeout(() => {
+        showSuccess(`👑 Top Performer: ${topCandidate.candidateName || 'Leading Candidate'} with ${topScore}% match!`);
+    }, 1000);
+    
+    // Generate cards (scores will animate after creation)
     candidatesData.forEach((candidate, index) => {
         const card = createCandidateCard(candidate, index);
         cardsContainer.appendChild(card);
     });
+    
+    // 📈 SCORE REVEAL SEQUENCE - Animate scores in order
+    setTimeout(() => {
+        animateScoreRevealSequence();
+    }, 1500);
+}
+
+function animateScoreRevealSequence() {
+    const scoreRings = document.querySelectorAll('.mini-score-ring');
+    const scoreTexts = document.querySelectorAll('.mini-score-text');
+    
+    // Get candidates with their scores and original indices
+    const candidateScores = candidatesData.map((candidate, index) => ({
+        score: parseInt(candidate.candidateScore) || 0,
+        index: index,
+        element: scoreRings[index],
+        textElement: scoreTexts[index]
+    })).sort((a, b) => b.score - a.score); // Sort by score descending
+    
+    // Animate scores in order (highest first)
+    candidateScores.forEach((candidateData, order) => {
+        setTimeout(() => {
+            animateSingleScore(candidateData.element, candidateData.textElement, candidateData.score);
+        }, order * 200); // 200ms delay between each score animation
+    });
+    
+    // 🎯 QUICK WINS SUMMARY after all scores are revealed
+    setTimeout(() => {
+        showQuickWinsSummary();
+    }, candidateScores.length * 200 + 1000);
+}
+
+function animateSingleScore(scoreElement, textElement, finalScore) {
+    if (!scoreElement || !textElement) return;
+    
+    // Start from 0 and animate to final score
+    let currentScore = 0;
+    const increment = finalScore / 15; // 20 steps over 1 second
+    const intervalTime = 50; // 50ms per step = 1 second total
+    
+    // Add highlight effect during animation
+    scoreElement.style.transform = 'scale(1.1)';
+    scoreElement.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.3)';
+    
+    const countUp = setInterval(() => {
+        currentScore += increment;
+        if (currentScore >= finalScore) {
+            currentScore = finalScore;
+            clearInterval(countUp);
+            
+            // Remove highlight effect when done
+            scoreElement.style.transform = 'scale(1)';
+            scoreElement.style.boxShadow = '';
+        }
+        
+        const roundedScore = Math.round(currentScore);
+        textElement.textContent = roundedScore;
+        scoreElement.style.setProperty('--score', `${currentScore}%`);
+    }, intervalTime);
+}
+
+function showQuickWinsSummary() {
+    const scores = candidatesData.map(c => parseInt(c.candidateScore) || 0);
+    const excellentCount = scores.filter(s => s >= 80).length;
+    const strongCount = scores.filter(s => s >= 60 && s < 80).length;
+    const averageCount = scores.filter(s => s >= 40 && s < 60).length;
+    
+    // 🎯 QUICK WINS SUMMARY
+    let summaryMessage = '';
+    if (excellentCount > 0) {
+        summaryMessage = `🎯 Found ${excellentCount} excellent match${excellentCount > 1 ? 'es' : ''}`;
+        if (strongCount > 0) {
+            summaryMessage += `, ${strongCount} strong candidate${strongCount > 1 ? 's' : ''}`;
+        }
+    } else if (strongCount > 0) {
+        summaryMessage = `🎯 Found ${strongCount} strong candidate${strongCount > 1 ? 's' : ''}`;
+        if (averageCount > 0) {
+            summaryMessage += `, ${averageCount} potential match${averageCount > 1 ? 'es' : ''}`;
+        }
+    } else {
+        summaryMessage = `🔍 ${candidatesData.length} candidates analyzed - review for potential matches`;
+    }
+    
+    showSuccess(summaryMessage);
+    
+    // 💡 SMART INSIGHTS after summary
+    setTimeout(() => {
+        showSmartInsights();
+    }, 2000);
+}
+
+function showSmartInsights() {
+    const topCandidate = candidatesData.reduce((prev, current) => 
+        (parseInt(current.candidateScore) || 0) > (parseInt(prev.candidateScore) || 0) ? current : prev
+    );
+    
+    const topScore = parseInt(topCandidate.candidateScore) || 0;
+    const topName = topCandidate.candidateName || 'Your top candidate';
+    
+    // Extract key skills from top candidate
+    const topSkills = extractAndFormatSkills(topCandidate.coreCompetencies);
+    const skillsText = topSkills.length > 0 ? topSkills.slice(0, 2).join(' and ') : 'relevant skills';
+    
+    // Generate dynamic smart insights based on data
+    let insightMessage = '';
+    
+    if (topScore >= 90) {
+        insightMessage = `💡 ${topName} has exceptional qualifications with ${skillsText} - exactly what you're looking for!`;
+    } else if (topScore >= 80) {
+        insightMessage = `💡 ${topName} shows strong expertise in ${skillsText} and ${topScore}% overall fit`;
+    } else if (topScore >= 70) {
+        insightMessage = `💡 ${topName} brings solid experience in ${skillsText} - worth a deeper look`;
+    } else if (topScore >= 60) {
+        insightMessage = `💡 Your candidates show diverse backgrounds - ${topName} leads with ${skillsText} experience`;
+    } else {
+        // Focus on potential and diversity when scores are lower
+        const uniqueSkills = new Set();
+        candidatesData.forEach(candidate => {
+            const skills = extractAndFormatSkills(candidate.coreCompetencies);
+            skills.forEach(skill => uniqueSkills.add(skill));
+        });
+        insightMessage = `💡 Diverse talent pool discovered - ${uniqueSkills.size} different skill areas represented`;
+    }
+    
+    showSuccess(insightMessage);
+    
+    // 🔍 DISCOVERY ENCOURAGEMENT after insights
+    setTimeout(() => {
+        showDiscoveryEncouragement();
+    }, 2500);
+}
+
+function showDiscoveryEncouragement() {
+    const encouragementMessages = [
+        "🔍 Click any candidate to discover hidden strengths and detailed insights",
+        "🔍 Tap candidates to uncover skills and experience that matter most",
+        "🔍 Explore each profile to find the perfect fit for your team",
+        "🔍 Click candidates to see what makes them unique"
+    ];
+    
+    const randomMessage = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
+    showSuccess(randomMessage);
 }
 
 // Add this NEW function right after generateCandidateCards
@@ -8950,7 +9127,7 @@ function showSingleCandidateView(data) {
             scoreElement.style.transition = 'opacity 0.3s ease';
             
             let currentScore = 0;
-            const increment = finalScore / 40; // 40 steps over ~2 seconds
+            const increment = finalScore / 15; // 40 steps over ~2 seconds
             const intervalTime = 50; // 50ms per step = 2 seconds total
             
             const countUp = setInterval(() => {
