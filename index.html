@@ -10571,6 +10571,78 @@ document.addEventListener("DOMContentLoaded", async function() {
         </div>
     </div>
 </footer>
-    
+    <script>
+    // Connect the enhanced filters to existing functions
+    document.addEventListener('DOMContentLoaded', function() {
+        // Connect enhanced search to existing function
+        const enhancedSearch = document.getElementById('saved-keywords-filter-enhanced');
+        if (enhancedSearch) {
+            enhancedSearch.addEventListener('input', debounce((e) => {
+                handleSavedKeywordsFilter(e.target.value);
+            }, 300));
+        }
+        
+        // Connect enhanced score filter
+        const enhancedScoreRange = document.getElementById('saved-score-range-enhanced');
+        const enhancedScoreDisplay = document.getElementById('saved-score-display-enhanced');
+        if (enhancedScoreRange && enhancedScoreDisplay) {
+            enhancedScoreRange.addEventListener('input', (e) => {
+                const value = e.target.value;
+                enhancedScoreDisplay.textContent = value;
+                handleSavedScoreFilter(value);
+            });
+        }
+        
+        // Connect enhanced compare button
+        const enhancedCompareBtn = document.getElementById('compare-selected-enhanced');
+        if (enhancedCompareBtn) {
+            enhancedCompareBtn.addEventListener('click', () => {
+                if (candidateComparison.canCompare()) {
+                    showComparisonView();
+                }
+            });
+        }
+        
+        // Connect enhanced sort buttons
+        const enhancedSortScore = document.getElementById('saved-sort-score-enhanced');
+        const enhancedSortName = document.getElementById('saved-sort-name-enhanced');
+        const enhancedSortDate = document.getElementById('saved-sort-date-enhanced');
+        
+        if (enhancedSortScore) {
+            enhancedSortScore.addEventListener('click', () => {
+                // Call existing sort function and update button states
+                document.querySelectorAll('.sort-btn-enhanced').forEach(btn => btn.classList.remove('active'));
+                enhancedSortScore.classList.add('active');
+                // Add your existing sort logic here
+            });
+        }
+        
+        // Clear filters
+        const enhancedClearBtn = document.getElementById('clear-saved-filters-enhanced');
+        if (enhancedClearBtn) {
+            enhancedClearBtn.addEventListener('click', clearSavedFilters);
+        }
+        
+        // Update the enhanced elements when candidates change
+        window.updateEnhancedElements = function() {
+            // Update compare button state
+            const compareBtn = document.getElementById('compare-selected-enhanced');
+            const compareBtnText = document.getElementById('compare-btn-text-enhanced');
+            
+            if (compareBtn && compareBtnText) {
+                const count = candidateComparison.selectedCandidates.size;
+                compareBtnText.textContent = `Compare Selected (${count})`;
+                
+                if (candidateComparison.canCompare()) {
+                    compareBtn.disabled = false;
+                    compareBtn.className = 'px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-medium rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 shadow-lg';
+                } else {
+                    compareBtn.disabled = true;
+                    compareBtn.className = 'px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-medium rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 shadow-lg disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed disabled:transform-none';
+                }
+            }
+        };
+    });
+    </script>
 </body>
 </html>
