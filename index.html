@@ -2685,13 +2685,24 @@
 
     <!-- Saved Candidates Overview (similar to multiple candidates layout) -->
     <div id="saved-candidates-overview" class="candidates-overview">
-        <!-- Updated Simplified Sidebar -->
+        <!-- Clean Sidebar - Just Cards -->
         <div class="candidates-sidebar">
-            <!-- Enhanced Candidate Cards Grid -->
-            <div class="mt-4">
-                <div class="flex items-center justify-between mb-3">
-                    <div class="text-xs opacity-75">Your Candidates</div>
-                    <div id="filtered-count-sidebar" class="text-xs opacity-60">0 shown</div>
+            <!-- Simple Header -->
+            <div class="candidate-summary">
+                <div class="text-center py-4">
+                    <div class="text-2xl font-bold mb-1" id="total-saved-candidates">0</div>
+                    <div class="text-sm opacity-90">Saved Candidates</div>
+                    <div class="text-xs opacity-75 mt-2" id="saved-last-updated">
+                        Last updated: Never
+                    </div>
+                </div>
+            </div>
+    
+            <!-- Clean Candidate Cards List -->
+            <div class="mt-2">
+                <div class="flex items-center justify-between mb-3 px-2">
+                    <div class="text-xs text-white/70">Your Pipeline</div>
+                    <div id="filtered-count-sidebar" class="text-xs text-white/60">0 shown</div>
                 </div>
                 
                 <div class="candidate-grid" id="saved-candidate-cards">
@@ -2710,22 +2721,26 @@
     
     <!-- Empty State -->
     <div id="saved-candidates-empty" class="text-center py-16 hidden">
-        <i class="fas fa-bookmark text-gray-300 text-6xl mb-6"></i>
-        <h3 class="text-xl font-semibold text-gray-600 mb-2">No Saved Candidates Yet</h3>
-        <p class="text-gray-500 mb-6">Start analyzing candidates and save the promising ones for comparison</p>
-        <button id="back-to-analysis-from-empty" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-            <i class="fas fa-upload mr-2"></i>
-            Start Analyzing Candidates
-        </button>
+        <div class="max-w-md mx-auto">
+            <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-bookmark text-gray-300 text-3xl"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-600 mb-2">Your Talent Pipeline Awaits</h3>
+            <p class="text-gray-500 mb-6">Start analyzing candidates and save the promising ones to build your dream team shortlist</p>
+            <button id="back-to-analysis-from-empty" class="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-colors font-medium shadow-md">
+                <i class="fas fa-magic mr-2"></i>
+                Start Discovering Talent
+            </button>
+        </div>
     </div>
     
     <!-- Back Button -->
     <div class="text-center mt-8">
-        <button id="back-from-saved" class="px-6 py-2 text-gray-600 hover:text-gray-800 transition-colors">
-            <i class="fas fa-arrow-left mr-2"></i>Back to Analysis
+        <button id="back-from-saved" class="inline-flex items-center px-6 py-2 text-gray-600 hover:text-gray-800 transition-colors group">
+            <i class="fas fa-arrow-left mr-2 group-hover:transform group-hover:-translate-x-1 transition-transform"></i>
+            Back to Analysis
         </button>
     </div>
-</div>
 
 <!-- Comparison Page -->
 <div id="comparison-page" class="max-w-7xl mx-auto p-6 support-page-hidden">
