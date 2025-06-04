@@ -2546,113 +2546,206 @@
                     <div class="w-10 h-10 bg-gradient-to-r from-yellow-500 to-amber-600 rounded-full flex items-center justify-center mr-3">
                         <i class="fas fa-bookmark text-white"></i>
                     </div>
-                    <h1 class="text-2xl font-bold text-gray-800">Your Saved Candidates</h1>
+                    <h1 class="text-2xl font-bold text-gray-800">Your Talent Pipeline</h1>
                 </div>
-                <p class="text-gray-600">Your curated shortlist - ready for comparison and final decisions</p>
+                <p class="text-gray-600">Your curated shortlist - ready for deep comparison and strategic decisions</p>
             </div>
             <div class="text-right">
                 <div class="text-3xl font-bold text-yellow-600" id="total-saved-display">0</div>
                 <div class="text-sm text-gray-500">Candidates Saved</div>
+                <div class="text-xs text-gray-400 mt-1" id="saved-pipeline-status">Building your dream team</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW: Top Filters and Sorting Section -->
+    <div class="bg-white rounded-xl shadow-sm p-6 mb-6 border border-gray-100">
+        <div class="flex flex-col lg:flex-row gap-6">
+            
+            <!-- Left Side: Search and Filters -->
+            <div class="flex-1">
+                <div class="flex items-center mb-4">
+                    <i class="fas fa-filter text-blue-500 mr-2"></i>
+                    <h3 class="text-lg font-semibold text-gray-800">Refine Your Search</h3>
+                </div>
+                
+                <div class="grid md:grid-cols-3 gap-4">
+                    <!-- Search Input -->
+                    <div class="relative">
+                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" 
+                               id="saved-keywords-filter-top" 
+                               class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" 
+                               placeholder="Search names, titles, skills...">
+                    </div>
+                    
+                    <!-- Score Filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Minimum Score: <span id="saved-score-display-top" class="text-blue-600 font-semibold">0</span>%
+                        </label>
+                        <input type="range" 
+                               id="saved-score-range-top" 
+                               class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider" 
+                               min="0" max="100" value="0">
+                    </div>
+                    
+                    <!-- Date Filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Saved Within</label>
+                        <select id="saved-date-filter-top" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                            <option value="all">All Time</option>
+                            <option value="week">Last Week</option>
+                            <option value="month">Last Month</option>
+                            <option value="3months">Last 3 Months</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Advanced Toggle -->
+                <div class="mt-4 flex items-center justify-between">
+                    <button id="toggle-advanced-filters-top" 
+                            class="text-sm text-blue-600 hover:text-blue-800 transition-colors flex items-center">
+                        <i class="fas fa-chevron-down mr-1"></i>
+                        <span>Advanced Filters</span>
+                    </button>
+                    
+                    <button id="clear-saved-filters-top" 
+                            class="text-sm text-gray-500 hover:text-red-600 transition-colors flex items-center">
+                        <i class="fas fa-times mr-1"></i>
+                        <span>Clear All</span>
+                    </button>
+                </div>
+                
+                <!-- Advanced Filters (Hidden by default) -->
+                <div id="advanced-filters-top" class="hidden mt-4 p-4 bg-gray-50 rounded-lg">
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="flex items-center text-sm">
+                                <input type="checkbox" id="has-premium-analysis-top" class="mr-2 rounded">
+                                <span class="text-gray-700">Has PRO/ULTRA Analysis</span>
+                            </label>
+                        </div>
+                        <div>
+                            <label class="flex items-center text-sm">
+                                <input type="checkbox" id="high-potential-top" class="mr-2 rounded">
+                                <span class="text-gray-700">High Potential (80%+ Score)</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Side: Sorting and Actions -->
+            <div class="lg:w-80 lg:border-l lg:pl-6">
+                <div class="flex items-center mb-4">
+                    <i class="fas fa-sort text-purple-500 mr-2"></i>
+                    <h3 class="text-lg font-semibold text-gray-800">Sort & Compare</h3>
+                </div>
+                
+                <!-- Sort Options -->
+                <div class="space-y-3 mb-4">
+                    <div class="flex gap-2">
+                        <button id="saved-sort-score-top" 
+                                class="sort-btn-top active flex-1 px-3 py-2 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200 transition-colors text-sm font-medium">
+                            <i class="fas fa-chart-line mr-1"></i>Score ↓
+                        </button>
+                        <button id="saved-sort-name-top" 
+                                class="sort-btn-top flex-1 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium">
+                            <i class="fas fa-user mr-1"></i>Name
+                        </button>
+                        <button id="saved-sort-date-top" 
+                                class="sort-btn-top flex-1 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium">
+                            <i class="fas fa-calendar mr-1"></i>Date
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Compare Section -->
+                <div class="bg-purple-50 rounded-lg p-4">
+                    <button id="compare-selected-btn-top" 
+                            class="w-full py-3 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed font-medium" 
+                            disabled>
+                        <i class="fas fa-balance-scale mr-2"></i>
+                        <span id="compare-btn-text-top">Compare Selected (0)</span>
+                    </button>
+                    <div class="text-xs text-center text-purple-700 mt-2">
+                        Select 2-3 candidates to unlock side-by-side comparison
+                    </div>
+                </div>
+                
+                <!-- Results Counter -->
+                <div id="saved-filter-results-top" class="text-center text-sm text-gray-500 mt-4 p-2 bg-gray-50 rounded-lg">
+                    Showing all candidates
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Saved Candidates Overview (similar to multiple candidates layout) -->
     <div id="saved-candidates-overview" class="candidates-overview">
-        <!-- Saved Candidates Sidebar -->
+        <!-- Updated Simplified Sidebar -->
         <div class="candidates-sidebar">
-            <!-- Summary Header -->
+            <!-- Simplified Summary Header -->
             <div class="candidate-summary">
-                <div class="text-2xl font-bold mb-1" id="total-saved-candidates">0</div>
-                <div class="text-sm opacity-90">Saved Candidates</div>
-                <div class="mt-3 text-xs opacity-75" id="saved-last-updated">
-                    Last updated: Never
-                </div>
-    
-                <!-- Filter Section -->
-                <div class="mt-4 pt-3 border-t border-white/30">
-                    <div class="text-xs opacity-75 mb-2">Filters:</div>
-                    
-                    <!-- Keywords Search -->
-                    <input type="text" id="saved-keywords-filter" class="filter-input mb-3" 
-                           placeholder="Search names, titles, skills..." 
-                           style="width: 100%; padding: 6px 8px; border: 1px solid rgba(255,255,255,0.3); border-radius: 4px; background: rgba(255,255,255,0.1); color: white; font-size: 12px;">
-                    
-                    <!-- Score Range -->
-                    <div class="mb-3">
-                        <div class="text-xs opacity-75 mb-1">Score: <span id="saved-score-display">0</span>+</div>
-                        <input type="range" id="saved-score-range" class="score-range-slider" min="0" max="100" value="0" style="width: 100%;">
-                    </div>
-                    
-                    <!-- Advanced Filters Toggle -->
-                    <button id="toggle-advanced-filters" class="text-xs opacity-75 hover:opacity-100 mb-2 transition-opacity">
-                        <i class="fas fa-chevron-down mr-1"></i>Advanced Filters
-                    </button>
-                    
-                    <!-- Advanced Filters (hidden by default) -->
-                    <div id="advanced-filters" class="hidden">
-                        <!-- Date Saved Filter -->
-                        <div class="mb-2">
-                            <div class="text-xs opacity-75 mb-1">Date Saved:</div>
-                            <select id="saved-date-filter" class="filter-input text-xs" style="width: 100%; padding: 4px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); border-radius: 4px; color: white;">
-                                <option value="all">All Time</option>
-                                <option value="week">Last Week</option>
-                                <option value="month">Last Month</option>
-                                <option value="3months">Last 3 Months</option>
-                            </select>
-                        </div>
-                        
-                        <!-- PRO/ULTRA Analysis Toggle -->
-                        <div class="mb-2">
-                            <label class="flex items-center text-xs">
-                                <input type="checkbox" id="has-premium-analysis" class="mr-2">
-                                <span class="opacity-75">Has PRO/ULTRA Analysis</span>
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <!-- Clear Filters Button -->
-                    <button id="clear-saved-filters" class="w-full py-1 px-2 bg-white/20 hover:bg-white/30 rounded text-xs transition-colors mb-3">
-                        <i class="fas fa-times mr-1"></i>Clear All Filters
-                    </button>
-                    
-                    <!-- Results Counter -->
-                    <div id="saved-filter-results" class="filter-results-count text-xs opacity-75 mb-3">
-                        Showing all candidates
+                <div class="text-center mb-4">
+                    <div class="text-3xl font-bold mb-2" id="total-saved-candidates">0</div>
+                    <div class="text-sm opacity-90 mb-1">In Your Pipeline</div>
+                    <div class="text-xs opacity-75" id="saved-last-updated">
+                        Last updated: Never
                     </div>
                 </div>
                 
-                <!-- Sort Section -->
-                <div class="mt-2 pt-3 border-t border-white/30">
-                    <div class="text-xs opacity-75 mb-2">Sort by:</div>
-                    <div class="flex gap-2">
-                        <button id="saved-sort-score" class="sort-btn active px-2 py-1 bg-white/20 rounded text-xs hover:bg-white/30 transition-colors">
-                            Score ↓
-                        </button>
-                        <button id="saved-sort-name" class="sort-btn px-2 py-1 bg-white/20 rounded text-xs hover:bg-white/30 transition-colors">
-                            Name
-                        </button>
-                        <button id="saved-sort-date" class="sort-btn px-2 py-1 bg-white/20 rounded text-xs hover:bg-white/30 transition-colors">
-                            Date Saved
-                        </button>
+                <!-- Quick Stats Row -->
+                <div class="grid grid-cols-2 gap-3 mb-4 pt-3 border-t border-white/20">
+                    <div class="text-center">
+                        <div class="text-lg font-bold" id="avg-score-display">--</div>
+                        <div class="text-xs opacity-75">Avg Score</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-lg font-bold" id="top-performers-count">--</div>
+                        <div class="text-xs opacity-75">Top Performers</div>
                     </div>
                 </div>
-    
-                <!-- Compare Button -->
-                <div class="mt-4 pt-3 border-t border-white/30">
-                    <button id="compare-selected-btn" class="w-full py-2 px-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed" disabled>
-                        <i class="fas fa-balance-scale mr-2"></i>
-                        <span id="compare-btn-text">Compare Selected (0)</span>
+                
+                <!-- Quick Actions -->
+                <div class="space-y-2 pt-3 border-t border-white/30">
+                    <button id="select-all-candidates" 
+                            class="w-full py-2 px-3 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors text-sm font-medium">
+                        <i class="fas fa-check-square mr-2"></i>
+                        Select All for Comparison
                     </button>
-                    <div class="text-xs text-center text-white/70 mt-1">
-                        Select 2-3 candidates to compare
+                    
+                    <button id="export-saved-candidates" 
+                            class="w-full py-2 px-3 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors text-sm font-medium">
+                        <i class="fas fa-download mr-2"></i>
+                        Export Pipeline
+                    </button>
+                </div>
+                
+                <!-- Pipeline Health Indicator -->
+                <div class="mt-4 pt-3 border-t border-white/30">
+                    <div class="text-xs opacity-75 mb-2">Pipeline Health:</div>
+                    <div class="flex items-center">
+                        <div class="flex-1 bg-white/20 rounded-full h-2">
+                            <div id="pipeline-health-bar" class="bg-white h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                        <span id="pipeline-health-text" class="text-xs ml-2 opacity-75">Building</span>
                     </div>
                 </div>
             </div>
-    
-            <!-- Saved Candidate Cards Grid -->
-            <div class="candidate-grid" id="saved-candidate-cards">
-                <!-- Cards will be dynamically inserted here -->
+        
+            <!-- Enhanced Candidate Cards Grid -->
+            <div class="mt-4">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="text-xs opacity-75">Your Candidates</div>
+                    <div id="filtered-count-sidebar" class="text-xs opacity-60">0 shown</div>
+                </div>
+                
+                <div class="candidate-grid" id="saved-candidate-cards">
+                    <!-- Cards will be dynamically inserted here -->
+                </div>
             </div>
         </div>
     
@@ -5227,6 +5320,20 @@ function loadSavedCandidatesData() {
         
         // Update summary
         document.getElementById('total-saved-candidates').textContent = savedCandidates.length;
+        document.getElementById('total-saved-display').textContent = savedCandidates.length;
+
+        // NEW: Update pipeline status
+        const pipelineStatus = document.getElementById('saved-pipeline-status');
+        if (pipelineStatus) {
+            if (savedCandidates.length >= 5) {
+                pipelineStatus.textContent = 'Strong pipeline ready';
+            } else if (savedCandidates.length >= 3) {
+                pipelineStatus.textContent = 'Good selection building';
+            } else {
+                pipelineStatus.textContent = 'Growing your options';
+            }
+        }
+        
         const lastSaved = savedCandidates[0]?.timestamp;
         document.getElementById('saved-last-updated').textContent = 
             lastSaved ? `Last updated: ${new Date(lastSaved).toLocaleDateString()}` : 'Last updated: Never';
@@ -5236,6 +5343,9 @@ function loadSavedCandidatesData() {
         
         // Setup filters
         setupSavedCandidatesFilters();
+
+        // NEW: Setup top filters
+        setupSavedCandidatesTopFilters();
         
         // Show first candidate by default
         if (savedCandidates.length > 0) {
@@ -9867,6 +9977,245 @@ function loadAnalysisFromHistory(analysisId) {
     document.getElementById('history-modal').classList.add('hidden');
     
     showSuccess('Analysis loaded from history!');
+}
+
+// Initialize Top Filters for Saved Candidates
+function setupSavedCandidatesTopFilters() {
+    // Keywords search (top version)
+    const keywordsInputTop = document.getElementById('saved-keywords-filter-top');
+    if (keywordsInputTop) {
+        keywordsInputTop.addEventListener('input', debounce((e) => {
+            handleSavedKeywordsFilter(e.target.value);
+            // Also sync with sidebar filter if it exists
+            const sidebarInput = document.getElementById('saved-keywords-filter');
+            if (sidebarInput) sidebarInput.value = e.target.value;
+        }, 300));
+    }
+    
+    // Score range (top version)
+    const scoreRangeTop = document.getElementById('saved-score-range-top');
+    const scoreDisplayTop = document.getElementById('saved-score-display-top');
+    if (scoreRangeTop && scoreDisplayTop) {
+        scoreRangeTop.addEventListener('input', (e) => {
+            const value = e.target.value;
+            scoreDisplayTop.textContent = value;
+            handleSavedScoreFilter(value);
+            
+            // Sync with sidebar elements
+            const sidebarRange = document.getElementById('saved-score-range');
+            const sidebarDisplay = document.getElementById('saved-score-display');
+            if (sidebarRange) sidebarRange.value = value;
+            if (sidebarDisplay) sidebarDisplay.textContent = value;
+        });
+    }
+    
+    // Date filter (top version)
+    const dateFilterTop = document.getElementById('saved-date-filter-top');
+    if (dateFilterTop) {
+        dateFilterTop.addEventListener('change', (e) => {
+            handleSavedDateFilter(e.target.value);
+            // Sync with sidebar
+            const sidebarDateFilter = document.getElementById('saved-date-filter');
+            if (sidebarDateFilter) sidebarDateFilter.value = e.target.value;
+        });
+    }
+    
+    // Advanced filters toggle (top version)
+    const toggleAdvancedTop = document.getElementById('toggle-advanced-filters-top');
+    const advancedFiltersTop = document.getElementById('advanced-filters-top');
+    if (toggleAdvancedTop && advancedFiltersTop) {
+        toggleAdvancedTop.addEventListener('click', () => {
+            const isHidden = advancedFiltersTop.classList.contains('hidden');
+            const icon = toggleAdvancedTop.querySelector('i');
+            const text = toggleAdvancedTop.querySelector('span');
+            
+            if (isHidden) {
+                advancedFiltersTop.classList.remove('hidden');
+                icon.className = 'fas fa-chevron-up mr-1';
+                text.textContent = 'Hide Advanced';
+            } else {
+                advancedFiltersTop.classList.add('hidden');
+                icon.className = 'fas fa-chevron-down mr-1';
+                text.textContent = 'Advanced Filters';
+            }
+        });
+    }
+    
+    // Premium analysis filter (top version)
+    const premiumAnalysisFilterTop = document.getElementById('has-premium-analysis-top');
+    if (premiumAnalysisFilterTop) {
+        premiumAnalysisFilterTop.addEventListener('change', (e) => {
+            handleSavedPremiumFilter(e.target.checked);
+            // Sync with sidebar
+            const sidebarPremiumFilter = document.getElementById('has-premium-analysis');
+            if (sidebarPremiumFilter) sidebarPremiumFilter.checked = e.target.checked;
+        });
+    }
+    
+    // High potential filter (new filter)
+    const highPotentialFilterTop = document.getElementById('high-potential-top');
+    if (highPotentialFilterTop) {
+        highPotentialFilterTop.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                // Set minimum score to 80 when high potential is checked
+                handleSavedScoreFilter(80);
+                if (scoreRangeTop) scoreRangeTop.value = 80;
+                if (scoreDisplayTop) scoreDisplayTop.textContent = '80';
+            }
+        });
+    }
+    
+    // Clear filters (top version)
+    const clearFiltersTop = document.getElementById('clear-saved-filters-top');
+    if (clearFiltersTop) {
+        clearFiltersTop.addEventListener('click', () => {
+            clearSavedFiltersFromTop();
+        });
+    }
+    
+    // Sort buttons (top version)
+    setupTopSortButtons();
+    
+    // Compare button (top version)
+    const compareBtnTop = document.getElementById('compare-selected-btn-top');
+    if (compareBtnTop) {
+        compareBtnTop.addEventListener('click', () => {
+            if (candidateComparison.canCompare()) {
+                showComparisonView();
+            }
+        });
+    }
+    
+    // Select all candidates button
+    const selectAllBtn = document.getElementById('select-all-candidates');
+    if (selectAllBtn) {
+        selectAllBtn.addEventListener('click', selectAllCandidatesForComparison);
+    }
+    
+    // Export saved candidates button
+    const exportBtn = document.getElementById('export-saved-candidates');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', exportSavedCandidates);
+    }
+}
+
+// Setup top sort buttons
+function setupTopSortButtons() {
+    const sortButtons = document.querySelectorAll('.sort-btn-top');
+    
+    sortButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
+            const buttonId = e.target.id;
+            let sortType = '';
+            
+            if (buttonId.includes('score')) sortType = 'score';
+            else if (buttonId.includes('name')) sortType = 'name';
+            else if (buttonId.includes('date')) sortType = 'date';
+            
+            // Update active state
+            sortButtons.forEach(btn => {
+                btn.classList.remove('active', 'bg-blue-100', 'text-blue-800');
+                btn.classList.add('bg-gray-100', 'text-gray-700');
+            });
+            
+            e.target.classList.add('active', 'bg-blue-100', 'text-blue-800');
+            e.target.classList.remove('bg-gray-100', 'text-gray-700');
+            
+            // Call existing sort function
+            sortSavedCandidates(sortType);
+        });
+    });
+}
+
+// Clear filters from top controls
+function clearSavedFiltersFromTop() {
+    // Clear top inputs
+    const keywordsInputTop = document.getElementById('saved-keywords-filter-top');
+    const scoreRangeTop = document.getElementById('saved-score-range-top');
+    const scoreDisplayTop = document.getElementById('saved-score-display-top');
+    const dateFilterTop = document.getElementById('saved-date-filter-top');
+    const premiumFilterTop = document.getElementById('has-premium-analysis-top');
+    const highPotentialTop = document.getElementById('high-potential-top');
+    
+    if (keywordsInputTop) keywordsInputTop.value = '';
+    if (scoreRangeTop) scoreRangeTop.value = 0;
+    if (scoreDisplayTop) scoreDisplayTop.textContent = '0';
+    if (dateFilterTop) dateFilterTop.value = 'all';
+    if (premiumFilterTop) premiumFilterTop.checked = false;
+    if (highPotentialTop) highPotentialTop.checked = false;
+    
+    // Call existing clear function
+    clearSavedFilters();
+    
+    showSuccess('All filters cleared!');
+}
+
+// Update the results counter for top filters
+function updateSavedCandidatesDisplayTop() {
+    const filteredCandidates = savedCandidatesFilter.getFilteredCandidates();
+    const stats = savedCandidatesFilter.getFilterStats();
+    
+    // Update top results counter
+    const resultsElementTop = document.getElementById('saved-filter-results-top');
+    if (resultsElementTop) {
+        if (stats.filtered === stats.total) {
+            resultsElementTop.innerHTML = `<i class="fas fa-check-circle text-green-500 mr-1"></i> Showing all ${stats.total} candidates`;
+            resultsElementTop.className = 'text-center text-sm text-green-600 mt-4 p-2 bg-green-50 rounded-lg border border-green-200';
+        } else {
+            resultsElementTop.innerHTML = `<i class="fas fa-filter text-blue-500 mr-1"></i> Showing ${stats.filtered} of ${stats.total} candidates`;
+            resultsElementTop.className = 'text-center text-sm text-blue-600 mt-4 p-2 bg-blue-50 rounded-lg border border-blue-200';
+        }
+    }
+    
+    // Update sidebar filtered count
+    const sidebarCount = document.getElementById('filtered-count-sidebar');
+    if (sidebarCount) {
+        sidebarCount.textContent = `${stats.filtered} shown`;
+    }
+    
+    // Call existing display update
+    updateSavedCandidatesDisplay();
+}
+
+// New function: Select all candidates for comparison
+function selectAllCandidatesForComparison() {
+    const savedCandidates = savedCandidatesManager.getSavedCandidates();
+    const maxSelection = 3; // Limit to 3 for comparison
+    
+    if (savedCandidates.length === 0) {
+        showWarning('No candidates to select');
+        return;
+    }
+    
+    // Clear existing selections
+    candidateComparison.clearSelections();
+    
+    // Select up to 3 candidates (highest scores first)
+    const sortedCandidates = savedCandidates
+        .sort((a, b) => (parseInt(b.candidate.candidateScore) || 0) - (parseInt(a.candidate.candidateScore) || 0))
+        .slice(0, maxSelection);
+    
+    sortedCandidates.forEach(savedItem => {
+        candidateComparison.toggleSelection(savedItem.id);
+    });
+    
+    // Update checkboxes
+    candidateComparison.updateCheckboxes();
+    
+    showSuccess(`Selected top ${sortedCandidates.length} candidates for comparison!`);
+}
+
+// New function: Export saved candidates
+function exportSavedCandidates() {
+    const savedCandidates = savedCandidatesManager.getSavedCandidates();
+    
+    if (savedCandidates.length === 0) {
+        showWarning('No saved candidates to export');
+        return;
+    }
+    
+    // Use existing CSV export functionality but for saved candidates
+    exportSavedCandidatesCSV(savedCandidates);
 }
 
 function goToHome() {
