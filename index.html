@@ -9894,13 +9894,25 @@ document.addEventListener("DOMContentLoaded", async function() {
         <!-- Main Footer Content -->
         <div class="grid lg:grid-cols-5 md:grid-cols-3 gap-8 mb-8">
             
-            <!-- Company Info (Enhanced) -->
+            <!-- Company Info (Enhanced) - BALANCED -->
             <div class="lg:col-span-2">
                 <img src="MontPro_logo_with_words-removebg-preview.png" alt="MontPro" class="h-10 mb-4">
                 <p class="text-sm text-gray-600 mb-4 leading-relaxed">
                     The AI-powered recruitment engine that turns overwhelming resume stacks 
                     into clear hiring decisions.
                 </p>
+                
+                <!-- ADD: Key Benefits for Balance -->
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div class="bg-blue-50 rounded-lg p-3 text-center border border-blue-100">
+                        <div class="text-lg font-bold text-blue-600">90%</div>
+                        <div class="text-xs text-blue-700">Time Saved</div>
+                    </div>
+                    <div class="bg-green-50 rounded-lg p-3 text-center border border-green-100">
+                        <div class="text-lg font-bold text-green-600">< 2min</div>
+                        <div class="text-xs text-green-700">Analysis Time</div>
+                    </div>
+                </div>
                 
                 <!-- Founder Message -->
                 <div class="bg-white rounded-lg p-4 border border-gray-200 mb-4">
@@ -9931,79 +9943,109 @@ document.addEventListener("DOMContentLoaded", async function() {
                 </div>
             </div>
             
-            <!-- Get Started (User Journey Focused) -->
+            <!-- Get Started (ALIGNED) -->
             <div>
                 <h3 class="font-semibold text-gray-800 mb-4 flex items-center">
-                    <i class="fas fa-play-circle text-blue-500 mr-2"></i>
+                    <div class="w-5 h-5 flex items-center justify-center mr-2">
+                        <i class="fas fa-play-circle text-blue-500"></i>
+                    </div>
                     Get Started
                 </h3>
                 <ul class="space-y-3 text-sm text-gray-600">
                     <li>
                         <a href="#" onclick="hideAllSupportPages(); document.getElementById('sample-resume-btn').click();" 
                            class="hover:text-blue-600 transition-colors flex items-center">
-                            <i class="fas fa-rocket text-xs mr-2 text-blue-500"></i>Try Demo Resume
+                            <div class="w-4 h-4 flex items-center justify-center mr-2">
+                                <i class="fas fa-rocket text-blue-500"></i>
+                            </div>
+                            Try Demo Resume
                         </a>
                     </li>
                     <li>
                         <a href="#" onclick="showPricingPage()" 
                            class="hover:text-blue-600 transition-colors flex items-center">
-                            <i class="fas fa-tag text-xs mr-2 text-green-500"></i>Pricing
+                            <div class="w-4 h-4 flex items-center justify-center mr-2">
+                                <i class="fas fa-tag text-green-500"></i>
+                            </div>
+                            Pricing
                         </a>
                     </li>
                     <li>
                         <a href="https://calendly.com/ardhipradhana/montpro_discovery" target="_blank" 
                            class="hover:text-blue-600 transition-colors flex items-center">
-                            <i class="fas fa-video text-xs mr-2 text-purple-500"></i>Schedule Demo
+                            <div class="w-4 h-4 flex items-center justify-center mr-2">
+                                <i class="fas fa-video text-purple-500"></i>
+                            </div>
+                            Schedule Demo
                         </a>
                     </li>
                 </ul>
             </div>
             
-            <!-- Support (Solution-Focused) -->
+            <!-- Support (ALIGNED) -->
             <div>
                 <h3 class="font-semibold text-gray-800 mb-4 flex items-center">
-                    <i class="fas fa-life-ring text-emerald-500 mr-2"></i>
+                    <div class="w-5 h-5 flex items-center justify-center mr-2">
+                        <i class="fas fa-life-ring text-emerald-500"></i>
+                    </div>
                     Need Help?
                 </h3>
                 <ul class="space-y-3 text-sm text-gray-600">
                     <li>
                         <a href="#" onclick="showSupportPage()" 
                            class="hover:text-blue-600 transition-colors flex items-center">
-                            <i class="fas fa-headset text-xs mr-2 text-blue-500"></i>Get Support
+                            <div class="w-4 h-4 flex items-center justify-center mr-2">
+                                <i class="fas fa-headset text-blue-500"></i>
+                            </div>
+                            Get Support
                         </a>
                     </li>
                     <li>
                         <a href="#" onclick="showFAQPage()" 
                            class="hover:text-blue-600 transition-colors flex items-center">
-                            <i class="fas fa-book text-xs mr-2 text-green-500"></i>FAQ & Guides
+                            <div class="w-4 h-4 flex items-center justify-center mr-2">
+                                <i class="fas fa-book text-green-500"></i>
+                            </div>
+                            FAQ & Guides
                         </a>
                     </li>
                     <li>
                         <a href="mailto:support@aapgrp.com?subject=Feature%20Request" 
                            class="hover:text-blue-600 transition-colors flex items-center">
-                            <i class="fas fa-lightbulb text-xs mr-2 text-yellow-500"></i>Feature Request
+                            <div class="w-4 h-4 flex items-center justify-center mr-2">
+                                <i class="fas fa-lightbulb text-yellow-500"></i>
+                            </div>
+                            Feature Request
                         </a>
                     </li>
                 </ul>
             </div>
             
-            <!-- Legal (Trust-Building) -->
+            <!-- Legal (ALIGNED) -->
             <div>
                 <h3 class="font-semibold text-gray-800 mb-4 flex items-center">
-                    <i class="fas fa-shield-check text-indigo-500 mr-2"></i>
+                    <div class="w-5 h-5 flex items-center justify-center mr-2">
+                        <i class="fas fa-shield-check text-indigo-500"></i>
+                    </div>
                     Trust & Security
                 </h3>
                 <ul class="space-y-3 text-sm text-gray-600">
                     <li>
                         <a href="#" onclick="showPrivacyPage()" 
                            class="hover:text-blue-600 transition-colors flex items-center">
-                            <i class="fas fa-user-shield text-xs mr-2 text-blue-500"></i>Privacy Policy
+                            <div class="w-4 h-4 flex items-center justify-center mr-2">
+                                <i class="fas fa-user-shield text-blue-500"></i>
+                            </div>
+                            Privacy Policy
                         </a>
                     </li>
                     <li>
                         <a href="#" onclick="showTermsPage()" 
                            class="hover:text-blue-600 transition-colors flex items-center">
-                            <i class="fas fa-file-contract text-xs mr-2 text-purple-500"></i>Terms & Conditions
+                            <div class="w-4 h-4 flex items-center justify-center mr-2">
+                                <i class="fas fa-file-contract text-purple-500"></i>
+                            </div>
+                            Terms & Conditions
                         </a>
                     </li>
                 </ul>
