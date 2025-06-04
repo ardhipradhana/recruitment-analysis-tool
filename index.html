@@ -1998,7 +1998,7 @@
                 <i class="fas fa-envelope mr-2"></i>Contact Support
             </button>
             <a href="https://calendly.com/ardhipradhana/montpro_discovery" target="_blank" class="px-6 py-3 bg-white/20 text-white font-medium rounded-lg hover:bg-white/30 transition-colors border border-white/30">
-                <i class="fas fa-video mr-2"></i>Book 15-Min Call
+                <i class="fas fa-video mr-2"></i>Book 30-Min Call
             </a>
         </div>
     </div>
@@ -2014,103 +2014,490 @@
 
 <!-- Terms Page -->
 <div id="terms-page" class="max-w-4xl mx-auto p-6 support-page-hidden">
+    <!-- Hero Section -->
     <header class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full mb-6">
+            <i class="fas fa-handshake text-white text-2xl"></i>
+        </div>
         <h1 class="text-3xl font-bold text-gray-800 mb-4">Terms & Conditions</h1>
-        <p class="text-gray-600">Last Update: 27 Mei 2025</p>
+        <p class="text-gray-600 max-w-2xl mx-auto">
+            Our commitment to you, explained in plain English. These terms protect both of us and ensure you get the best MontPro experience.
+        </p>
+        <div class="mt-4 text-sm text-gray-500">
+            Last updated: December 2024 • 
+            <a href="#" onclick="showSupportPage()" class="text-blue-600 hover:text-blue-800">Questions? Ask us anything</a>
+        </div>
     </header>
 
-    <div class="bg-white rounded-xl shadow-lg p-8">
-        <div class="prose max-w-none">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">1. Service Usage</h2>
-            <p class="text-gray-600 mb-4">
-                By using MontPro, you agree to use this service responsibly 
-                and in compliance with applicable Indonesian law.
-            </p>
+    <!-- Summary Cards (Key Points First) -->
+    <div class="grid md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
+            <i class="fas fa-shield-check text-green-500 text-2xl mb-2"></i>
+            <h3 class="font-semibold text-green-800 mb-1">Your Data is Safe</h3>
+            <p class="text-xs text-green-700">We never store your candidate files permanently</p>
+        </div>
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
+            <i class="fas fa-heart text-blue-500 text-2xl mb-2"></i>
+            <h3 class="font-semibold text-blue-800 mb-1">Fair & Transparent</h3>
+            <p class="text-xs text-blue-700">No hidden fees, clear refund policy</p>
+        </div>
+        <div class="bg-purple-50 border border-purple-200 rounded-lg p-4 text-center">
+            <i class="fas fa-users text-purple-500 text-2xl mb-2"></i>
+            <h3 class="font-semibold text-purple-800 mb-1">You're in Control</h3>
+            <p class="text-xs text-purple-700">Cancel anytime, keep your credits</p>
+        </div>
+    </div>
 
-            <h2 class="text-xl font-bold text-gray-800 mb-4">2. Account dan Security</h2>
-            <p class="text-gray-600 mb-4">
-                You are responsible for maintaining the security of your account and password. 
-                Report any unauthorized usage immediately.
-            </p>
+    <!-- Main Terms Content -->
+    <div class="bg-white rounded-xl shadow-lg border border-gray-100">
+        <div class="p-8">
+            
+            <!-- Section 1: Service Usage -->
+            <div class="mb-8">
+                <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-play-circle text-blue-500 mr-3"></i>
+                    How You Can Use MontPro
+                </h2>
+                <div class="bg-blue-50 rounded-lg p-4 mb-4">
+                    <p class="text-sm text-blue-800 mb-2">
+                        <strong>What this means for you:</strong> Use MontPro for legitimate recruitment purposes. Be respectful of candidate privacy.
+                    </p>
+                </div>
+                <div class="prose text-gray-600 text-sm">
+                    <p class="mb-3">
+                        By using MontPro, you agree to use our service responsibly and in compliance with applicable Indonesian law. This includes:
+                    </p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li>Using the service only for legitimate recruitment and hiring purposes</li>
+                        <li>Respecting candidate privacy and data protection laws</li>
+                        <li>Not attempting to reverse-engineer or misuse our AI technology</li>
+                        <li>Following our community guidelines and treating all users respectfully</li>
+                    </ul>
+                </div>
+            </div>
 
-            <h2 class="text-xl font-bold text-gray-800 mb-4">3. Payment and Refund</h2>
-            <p class="text-gray-600 mb-4">
-                All payments are final. Purchased credits cannot be refunded, 
-                except in cases of proven system errors.
-            </p>
+            <!-- Section 2: Account Security -->
+            <div class="mb-8">
+                <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-lock text-green-500 mr-3"></i>
+                    Your Account & Security
+                </h2>
+                <div class="bg-green-50 rounded-lg p-4 mb-4">
+                    <p class="text-sm text-green-800 mb-2">
+                        <strong>What this means for you:</strong> Keep your login secure. Report any suspicious activity immediately.
+                    </p>
+                </div>
+                <div class="prose text-gray-600 text-sm">
+                    <p class="mb-3">
+                        You are responsible for maintaining the security of your account and password:
+                    </p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li>Use a strong, unique password for your MontPro account</li>
+                        <li>Never share your login credentials with others</li>
+                        <li>Report any unauthorized access immediately to support@aapgrp.com</li>
+                        <li>You're responsible for all activity under your account</li>
+                    </ul>
+                </div>
+            </div>
 
-            <h2 class="text-xl font-bold text-gray-800 mb-4">4. Data Privacy</h2>
-            <p class="text-gray-600 mb-4">
-                We respect your privacy. Uploaded file only use for analysis purposes 
-                and are not stored after processing is complete 
-                and can be deleted anytime.
-            </p>
+            <!-- Section 3: Payment & Refunds -->
+            <div class="mb-8">
+                <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-credit-card text-purple-500 mr-3"></i>
+                    Payments & Refunds
+                </h2>
+                <div class="bg-purple-50 rounded-lg p-4 mb-4">
+                    <p class="text-sm text-purple-800 mb-2">
+                        <strong>What this means for you:</strong> Credits never expire. Refunds available for technical issues within 7 days.
+                    </p>
+                </div>
+                <div class="prose text-gray-600 text-sm">
+                    <p class="mb-3">Our payment terms are designed to be fair and transparent:</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong>Credits never expire</strong> - use them at your own pace</li>
+                        <li>Refunds available within 7 days for technical issues or system errors</li>
+                        <li>No refunds for used credits, but since they don't expire, there's no rush</li>
+                        <li>All payments are processed securely through certified payment providers</li>
+                        <li>Prices are clearly displayed before purchase with no hidden fees</li>
+                    </ul>
+                </div>
+            </div>
 
-            <h2 class="text-xl font-bold text-gray-800 mb-4">5. Limitation of Liability</h2>
-            <p class="text-gray-600 mb-4">
-                MontPro analysis results are for reference and do not replace professional judgment 
-                in the recruitment process. Hiring decisions remain the user's responsibility.
-            </p>
+            <!-- Section 4: Data Privacy -->
+            <div class="mb-8">
+                <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-shield-alt text-emerald-500 mr-3"></i>
+                    Your Data & Privacy
+                </h2>
+                <div class="bg-emerald-50 rounded-lg p-4 mb-4">
+                    <p class="text-sm text-emerald-800 mb-2">
+                        <strong>What this means for you:</strong> Your uploaded files are never stored permanently. Analysis results are yours to control.
+                    </p>
+                </div>
+                <div class="prose text-gray-600 text-sm">
+                    <p class="mb-3">We take your privacy seriously and handle data responsibly:</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li>Uploaded files are processed in real-time and automatically deleted</li>
+                        <li>Analysis results are stored securely and can be deleted anytime</li>
+                        <li>We never share your data with third parties</li>
+                        <li>You retain full ownership of your recruitment data</li>
+                        <li>GDPR compliant with industry-standard security measures</li>
+                    </ul>
+                </div>
+            </div>
 
-            <h2 class="text-xl font-bold text-gray-800 mb-4">6. Contact</h2>
-            <p class="text-gray-600 mb-4">
-                For questions regarding Terms & Conditions, contact us at 
-                <a href="mailto:support@aapgrp.com" class="text-blue-600">support@aapgrp.com</a>
-            </p>
+            <!-- Section 5: Service Limitations -->
+            <div class="mb-8">
+                <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-exclamation-triangle text-yellow-500 mr-3"></i>
+                    Important Limitations
+                </h2>
+                <div class="bg-yellow-50 rounded-lg p-4 mb-4">
+                    <p class="text-sm text-yellow-800 mb-2">
+                        <strong>What this means for you:</strong> Our AI provides insights to guide your decisions, but final hiring choices are always yours.
+                    </p>
+                </div>
+                <div class="prose text-gray-600 text-sm">
+                    <p class="mb-3">
+                        MontPro analysis results are for reference and guidance only:
+                    </p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li>AI analysis does not replace professional judgment in recruitment</li>
+                        <li>Final hiring decisions remain your responsibility</li>
+                        <li>Results should be combined with interviews and reference checks</li>
+                        <li>We cannot guarantee specific hiring outcomes</li>
+                        <li>Service availability may vary during maintenance periods</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="bg-gray-50 rounded-lg p-6">
+                <h3 class="font-bold text-gray-800 mb-3">Questions About These Terms?</h3>
+                <p class="text-gray-600 text-sm mb-4">
+                    We believe in transparency. If anything isn't clear, please ask! These terms are meant to protect both of us, not confuse you.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <a href="mailto:support@aapgrp.com" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                        <i class="fas fa-envelope mr-2"></i>Email Us
+                    </a>
+                    <a href="https://calendly.com/ardhipradhana/montpro_discovery" target="_blank" class="inline-flex items-center px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors text-sm">
+                        <i class="fas fa-video mr-2"></i>Schedule Call
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
     
+    <!-- Back Button -->
     <div class="text-center mt-8">
-        <button id="back-from-terms" class="px-6 py-2 text-gray-600 hover:text-gray-800 transition-colors">
-            <i class="fas fa-arrow-left mr-2"></i>Back to Application
+        <button id="back-from-terms" class="inline-flex items-center px-6 py-3 border-2 border-gray-300 text-gray-700 font-medium rounded-xl hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50 transition-all duration-300 group">
+            <i class="fas fa-arrow-left mr-2 group-hover:transform group-hover:-translate-x-1 transition-transform"></i>
+            <span>Back to Analysis</span>
         </button>
     </div>
 </div>
 
 <!-- Privacy Policy Page -->
 <div id="privacy-page" class="max-w-4xl mx-auto p-6 support-page-hidden">
+    <!-- Hero Section -->
     <header class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full mb-6">
+            <i class="fas fa-user-shield text-white text-2xl"></i>
+        </div>
         <h1 class="text-3xl font-bold text-gray-800 mb-4">Privacy Policy</h1>
-        <p class="text-gray-600">Last Update: 27 Mei 2025</p>
+        <p class="text-gray-600 max-w-2xl mx-auto">
+            Your privacy is our priority. Here's exactly how we protect your data and respect your trust when you use MontPro.
+        </p>
+        <div class="mt-4 text-sm text-gray-500">
+            Last updated: June 2025 • 
+            <a href="#" onclick="showSupportPage()" class="text-blue-600 hover:text-blue-800">Privacy questions? Contact us</a>
+        </div>
     </header>
 
-    <div class="bg-white rounded-xl shadow-lg p-8">
-        <div class="prose max-w-none">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">1. Information We Collect</h2>
-            <p class="text-gray-600 mb-4">
-                We collect information you provide directly, such as email addresses for login 
-                and CV files you upload for analysis.
-            </p>
+    <!-- Privacy Promise Cards -->
+    <div class="grid md:grid-cols-4 gap-4 mb-8">
+        <div class="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
+            <i class="fas fa-trash text-green-500 text-xl mb-2"></i>
+            <h3 class="font-semibold text-green-800 text-sm mb-1">Auto-Delete</h3>
+            <p class="text-xs text-green-700">Files deleted after processing</p>
+        </div>
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
+            <i class="fas fa-ban text-blue-500 text-xl mb-2"></i>
+            <h3 class="font-semibold text-blue-800 text-sm mb-1">No Sharing</h3>
+            <p class="text-xs text-blue-700">Never sold or shared</p>
+        </div>
+        <div class="bg-purple-50 border border-purple-200 rounded-lg p-4 text-center">
+            <i class="fas fa-lock text-purple-500 text-xl mb-2"></i>
+            <h3 class="font-semibold text-purple-800 text-sm mb-1">Encrypted</h3>
+            <p class="text-xs text-purple-700">Bank-level security</p>
+        </div>
+        <div class="bg-orange-50 border border-orange-200 rounded-lg p-4 text-center">
+            <i class="fas fa-user-check text-orange-500 text-xl mb-2"></i>
+            <h3 class="font-semibold text-orange-800 text-sm mb-1">Your Control</h3>
+            <p class="text-xs text-orange-700">Delete anytime</p>
+        </div>
+    </div>
 
-            <h2 class="text-xl font-bold text-gray-800 mb-4">2. Use of Information</h2>
-            <p class="text-gray-600 mb-4">
-                Information we collect is used to provide CV analysis services, 
-                manage your account, and communicate with you about our services.
-            </p>
+    <!-- Main Privacy Content -->
+    <div class="bg-white rounded-xl shadow-lg border border-gray-100">
+        <div class="p-8">
+            
+            <!-- Section 1: What We Collect -->
+            <div class="mb-8">
+                <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-list text-blue-500 mr-3"></i>
+                    What Information We Collect
+                </h2>
+                <div class="bg-blue-50 rounded-lg p-4 mb-4">
+                    <p class="text-sm text-blue-800 mb-2">
+                        <strong>Bottom line:</strong> Only what's necessary to provide AI analysis and manage your account. No unnecessary tracking.
+                    </p>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <h4 class="font-semibold text-gray-800 mb-2 flex items-center">
+                            <i class="fas fa-envelope text-blue-500 mr-2"></i>
+                            Account Information
+                        </h4>
+                        <ul class="text-sm text-gray-600 list-disc pl-5 space-y-1">
+                            <li>Email address (for login and communication)</li>
+                            <li>Account preferences and settings</li>
+                            <li>Usage statistics (to improve our service)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <h4 class="font-semibold text-gray-800 mb-2 flex items-center">
+                            <i class="fas fa-file-upload text-purple-500 mr-2"></i>
+                            Files You Upload
+                        </h4>
+                        <ul class="text-sm text-gray-600 list-disc pl-5 space-y-1">
+                            <li>Resume/CV files (processed in real-time, then automatically deleted)</li>
+                            <li>Job descriptions (if you use ULTRA features)</li>
+                        </ul>
+                        <div class="mt-3 bg-green-50 rounded p-3">
+                            <p class="text-xs text-green-700">
+                                <i class="fas fa-shield-check mr-1"></i>
+                                <strong>Important:</strong> Original files are never stored permanently on our servers
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <h4 class="font-semibold text-gray-800 mb-2 flex items-center">
+                            <i class="fas fa-chart-bar text-emerald-500 mr-2"></i>
+                            Analysis Results
+                        </h4>
+                        <ul class="text-sm text-gray-600 list-disc pl-5 space-y-1">
+                            <li>AI-generated analysis summaries and scores</li>
+                            <li>Your saved candidates and comparisons</li>
+                            <li>Export history and preferences</li>
+                        </ul>
+                        <div class="mt-3 bg-blue-50 rounded p-3">
+                            <p class="text-xs text-blue-700">
+                                <i class="fas fa-user-check mr-1"></i>
+                                <strong>Your control:</strong> You can delete all analysis results anytime from your account
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-            <h2 class="text-xl font-bold text-gray-800 mb-4">3. Data Storage</h2>
-            <p class="text-gray-600 mb-4">
-                Uploaded file is processed at real-time not stored in our server. 
-                Analysis results are stored within your account and can be deleted anytime.
-            </p>
+            <!-- Section 2: How We Use Information -->
+            <div class="mb-8">
+                <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-cogs text-purple-500 mr-3"></i>
+                    How We Use Your Information
+                </h2>
+                <div class="bg-purple-50 rounded-lg p-4 mb-4">
+                    <p class="text-sm text-purple-800 mb-2">
+                        <strong>Simple purpose:</strong> To provide AI analysis and improve our service. We never use your data for advertising or sell it to others.
+                    </p>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="border border-green-200 bg-green-50 rounded-lg p-4">
+                        <h4 class="font-semibold text-green-800 mb-2">✅ What We Do</h4>
+                        <ul class="text-sm text-green-700 space-y-1">
+                            <li>• Process resumes for AI analysis</li>
+                            <li>• Store your analysis results securely</li>
+                            <li>• Send service updates and support responses</li>
+                            <li>• Improve our AI models (anonymously)</li>
+                            <li>• Provide customer support</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="border border-red-200 bg-red-50 rounded-lg p-4">
+                        <h4 class="font-semibold text-red-800 mb-2">❌ What We Never Do</h4>
+                        <ul class="text-sm text-red-700 space-y-1">
+                            <li>• Sell your data to third parties</li>
+                            <li>• Use your data for advertising</li>
+                            <li>• Share candidate information</li>
+                            <li>• Store uploaded files permanently</li>
+                            <li>• Send marketing emails without permission</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
 
-            <h2 class="text-xl font-bold text-gray-800 mb-4">4. Data Security</h2>
-            <p class="text-gray-600 mb-4">
-                We use encryption technology and industry-standard security practices 
-                to protect your personal information.
-            </p>
+            <!-- Section 3: Data Security -->
+            <div class="mb-8">
+                <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-shield-alt text-emerald-500 mr-3"></i>
+                    How We Protect Your Data
+                </h2>
+                <div class="bg-emerald-50 rounded-lg p-4 mb-4">
+                    <p class="text-sm text-emerald-800 mb-2">
+                        <strong>Enterprise-grade security:</strong> We use the same encryption and security measures as major banks and tech companies.
+                    </p>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <h4 class="font-semibold text-gray-800 mb-3 flex items-center">
+                            <i class="fas fa-lock text-blue-500 mr-2"></i>
+                            Encryption & Security
+                        </h4>
+                        <div class="grid md:grid-cols-2 gap-4 text-sm text-gray-600">
+                            <div>
+                                <ul class="space-y-1">
+                                    <li>• SSL/TLS encryption for all data transfers</li>
+                                    <li>• AES-256 encryption for stored data</li>
+                                    <li>• Regular security audits and updates</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <ul class="space-y-1">
+                                    <li>• Secure cloud infrastructure (AWS/Google)</li>
+                                    <li>• Access controls and monitoring</li>
+                                    <li>• GDPR compliant data handling</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <h4 class="font-semibold text-gray-800 mb-3 flex items-center">
+                            <i class="fas fa-clock text-purple-500 mr-2"></i>
+                            Automatic Data Deletion
+                        </h4>
+                        <div class="text-sm text-gray-600">
+                            <p class="mb-2">We automatically delete sensitive data to minimize risk:</p>
+                            <ul class="space-y-1 list-disc pl-5">
+                                <li><strong>Uploaded files:</strong> Deleted immediately after processing (within minutes)</li>
+                                <li><strong>Temporary processing data:</strong> Cleared every 24 hours</li>
+                                <li><strong>Saved candidates:</strong> Cleaned up after 6 months of inactivity</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-            <h2 class="text-xl font-bold text-gray-800 mb-4">5. Contact</h2>
-            <p class="text-gray-600 mb-4">
-                For questions regarding Privacy Policy, contact us at 
-                <a href="mailto:support@aapgrp.com" class="text-blue-600">support@aapgrp.com</a>
-            </p>
+            <!-- Section 4: Your Privacy Rights -->
+            <div class="mb-8">
+                <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-user-cog text-orange-500 mr-3"></i>
+                    Your Privacy Rights & Control
+                </h2>
+                <div class="bg-orange-50 rounded-lg p-4 mb-4">
+                    <p class="text-sm text-orange-800 mb-2">
+                        <strong>You're in control:</strong> Access, modify, or delete your data anytime. No questions asked.
+                    </p>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="space-y-3">
+                        <div class="border border-blue-200 rounded-lg p-3">
+                            <h4 class="font-semibold text-blue-800 text-sm mb-1">📥 Access Your Data</h4>
+                            <p class="text-xs text-blue-700">Download all your analysis results and account data</p>
+                        </div>
+                        <div class="border border-purple-200 rounded-lg p-3">
+                            <h4 class="font-semibold text-purple-800 text-sm mb-1">✏️ Modify Information</h4>
+                            <p class="text-xs text-purple-700">Update account details and preferences anytime</p>
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="border border-red-200 rounded-lg p-3">
+                            <h4 class="font-semibold text-red-800 text-sm mb-1">🗑️ Delete Everything</h4>
+                            <p class="text-xs text-red-700">Completely remove your account and all associated data</p>
+                        </div>
+                        <div class="border border-green-200 rounded-lg p-3">
+                            <h4 class="font-semibold text-green-800 text-sm mb-1">🛑 Opt-Out Anytime</h4>
+                            <p class="text-xs text-green-700">Unsubscribe from communications with one click</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 5: Third-Party Services -->
+            <div class="mb-8">
+                <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-handshake text-indigo-500 mr-3"></i>
+                    Third-Party Services We Use
+                </h2>
+                <div class="bg-indigo-50 rounded-lg p-4 mb-4">
+                    <p class="text-sm text-indigo-800 mb-2">
+                        <strong>Transparency first:</strong> We work with trusted partners who meet our privacy standards.
+                    </p>
+                </div>
+                
+                <div class="space-y-3">
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <h4 class="font-semibold text-gray-800 mb-2">🔐 Authentication & Payments</h4>
+                        <div class="text-sm text-gray-600">
+                            <p class="mb-2">We use industry-standard services for security:</p>
+                            <ul class="list-disc pl-5 space-y-1">
+                                <li><strong>Supabase:</strong> Secure user authentication and database</li>
+                                <li><strong>Midtrans:</strong> Payment processing (they never see your analysis data)</li>
+                                <li><strong>Google/AWS:</strong> Cloud infrastructure with enterprise security</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                        <p class="text-xs text-yellow-800">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            <strong>Important:</strong> These partners only receive the minimum data necessary for their specific function (like processing payments). They never access your recruitment data or analysis results.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact & Updates Section -->
+            <div class="bg-gray-50 rounded-lg p-6">
+                <h3 class="font-bold text-gray-800 mb-3 flex items-center">
+                    <i class="fas fa-envelope text-blue-500 mr-2"></i>
+                    Questions About Your Privacy?
+                </h3>
+                <p class="text-gray-600 text-sm mb-4">
+                    Privacy shouldn't be confusing. If you have any questions about how we handle your data, please ask! We're committed to complete transparency.
+                </p>
+                
+                <div class="space-y-3">
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <a href="mailto:support@aapgrp.com" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                            <i class="fas fa-envelope mr-2"></i>Email Privacy Questions
+                        </a>
+                        <a href="mailto:support@aapgrp.com?subject=Delete%20My%20Data" class="inline-flex items-center px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 transition-colors text-sm">
+                            <i class="fas fa-trash mr-2"></i>Request Data Deletion
+                        </a>
+                    </div>
+                    
+                    <div class="text-xs text-gray-500">
+                        <p><strong>Policy Updates:</strong> We'll notify you of any significant privacy policy changes via email. Minor updates will be posted here with the updated date.</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     
+    <!-- Back Button -->
     <div class="text-center mt-8">
-        <button id="back-from-privacy" class="px-6 py-2 text-gray-600 hover:text-gray-800 transition-colors">
-            <i class="fas fa-arrow-left mr-2"></i>Back to Application
+        <button id="back-from-privacy" class="inline-flex items-center px-6 py-3 border-2 border-gray-300 text-gray-700 font-medium rounded-xl hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50 transition-all duration-300 group">
+            <i class="fas fa-arrow-left mr-2 group-hover:transform group-hover:-translate-x-1 transition-transform"></i>
+            <span>Back to Analysis</span>
         </button>
     </div>
 </div>
