@@ -8876,19 +8876,54 @@ function showSingleCandidateView(data) {
         nameElement.textContent = sanitizeText(data.candidateName);
     }
     
-    // Update score safely
-    if (data.candidateScore) {
-        const scoreValue = parseInt(data.candidateScore);
-        const scoreElement = document.getElementById('candidate-score');
-        const scoreCircle = document.querySelector('.score-circle');
-        
-        if (scoreElement) {
-            scoreElement.textContent = `${scoreValue}`;
-        }
-        if (scoreCircle) {
-            scoreCircle.style.setProperty('--score-percent', `${scoreValue}%`);
-        }
+    // 🎭 DRAMATIC REVEAL: Start with score hidden and show completion message
+    const scoreElement = document.getElementById('candidate-score');
+    const scoreCircle = document.querySelector('.score-circle');
+    const scoreBadge = document.getElementById('score-badge');
+    const analysisTimeElement = document.getElementById('analysis-time');
+    
+    // Hide score initially for dramatic reveal
+    if (scoreElement) {
+        scoreElement.style.opacity = '0';
+        scoreElement.textContent = '0';
     }
+    if (scoreCircle) {
+        scoreCircle.style.setProperty('--score-percent', '0%');
+    }
+    
+    // Show completion hero moment
+    showSuccess('🎉 Analysis Complete! Discovering insights...');
+    
+    // Get final score for animation
+    const finalScore = parseInt(data.candidateScore) || 75;
+    
+    // 📊 ANIMATED SCORE: Count up effect (2 seconds max)
+    setTimeout(() => {
+        if (scoreElement && scoreCircle) {
+            scoreElement.style.opacity = '1';
+            scoreElement.style.transition = 'opacity 0.3s ease';
+            
+            let currentScore = 0;
+            const increment = finalScore / 40; // 40 steps over ~2 seconds
+            const intervalTime = 50; // 50ms per step = 2 seconds total
+            
+            const countUp = setInterval(() => {
+                currentScore += increment;
+                if (currentScore >= finalScore) {
+                    currentScore = finalScore;
+                    clearInterval(countUp);
+                    
+                    // 🎯 SCORE BADGE: Show dynamic badge after score animation
+                    setTimeout(() => {
+                        updateScoreBadge(finalScore, scoreBadge);
+                    }, 300);
+                }
+                
+                scoreElement.textContent = Math.round(currentScore);
+                scoreCircle.style.setProperty('--score-percent', `${currentScore}%`);
+            }, intervalTime);
+        }
+    }, 800); // Start score animation after 0.8s
     
     // Update executive summary safely
     const executiveSummaryElement = document.getElementById('executive-summary');
@@ -8935,6 +8970,57 @@ function showSingleCandidateView(data) {
 
     // Update user tier badge
     updateUserTierBadge();
+    
+    // 🚀 ACTION ENCOURAGEMENT: Show after everything loads
+    setTimeout(() => {
+        showActionEncouragement();
+    }, 4000); // Show after score animation completes
+}
+
+// 🎯 SCORE BADGE: Dynamic badge function
+function updateScoreBadge(score, badgeElement) {
+    if (!badgeElement) return;
+    
+    let badgeHTML = '';
+    let badgeClass = '';
+    
+    if (score >= 80) {
+        badgeHTML = score >= 90 ? '🏆 Excellent Match' : '⭐ Top Candidate';
+        badgeClass = 'px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full';
+    } else if (score >= 60) {
+        badgeHTML = score >= 70 ? '🎯 Good Potential' : '✅ Worth Considering';
+        badgeClass = 'px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full';
+    } else {
+        badgeHTML = score >= 50 ? '💡 Needs Review' : '🔍 Mixed Signals';
+        badgeClass = 'px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full';
+    }
+    
+    badgeElement.innerHTML = badgeHTML;
+    badgeElement.className = badgeClass;
+    
+    // Animate badge appearance
+    badgeElement.style.opacity = '0';
+    badgeElement.style.transform = 'scale(0.8)';
+    badgeElement.style.transition = 'all 0.4s ease';
+    
+    requestAnimationFrame(() => {
+        badgeElement.style.opacity = '1';
+        badgeElement.style.transform = 'scale(1)';
+    });
+}
+
+// 🚀 ACTION ENCOURAGEMENT: Show motivating next steps
+function showActionEncouragement() {
+    const encouragementMessages = [
+        "Ready to find more talent like this?",
+        "Upload another resume to compare candidates",
+        "Save this candidate and analyze more",
+        "Want to build your dream team? Keep analyzing!"
+    ];
+    
+    const randomMessage = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
+    
+    showSuccess(`🚀 ${randomMessage}`);
 }
 
 function updateUserTierBadge(analysisType = null) {
