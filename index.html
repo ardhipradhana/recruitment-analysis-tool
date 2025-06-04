@@ -284,8 +284,10 @@
     grid-template-columns: 300px 1fr;
     gap: 24px;
     align-items: start;
-    margin-left: 24px;
-    margin-right: 24px;
+    margin-left: 0;
+    margin-right: 0;
+    max-width: 100%;
+    width: 100%;
 }
 
 .candidates-sidebar {
@@ -8499,6 +8501,10 @@ function showMultipleCandidatesResults(data) {
 function showMultipleCandidatesView() {
     document.getElementById('single-candidate-view').classList.add('hidden');
     document.getElementById('multiple-candidates-view').classList.remove('hidden');
+    document.getElementById('multiple-candidates-view').style.maxWidth = 'none';
+    document.getElementById('multiple-candidates-view').style.width = '100%';
+    document.getElementById('multiple-candidates-view').parentElement.style.maxWidth = '100vw';
+    document.getElementById('multiple-candidates-view').parentElement.style.padding = '0 2rem';
     
     // 🏆 RESULTS OVERVIEW - Enhanced with achievement feeling
     const totalCandidates = candidatesData.length;
