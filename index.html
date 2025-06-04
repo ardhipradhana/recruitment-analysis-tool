@@ -8905,14 +8905,21 @@ function showSingleCandidateView(data) {
     console.log('score-badge element:', document.getElementById('score-badge'));
     console.log('finalScore:', finalScore);
     console.log('=== END DEBUG ===');
+
+    // DEBUG: Find the actual score circle element
+    console.log('=== CIRCLE DEBUG ===');
+    console.log('All elements with "score" in class:', document.querySelectorAll('[class*="score"]'));
+    console.log('All elements with "circle" in class:', document.querySelectorAll('[class*="circle"]'));
+    console.log('All elements with "--score" style:', document.querySelectorAll('[style*="--score"]'));
+    console.log('=== END CIRCLE DEBUG ===');
     
     // 📊 ANIMATED SCORE: Count up effect (2 seconds max)
     setTimeout(() => {
-        // Find the correct score element
+        // Find the correct score elements with multiple selectors
         const scoreElement = document.querySelector('#candidate-score, .score-value');
-        const scoreCircle = document.querySelector('.score-circle');
+        const scoreCircle = document.querySelector('.score-circle, [style*="--score-percent"]');
         
-        if (scoreElement && scoreCircle) {
+        if (scoreElement) {
             scoreElement.style.opacity = '1';
             scoreElement.style.transition = 'opacity 0.3s ease';
             
@@ -8934,7 +8941,17 @@ function showSingleCandidateView(data) {
                 }
                 
                 scoreElement.textContent = Math.round(currentScore);
-                scoreCircle.style.setProperty('--score-percent', `${currentScore}%`);
+                
+                // Try to find and update score circle
+                if (scoreCircle) {
+                    scoreCircle.style.setProperty('--score-percent', `${currentScore}%`);
+                } else {
+                    // Alternative: find any element with score-related styling
+                    const circleElement = document.querySelector('[class*="score"], [class*="circle"]');
+                    if (circleElement) {
+                        circleElement.style.setProperty('--score-percent', `${currentScore}%`);
+                    }
+                }
             }, intervalTime);
         } else {
             console.log('Score elements not found:', {
@@ -8942,7 +8959,7 @@ function showSingleCandidateView(data) {
                 scoreCircle: !!scoreCircle
             });
         }
-    }, 800); // Start score animation after 0.8s
+    }, 800);
     
     // Update executive summary safely
     const executiveSummaryElement = document.getElementById('executive-summary');
