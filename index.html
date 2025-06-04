@@ -2503,11 +2503,133 @@
 </div>
 
 <!-- Saved Candidates Page -->
-<div id="saved-candidates-page" class="max-w-6xl mx-auto p-6 support-page-hidden">
-    <header class="text-center mb-8">
-        <h1 class="text-3xl font-bold text-gray-800 mb-4">Saved Candidates</h1>
-        <p class="text-gray-600">Your shortlisted candidates for comparison and review</p>
+<div id="saved-candidates-page" class="max-w-5xl mx-auto p-6 support-page-hidden">
+    <!-- Main App Header (replicated for consistency) -->
+    <header class="flex justify-between items-center mb-8 pb-4 border-b border-gray-200">
+        <div class="flex items-center space-x-4 cursor-pointer hover:opacity-80 transition-opacity" onclick="goToHome()">
+            <img src="MontPro_logo_with_words-removebg-preview.png" alt="MontPro Logo" class="h-12 w-auto" />
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800">Recruitment Engine</h1>
+                <div class="flex items-center text-sm text-gray-500 mt-1">
+                    <span>Home</span>
+                    <i class="fas fa-chevron-right mx-2 text-xs"></i>
+                    <span class="text-yellow-600 font-medium">Saved Candidates</span>
+                </div>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <!-- History Button -->
+            <button id="history-btn-saved" class="flex items-center px-3 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg hover:from-blue-600 hover:to-blue-700 transition-colors shadow-sm">
+                <i class="fas fa-history mr-2"></i>
+                <span>Recent Analyses</span>
+                <span id="history-count-saved" class="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full hidden">0</span>
+            </button>
+
+            <!-- Usage Display -->
+            <div id="usage-display-saved" class="flex items-center px-3 py-2 text-sm font-medium bg-gradient-to-r from-gray-100 to-gray-200 rounded-lg shadow-sm">
+                <i class="fas fa-coins mr-2 text-gray-600"></i>
+                <span id="usage-text-saved">Loading...</span>
+            </div>
+            
+            <button id="logout-btn-saved" class="flex items-center px-3 py-2 text-sm font-medium text-white bg-gradient-to-r from-gray-400 to-gray-500 rounded-lg hover:from-gray-500 hover:to-gray-600 transition-colors shadow-sm">
+                <span>Log Out</span>
+                <i class="fas fa-sign-out-alt ml-2"></i>
+            </button>
+        </div>
     </header>
+
+    <!-- Page Title Section (enhanced) -->
+    <div class="bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl p-6 mb-8 border border-yellow-200">
+        <div class="flex items-center justify-between">
+            <div>
+                <div class="flex items-center mb-2">
+                    <div class="w-10 h-10 bg-gradient-to-r from-yellow-500 to-amber-600 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-bookmark text-white"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold text-gray-800">Your Saved Candidates</h1>
+                </div>
+                <p class="text-gray-600">Your curated shortlist - ready for comparison and final decisions</p>
+            </div>
+            <div class="text-right">
+                <div class="text-3xl font-bold text-yellow-600" id="total-saved-display">0</div>
+                <div class="text-sm text-gray-500">Candidates Saved</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW: Enhanced Filter & Action Toolbar -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+        <!-- Top Row: Search & Quick Actions -->
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4">
+            <!-- Search Section -->
+            <div class="flex-1 max-w-md">
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-gray-400"></i>
+                    </div>
+                    <input type="text" 
+                           id="saved-keywords-filter-enhanced" 
+                           class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                           placeholder="Search by name, title, or skills...">
+                </div>
+            </div>
+    
+            <!-- Compare Button -->
+            <div class="flex items-center gap-3">
+                <button id="compare-selected-enhanced" 
+                        class="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-medium rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 shadow-lg disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed disabled:transform-none" 
+                        disabled>
+                    <div class="flex items-center">
+                        <i class="fas fa-balance-scale mr-2"></i>
+                        <span id="compare-btn-text-enhanced">Compare Selected (0)</span>
+                    </div>
+                </button>
+            </div>
+        </div>
+    
+        <!-- Bottom Row: Advanced Filters -->
+        <div class="border-t pt-4">
+            <div class="flex flex-col lg:flex-row lg:items-center gap-4">
+                <!-- Score Filter -->
+                <div class="flex items-center gap-3">
+                    <label class="text-sm font-medium text-gray-700 whitespace-nowrap">Min Score:</label>
+                    <div class="flex items-center gap-2">
+                        <input type="range" 
+                               id="saved-score-range-enhanced" 
+                               class="w-24" 
+                               min="0" max="100" value="0">
+                        <span id="saved-score-display-enhanced" class="text-sm font-medium text-gray-600 w-8">0</span>
+                    </div>
+                </div>
+    
+                <!-- Sort Options -->
+                <div class="flex items-center gap-3 lg:ml-auto">
+                    <label class="text-sm font-medium text-gray-700 whitespace-nowrap">Sort by:</label>
+                    <div class="flex gap-1">
+                        <button id="saved-sort-score-enhanced" class="sort-btn-enhanced active px-3 py-2 bg-blue-100 text-blue-800 rounded-lg text-sm font-medium hover:bg-blue-200 transition-colors">
+                            Score ↓
+                        </button>
+                        <button id="saved-sort-name-enhanced" class="sort-btn-enhanced px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
+                            Name
+                        </button>
+                        <button id="saved-sort-date-enhanced" class="sort-btn-enhanced px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
+                            Date
+                        </button>
+                    </div>
+                </div>
+    
+                <!-- Clear Filters -->
+                <button id="clear-saved-filters-enhanced" class="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 transition-colors">
+                    <i class="fas fa-times mr-1"></i>Clear
+                </button>
+            </div>
+    
+            <!-- Results Counter -->
+            <div class="mt-3 text-sm text-gray-500" id="saved-filter-results-enhanced">
+                Showing all candidates
+            </div>
+        </div>
+    </div>
 
     <!-- Saved Candidates Overview (similar to multiple candidates layout) -->
     <div id="saved-candidates-overview" class="candidates-overview">
@@ -2522,7 +2644,7 @@
                 </div>
 
                 <!-- Filter Section -->
-                <div class="mt-4 pt-3 border-t border-white/30">
+                <div class="mt-4 pt-3 border-t border-white/30" style="display: none;">
                     <div class="text-xs opacity-75 mb-2">Filters:</div>
                     
                     <!-- Keywords Search -->
@@ -2591,7 +2713,7 @@
                 </div>
 
                 <!-- Compare Button (add this after the sort section) -->
-                <div class="mt-4 pt-3 border-t border-white/30">
+                <div class="mt-4 pt-3 border-t border-white/30" style="display: none;">
                     <button id="compare-selected-btn" class="w-full py-2 px-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed" disabled>
                         <i class="fas fa-balance-scale mr-2"></i>
                         <span id="compare-btn-text">Compare Selected (0)</span>
