@@ -8501,10 +8501,15 @@ function showMultipleCandidatesResults(data) {
 function showMultipleCandidatesView() {
     document.getElementById('single-candidate-view').classList.add('hidden');
     document.getElementById('multiple-candidates-view').classList.remove('hidden');
-    document.getElementById('multiple-candidates-view').style.maxWidth = 'none';
-    document.getElementById('multiple-candidates-view').style.width = '100%';
-    document.getElementById('multiple-candidates-view').parentElement.style.maxWidth = '100vw';
-    document.getElementById('multiple-candidates-view').parentElement.style.padding = '0 2rem';
+    // Make multiple candidates view full width
+    const mainApp = document.getElementById('main-app');
+    const multipleView = document.getElementById('multiple-candidates-view');
+    
+    mainApp.classList.remove('max-w-7xl');
+    mainApp.style.maxWidth = '100vw';
+    mainApp.style.width = '100%';
+    multipleView.style.maxWidth = 'none';
+    multipleView.style.width = '100%';
     
     // 🏆 RESULTS OVERVIEW - Enhanced with achievement feeling
     const totalCandidates = candidatesData.length;
@@ -9189,6 +9194,12 @@ function generateCompetenciesHTML(competencies) {
 }
 
 function showSingleCandidateView(data) {
+    // Restore normal width for single candidate
+    const mainApp = document.getElementById('main-app');
+    mainApp.classList.add('max-w-7xl');
+    mainApp.style.maxWidth = '';
+    mainApp.style.width = '';
+    
     document.getElementById('multiple-candidates-view').classList.add('hidden');
     document.getElementById('single-candidate-view').classList.remove('hidden');
     
