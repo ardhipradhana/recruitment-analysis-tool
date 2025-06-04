@@ -1091,8 +1091,6 @@
             </button>
         </header>
 
-        
-
         <div id="upload-interface" class="bg-white rounded-xl shadow-sm p-8 mb-8">
             <!-- NEW: Engaging header section -->
             <div class="text-center mb-8">
@@ -1251,6 +1249,288 @@
 
             <div class="text-center text-sm text-gray-500 mt-8">
                 <p>This tool will analyze your candidate documents and extract relevant information for recruitment purposes.</p>
+                <p class="mt-1">© 2025 MontPro. All rights reserved.</p>
+            </div>
+        </div>
+
+        <div id="analysis-loading" class="hidden">
+            <div class="bg-white rounded-xl shadow-sm p-8 mb-8 text-center">
+                <div class="mb-6">
+                    <!-- Enhanced loading animation -->
+                    <div class="w-24 h-24 mx-auto mb-6 flex items-center justify-center relative">
+                        <!-- Outer ring animation -->
+                        <div class="absolute inset-0 border-4 border-blue-100 rounded-full"></div>
+                        <div class="absolute inset-0 border-4 border-transparent border-t-blue-500 rounded-full animate-spin"></div>
+                        
+                        <!-- Inner icon with subtle pulse -->
+                        <i class="fas fa-brain text-blue-500 text-3xl animate-pulse"></i>
+                    </div>
+                    
+                    <!-- NEW: Engaging headlines -->
+                    <h2 class="text-xl font-semibold text-gray-800 mb-2">🔍 Uncovering Hidden Talent...</h2>
+                    <p class="text-gray-600 typingEffect">Our AI is reading between the lines to find what others miss</p>
+                </div>
+                
+                <div class="max-w-md mx-auto mb-8">
+                    <div class="flex justify-between text-sm text-gray-600 mb-1">
+                        <span id="loading-step">Extracting qualifications</span>
+                        <span id="loading-percent">25%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="progress-bar-fill" class="progress-bar-fill" style="width: 25%"></div>
+                    </div>
+                </div>
+                
+                <!-- NEW: Exciting step descriptions -->
+                <div class="text-center text-sm text-gray-500 space-y-3" id="loading-checklist">
+                    <div class="flex items-center justify-center">
+                        <div class="w-4 h-4 bg-green-500 rounded-full mr-2 flex items-center justify-center">
+                            <i class="fas fa-check text-white text-xs"></i>
+                        </div>
+                        <span>Resume received and secured</span>
+                    </div>
+                    <div class="flex items-center justify-center">
+                        <div class="w-4 h-4 bg-green-500 rounded-full mr-2 flex items-center justify-center">
+                            <i class="fas fa-check text-white text-xs"></i>
+                        </div>
+                        <span>Smart text extraction complete</span>
+                    </div>
+                    <div class="flex items-center justify-center">
+                        <div class="w-4 h-4 bg-blue-500 rounded-full mr-2 flex items-center justify-center animate-pulse">
+                            <div class="w-2 h-2 bg-white rounded-full"></div>
+                        </div>
+                        <span id="current-analysis-step">🧠 Analyzing experience patterns and skill depth</span>
+                    </div>
+                    <div class="flex items-center justify-center opacity-50">
+                        <div class="w-4 h-4 border border-gray-300 rounded-full mr-2"></div>
+                        <span>🎯 Calculating compatibility scores</span>
+                    </div>
+                    <div class="flex items-center justify-center opacity-50">
+                        <div class="w-4 h-4 border border-gray-300 rounded-full mr-2"></div>
+                        <span>📊 Generating insights report</span>
+                    </div>
+                </div>
+                
+                <!-- NEW: Anticipation builder -->
+                <div class="mt-8 p-4 bg-blue-50 rounded-lg">
+                    <p class="text-sm text-blue-700 font-medium">💡 Pro Tip</p>
+                    <p class="text-xs text-blue-600 mt-1">While we analyze, our AI is discovering skills and experiences that traditional keyword searches miss entirely.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Replace your existing analysis-results div with this -->
+        <div id="analysis-results" class="hidden">
+            <!-- Single Candidate View (existing) -->
+            <div id="single-candidate-view">
+                <!-- Your existing single candidate HTML stays exactly the same -->
+                <!-- Candidate Overview -->
+                <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                    <!-- Compact results header -->
+                    <div class="text-center mb-4">
+                        <div class="inline-flex items-center justify-center w-10 h-10 bg-green-100 rounded-full mb-2">
+                            <i class="fas fa-magic text-green-600"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-1">✨ Analysis Complete!</h3>
+                        <p class="text-sm text-gray-600">Here's what our AI discovered about this candidate</p>
+                    </div>
+                    
+                    <div class="flex justify-between items-center">
+                        <div class="flex-1">
+                            <div class="flex items-center mb-2">
+                                <h2 id="candidate-name" class="text-2xl font-bold text-gray-800">Candidate Name</h2>
+                                <span id="user-tier-badge" class="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">Free Trial</span>
+                            </div>
+                            
+                            <div class="flex flex-wrap gap-2">
+                                <span class="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-md">Resume Analysis</span>
+                                <span class="text-xs bg-green-50 text-green-700 px-2 py-1 rounded-md">AI-Powered</span>
+                                <span id="analysis-date" class="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-md">May 21, 2025</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Compact score section -->
+                        <div class="text-center relative ml-6">
+                            <button class="save-candidate-btn absolute -top-2 -left-2 w-7 h-7 bg-transparent hover:bg-gray-100 text-gray-400 hover:text-gray-600 rounded-full flex items-center justify-center transition-colors z-10 border border-gray-300" 
+                                    data-candidate-index="0"
+                                    onclick="toggleSaveCandidate(0, event)" 
+                                    title="Save candidate">
+                                <i class="far fa-bookmark text-xs"></i>
+                            </button>
+                            
+                            <!-- Simplified score circle -->
+                            <div class="w-20 h-20 rounded-full bg-conic-gradient flex items-center justify-center mb-2 mx-auto" style="background: conic-gradient(#3b82f6 0%, #3b82f6 75%, #e2e8f0 75%, #e2e8f0 100%);">
+                                <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center">
+                                    <span id="candidate-score" class="text-2xl font-bold text-blue-600">88</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Centered info below -->
+                            <div class="flex flex-col items-center space-y-1">
+                                <span id="score-badge" class="px-2 py-1 bg-emerald-100 text-emerald-800 text-xs font-medium rounded-full">
+                                    🎯 Strong Match
+                                </span>
+                                <div class="text-xs text-gray-500 flex items-center">
+                                    <i class="fas fa-clock mr-1"></i>
+                                    <span id="analysis-time">26s</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Executive Summary -->
+                <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-file-alt text-blue-500 mr-3"></i>
+                        <h3 class="text-lg font-semibold">Executive Summary</h3>
+                    </div>
+                    <div id="executive-summary" class="text-gray-700">
+                        <!-- Executive summary will be inserted here -->
+                    </div>
+                </div>
+                
+                <!-- Core Competencies Preview -->
+                <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center">
+                            <i class="fas fa-brain text-blue-500 mr-3"></i>
+                            <h3 class="text-lg font-semibold">Core Competencies</h3>
+                        </div>
+                        <span class="text-sm text-gray-500">Top Skills Preview</span>
+                    </div>
+                    <div id="core-competencies" class="flex flex-wrap gap-1.5">
+                        <!-- Top skills will be inserted here -->
+                    </div>
+                </div>
+                
+                <!-- Upgrade CTA -->
+                <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-6 text-white mb-6">
+                    <div class="md:flex justify-between items-center">
+                        <div class="mb-4 md:mb-0">
+                            <h3 class="font-bold text-xl mb-2">Take Your Recruitment Process to the Next Level</h3>
+                            <p class="opacity-90 mb-2">Unlock advanced customization options and powerful features:</p>
+                            <ul class="list-disc pl-5 text-sm opacity-90 space-y-1">
+                                <li>Custom metrics tracking tailored to your hiring needs</li>
+                                <li>Batch upload via Google Drive for efficient processing</li>
+                                <li>Flexible output formats (Google Docs, Slides, Sheets, PDF)</li>
+                                <li>Personalized report templates to match your brand</li>
+                                <li>Match candidates against your specific job requirements</li>
+                            </ul>
+                        </div>
+                        <div class="mt-4 md:mt-0 flex-shrink-0 text-center">
+                            <p class="text-sm italic text-white opacity-80 mb-2">You've tried it, now make it yours.</p>
+                            <a href="https://calendly.com/ardhipradhana/montpro_discovery" class="inline-block px-6 py-3 bg-white text-purple-700 font-medium rounded-lg hover:bg-gray-100 transition-colors shadow-md">
+                                <i class="fas fa-magic mr-2"></i>
+                                Get My Tailored Version
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        
+            <!-- Multiple Candidates View (new) -->
+            <div id="multiple-candidates-view" class="hidden">
+                <div class="candidates-overview">
+                    <!-- Candidates Sidebar -->
+                    <div class="candidates-sidebar">
+                        <!-- Summary Header -->
+                        <div class="candidate-summary">
+                            <div class="text-2xl font-bold mb-1" id="total-candidates">5</div>
+                            <div class="text-sm opacity-90">Candidates Analyzed</div>
+                            <div class="mt-3 text-xs opacity-75" id="analysis-timestamp">
+                                Analysis completed on May 22, 2025
+                            </div>
+        
+                            <div class="mt-4 pt-3 border-t border-white/30">
+                                <div class="text-xs opacity-75 mb-2">Sort by:</div>
+                                <div class="flex gap-2">
+                                    <button id="sort-score" class="sort-btn active px-2 py-1 bg-white/20 rounded text-xs hover:bg-white/30 transition-colors">
+                                        Score ↓
+                                    </button>
+                                    <button id="sort-name" class="sort-btn px-2 py-1 bg-white/20 rounded text-xs hover:bg-white/30 transition-colors">
+                                        Name
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- ADD THIS NEW SECTION -->
+                            <div class="filter-section mt-4 pt-3 border-t border-white/30">
+                                <div class="text-xs opacity-75 mb-2">Search & Filter:</div>
+            
+                                <!-- Search Input -->
+                                <input type="text" id="candidate-search" class="filter-input mb-3" 
+                                       placeholder="Search names, titles, skills..." 
+                                       style="width: 100%; padding: 8px 12px; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; background: rgba(255,255,255,0.1); color: white; font-size: 14px;">
+            
+                                <!-- Score section (you already have this working) -->
+                                <div class="text-xs opacity-75 mb-1">Min Score: <span id="score-display">0</span></div>
+                                <input type="range" id="score-range" class="score-range-slider" min="0" max="100" value="0">
+            
+                                <!-- Results counter -->
+                                <div id="filter-results" class="filter-results-count text-xs opacity-75 mt-2">
+                                    Showing all candidates
+                                </div>
+                            </div>
+                        </div>
+        
+                        <!-- Candidate Cards Grid -->
+                        <div class="candidate-grid" id="candidate-cards">
+                            <!-- Cards will be dynamically inserted here -->
+                        </div>
+                    </div>
+        
+                    <!-- Detailed View -->
+                    <div class="candidate-detail-view">
+                        <div id="selected-candidate-detail">
+                            <!-- Selected candidate details will be shown here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Actions -->
+            <div id="analysis-actions" class="flex flex-col md:flex-row justify-between gap-4 mt-6 hidden" style="margin-left: 20px; margin-bottom: 20px; margin-right: 20px;">
+                <button id="new-analysis-btn" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg flex items-center justify-center hover:bg-gray-300 transition-colors">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Analyze Another Resume
+                </button>
+            
+                <div class="flex flex-col md:flex-row gap-3">
+                    <!-- Export Dropdown -->
+                    <div class="relative">
+                        <button id="export-btn" class="px-4 py-2 bg-green-600 text-white rounded-lg flex items-center justify-center hover:bg-green-700 transition-colors">
+                            <i class="fas fa-download mr-2"></i>
+                            Export Results
+                            <i class="fas fa-chevron-down ml-2 text-xs"></i>
+                        </button>
+                    
+                        <!-- Dropdown Menu -->
+                        <div id="export-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10 hidden">
+                            <button id="export-csv" class="w-full px-4 py-2 text-left hover:bg-gray-50 rounded-t-lg flex items-center">
+                                <i class="fas fa-file-csv text-green-600 mr-3"></i>
+                                Export to CSV
+                            </button>
+                            <button id="copy-results" class="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center">
+                                <i class="fas fa-copy text-blue-600 mr-3"></i>
+                                Copy to Clipboard
+                            </button>
+                            <button id="email-results" class="w-full px-4 py-2 text-left hover:bg-gray-50 rounded-b-lg flex items-center">
+                                <i class="fas fa-envelope text-purple-600 mr-3"></i>
+                                Email Results
+                            </button>
+                        </div>
+                    </div>
+                
+                    <button id="download-pdf-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center justify-center hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-file-pdf mr-2"></i>
+                        Download PDF
+                    </button>
+                </div>
+            </div>
+        
+            <!-- Footer text also here for results page with bottom margin -->
+            <div id="results-footer" class="text-center text-sm text-gray-500 mt-8 mb-8 hidden">
+                <p>Results are provided for recruitment guidance only. Final hiring decisions should consider multiple factors beyond this analysis.</p>
                 <p class="mt-1">© 2025 MontPro. All rights reserved.</p>
             </div>
         </div>
@@ -2792,289 +3072,6 @@
         <button id="back-from-comparison" class="px-6 py-2 text-gray-600 hover:text-gray-800 transition-colors">
             <i class="fas fa-arrow-left mr-2"></i>Back to Saved Candidates
         </button>
-    </div>
-</div>
-
-<!-- 1. Add the loading UI section right after your upload-interface section -->
-<div id="analysis-loading" class="hidden">
-    <div class="bg-white rounded-xl shadow-sm p-8 mb-8 text-center">
-        <div class="mb-6">
-            <!-- Enhanced loading animation -->
-            <div class="w-24 h-24 mx-auto mb-6 flex items-center justify-center relative">
-                <!-- Outer ring animation -->
-                <div class="absolute inset-0 border-4 border-blue-100 rounded-full"></div>
-                <div class="absolute inset-0 border-4 border-transparent border-t-blue-500 rounded-full animate-spin"></div>
-                
-                <!-- Inner icon with subtle pulse -->
-                <i class="fas fa-brain text-blue-500 text-3xl animate-pulse"></i>
-            </div>
-            
-            <!-- NEW: Engaging headlines -->
-            <h2 class="text-xl font-semibold text-gray-800 mb-2">🔍 Uncovering Hidden Talent...</h2>
-            <p class="text-gray-600 typingEffect">Our AI is reading between the lines to find what others miss</p>
-        </div>
-        
-        <div class="max-w-md mx-auto mb-8">
-            <div class="flex justify-between text-sm text-gray-600 mb-1">
-                <span id="loading-step">Extracting qualifications</span>
-                <span id="loading-percent">25%</span>
-            </div>
-            <div class="progress-bar">
-                <div id="progress-bar-fill" class="progress-bar-fill" style="width: 25%"></div>
-            </div>
-        </div>
-        
-        <!-- NEW: Exciting step descriptions -->
-        <div class="text-center text-sm text-gray-500 space-y-3" id="loading-checklist">
-            <div class="flex items-center justify-center">
-                <div class="w-4 h-4 bg-green-500 rounded-full mr-2 flex items-center justify-center">
-                    <i class="fas fa-check text-white text-xs"></i>
-                </div>
-                <span>Resume received and secured</span>
-            </div>
-            <div class="flex items-center justify-center">
-                <div class="w-4 h-4 bg-green-500 rounded-full mr-2 flex items-center justify-center">
-                    <i class="fas fa-check text-white text-xs"></i>
-                </div>
-                <span>Smart text extraction complete</span>
-            </div>
-            <div class="flex items-center justify-center">
-                <div class="w-4 h-4 bg-blue-500 rounded-full mr-2 flex items-center justify-center animate-pulse">
-                    <div class="w-2 h-2 bg-white rounded-full"></div>
-                </div>
-                <span id="current-analysis-step">🧠 Analyzing experience patterns and skill depth</span>
-            </div>
-            <div class="flex items-center justify-center opacity-50">
-                <div class="w-4 h-4 border border-gray-300 rounded-full mr-2"></div>
-                <span>🎯 Calculating compatibility scores</span>
-            </div>
-            <div class="flex items-center justify-center opacity-50">
-                <div class="w-4 h-4 border border-gray-300 rounded-full mr-2"></div>
-                <span>📊 Generating insights report</span>
-            </div>
-        </div>
-        
-        <!-- NEW: Anticipation builder -->
-        <div class="mt-8 p-4 bg-blue-50 rounded-lg">
-            <p class="text-sm text-blue-700 font-medium">💡 Pro Tip</p>
-            <p class="text-xs text-blue-600 mt-1">While we analyze, our AI is discovering skills and experiences that traditional keyword searches miss entirely.</p>
-        </div>
-    </div>
-</div>
-
-<!-- Replace your existing analysis-results div with this -->
-<div id="analysis-results" class="hidden">
-    <!-- Single Candidate View (existing) -->
-    <div id="single-candidate-view">
-        <!-- Your existing single candidate HTML stays exactly the same -->
-        <!-- Candidate Overview -->
-        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-            <!-- Compact results header -->
-            <div class="text-center mb-4">
-                <div class="inline-flex items-center justify-center w-10 h-10 bg-green-100 rounded-full mb-2">
-                    <i class="fas fa-magic text-green-600"></i>
-                </div>
-                <h3 class="text-lg font-semibold text-gray-800 mb-1">✨ Analysis Complete!</h3>
-                <p class="text-sm text-gray-600">Here's what our AI discovered about this candidate</p>
-            </div>
-            
-            <div class="flex justify-between items-center">
-                <div class="flex-1">
-                    <div class="flex items-center mb-2">
-                        <h2 id="candidate-name" class="text-2xl font-bold text-gray-800">Candidate Name</h2>
-                        <span id="user-tier-badge" class="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">Free Trial</span>
-                    </div>
-                    
-                    <div class="flex flex-wrap gap-2">
-                        <span class="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-md">Resume Analysis</span>
-                        <span class="text-xs bg-green-50 text-green-700 px-2 py-1 rounded-md">AI-Powered</span>
-                        <span id="analysis-date" class="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-md">May 21, 2025</span>
-                    </div>
-                </div>
-                
-                <!-- Compact score section -->
-                <div class="text-center relative ml-6">
-                    <button class="save-candidate-btn absolute -top-2 -left-2 w-7 h-7 bg-transparent hover:bg-gray-100 text-gray-400 hover:text-gray-600 rounded-full flex items-center justify-center transition-colors z-10 border border-gray-300" 
-                            data-candidate-index="0"
-                            onclick="toggleSaveCandidate(0, event)" 
-                            title="Save candidate">
-                        <i class="far fa-bookmark text-xs"></i>
-                    </button>
-                    
-                    <!-- Simplified score circle -->
-                    <div class="w-20 h-20 rounded-full bg-conic-gradient flex items-center justify-center mb-2 mx-auto" style="background: conic-gradient(#3b82f6 0%, #3b82f6 75%, #e2e8f0 75%, #e2e8f0 100%);">
-                        <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center">
-                            <span id="candidate-score" class="text-2xl font-bold text-blue-600">88</span>
-                        </div>
-                    </div>
-                    
-                    <!-- Centered info below -->
-                    <div class="flex flex-col items-center space-y-1">
-                        <span id="score-badge" class="px-2 py-1 bg-emerald-100 text-emerald-800 text-xs font-medium rounded-full">
-                            🎯 Strong Match
-                        </span>
-                        <div class="text-xs text-gray-500 flex items-center">
-                            <i class="fas fa-clock mr-1"></i>
-                            <span id="analysis-time">26s</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Executive Summary -->
-        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-            <div class="flex items-center mb-4">
-                <i class="fas fa-file-alt text-blue-500 mr-3"></i>
-                <h3 class="text-lg font-semibold">Executive Summary</h3>
-            </div>
-            <div id="executive-summary" class="text-gray-700">
-                <!-- Executive summary will be inserted here -->
-            </div>
-        </div>
-        
-        <!-- Core Competencies Preview -->
-        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-            <div class="flex items-center justify-between mb-4">
-                <div class="flex items-center">
-                    <i class="fas fa-brain text-blue-500 mr-3"></i>
-                    <h3 class="text-lg font-semibold">Core Competencies</h3>
-                </div>
-                <span class="text-sm text-gray-500">Top Skills Preview</span>
-            </div>
-            <div id="core-competencies" class="flex flex-wrap gap-1.5">
-                <!-- Top skills will be inserted here -->
-            </div>
-        </div>
-        
-        <!-- Upgrade CTA -->
-        <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-6 text-white mb-6">
-            <div class="md:flex justify-between items-center">
-                <div class="mb-4 md:mb-0">
-                    <h3 class="font-bold text-xl mb-2">Take Your Recruitment Process to the Next Level</h3>
-                    <p class="opacity-90 mb-2">Unlock advanced customization options and powerful features:</p>
-                    <ul class="list-disc pl-5 text-sm opacity-90 space-y-1">
-                        <li>Custom metrics tracking tailored to your hiring needs</li>
-                        <li>Batch upload via Google Drive for efficient processing</li>
-                        <li>Flexible output formats (Google Docs, Slides, Sheets, PDF)</li>
-                        <li>Personalized report templates to match your brand</li>
-                        <li>Match candidates against your specific job requirements</li>
-                    </ul>
-                </div>
-                <div class="mt-4 md:mt-0 flex-shrink-0 text-center">
-                    <p class="text-sm italic text-white opacity-80 mb-2">You've tried it, now make it yours.</p>
-                    <a href="https://calendly.com/ardhipradhana/montpro_discovery" class="inline-block px-6 py-3 bg-white text-purple-700 font-medium rounded-lg hover:bg-gray-100 transition-colors shadow-md">
-                        <i class="fas fa-magic mr-2"></i>
-                        Get My Tailored Version
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Multiple Candidates View (new) -->
-    <div id="multiple-candidates-view" class="hidden">
-        <div class="candidates-overview">
-            <!-- Candidates Sidebar -->
-            <div class="candidates-sidebar">
-                <!-- Summary Header -->
-                <div class="candidate-summary">
-                    <div class="text-2xl font-bold mb-1" id="total-candidates">5</div>
-                    <div class="text-sm opacity-90">Candidates Analyzed</div>
-                    <div class="mt-3 text-xs opacity-75" id="analysis-timestamp">
-                        Analysis completed on May 22, 2025
-                    </div>
-
-                    <div class="mt-4 pt-3 border-t border-white/30">
-                        <div class="text-xs opacity-75 mb-2">Sort by:</div>
-                        <div class="flex gap-2">
-                            <button id="sort-score" class="sort-btn active px-2 py-1 bg-white/20 rounded text-xs hover:bg-white/30 transition-colors">
-                                Score ↓
-                            </button>
-                            <button id="sort-name" class="sort-btn px-2 py-1 bg-white/20 rounded text-xs hover:bg-white/30 transition-colors">
-                                Name
-                            </button>
-                        </div>
-                    </div>
-                    <!-- ADD THIS NEW SECTION -->
-                    <div class="filter-section mt-4 pt-3 border-t border-white/30">
-                        <div class="text-xs opacity-75 mb-2">Search & Filter:</div>
-    
-                        <!-- Search Input -->
-                        <input type="text" id="candidate-search" class="filter-input mb-3" 
-                               placeholder="Search names, titles, skills..." 
-                               style="width: 100%; padding: 8px 12px; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; background: rgba(255,255,255,0.1); color: white; font-size: 14px;">
-    
-                        <!-- Score section (you already have this working) -->
-                        <div class="text-xs opacity-75 mb-1">Min Score: <span id="score-display">0</span></div>
-                        <input type="range" id="score-range" class="score-range-slider" min="0" max="100" value="0">
-    
-                        <!-- Results counter -->
-                        <div id="filter-results" class="filter-results-count text-xs opacity-75 mt-2">
-                            Showing all candidates
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Candidate Cards Grid -->
-                <div class="candidate-grid" id="candidate-cards">
-                    <!-- Cards will be dynamically inserted here -->
-                </div>
-            </div>
-
-            <!-- Detailed View -->
-            <div class="candidate-detail-view">
-                <div id="selected-candidate-detail">
-                    <!-- Selected candidate details will be shown here -->
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Actions -->
-    <div id="analysis-actions" class="flex flex-col md:flex-row justify-between gap-4 mt-6 hidden" style="margin-left: 20px; margin-bottom: 20px; margin-right: 20px;">
-        <button id="new-analysis-btn" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg flex items-center justify-center hover:bg-gray-300 transition-colors">
-            <i class="fas fa-arrow-left mr-2"></i>
-            Analyze Another Resume
-        </button>
-    
-        <div class="flex flex-col md:flex-row gap-3">
-            <!-- Export Dropdown -->
-            <div class="relative">
-                <button id="export-btn" class="px-4 py-2 bg-green-600 text-white rounded-lg flex items-center justify-center hover:bg-green-700 transition-colors">
-                    <i class="fas fa-download mr-2"></i>
-                    Export Results
-                    <i class="fas fa-chevron-down ml-2 text-xs"></i>
-                </button>
-            
-                <!-- Dropdown Menu -->
-                <div id="export-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10 hidden">
-                    <button id="export-csv" class="w-full px-4 py-2 text-left hover:bg-gray-50 rounded-t-lg flex items-center">
-                        <i class="fas fa-file-csv text-green-600 mr-3"></i>
-                        Export to CSV
-                    </button>
-                    <button id="copy-results" class="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center">
-                        <i class="fas fa-copy text-blue-600 mr-3"></i>
-                        Copy to Clipboard
-                    </button>
-                    <button id="email-results" class="w-full px-4 py-2 text-left hover:bg-gray-50 rounded-b-lg flex items-center">
-                        <i class="fas fa-envelope text-purple-600 mr-3"></i>
-                        Email Results
-                    </button>
-                </div>
-            </div>
-        
-            <button id="download-pdf-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center justify-center hover:bg-blue-700 transition-colors">
-                <i class="fas fa-file-pdf mr-2"></i>
-                Download PDF
-            </button>
-        </div>
-    </div>
-
-    <!-- Footer text also here for results page with bottom margin -->
-    <div id="results-footer" class="text-center text-sm text-gray-500 mt-8 mb-8 hidden">
-        <p>Results are provided for recruitment guidance only. Final hiring decisions should consider multiple factors beyond this analysis.</p>
-        <p class="mt-1">© 2025 MontPro. All rights reserved.</p>
     </div>
 </div>
 
