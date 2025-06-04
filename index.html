@@ -10212,6 +10212,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // History button
     document.getElementById('history-btn').addEventListener('click', showHistoryModal);
 
+    // History button in saved candidates page header
+    const historyBtnSaved = document.getElementById('history-btn-saved');
+    if (historyBtnSaved) {
+        historyBtnSaved.addEventListener('click', showHistoryModal);
+    }
+
     // Update saved counter on page load
     updateSavedCounter();
 
@@ -10358,6 +10364,23 @@ document.addEventListener("DOMContentLoaded", async function() {
             showError("Failed to log out. Please try again.");
         }
     };
+
+    // Logout button for saved page
+    const logoutBtnSaved = document.getElementById('logout-btn-saved');
+    if (logoutBtnSaved) {
+        logoutBtnSaved.onclick = async function() {
+            try {
+                // Force clear memory on logout
+                memoryManager.forceClear('logout');
+                
+                await supabase.auth.signOut();
+                showAuthBox();
+            } catch (error) {
+                console.error("Error signing out:", error);
+                showError("Failed to log out. Please try again.");
+            }
+        };
+    }
 
     // Job Description Clear Button Functionality
     const jobDescriptionTextarea = document.getElementById('job-description');
