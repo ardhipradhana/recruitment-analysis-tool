@@ -4968,6 +4968,9 @@ function toggleSaveCandidate(candidateIndex, event) {
 
     const isAlreadySaved = savedCandidatesManager.isCandidateSaved(candidate);
     
+    // GET THE ACTUAL CLICKED BUTTON
+    const clickedButton = event.target.closest('.save-candidate-btn');
+    
     if (isAlreadySaved) {
         // Find and remove the saved candidate
         const savedCandidates = savedCandidatesManager.getSavedCandidates();
@@ -4981,8 +4984,16 @@ function toggleSaveCandidate(candidateIndex, event) {
             if (result.success) {
                 showSuccess('Candidate removed from saved list');
                 updateSavedCounter();
-                // Update specific button using the new function
-                updateSpecificSaveButton(candidateIndex, false);
+                
+                // UPDATE THE ACTUAL CLICKED BUTTON TO UNSAVED STATE
+                if (clickedButton) {
+                    clickedButton.className = 'save-candidate-btn w-6 h-6 bg-transparent hover:bg-gray-100 text-gray-400 hover:text-gray-600 rounded-full flex items-center justify-center transition-colors border border-gray-300';
+                    clickedButton.title = 'Save candidate';
+                    const icon = clickedButton.querySelector('i');
+                    if (icon) {
+                        icon.className = 'far fa-bookmark text-xs';
+                    }
+                }
             } else {
                 showError(result.message);
             }
@@ -4997,8 +5008,16 @@ function toggleSaveCandidate(candidateIndex, event) {
         if (result.success) {
             showSuccess('Candidate saved successfully!');
             updateSavedCounter();
-            // Update specific button using the new function
-            updateSpecificSaveButton(candidateIndex, true);
+            
+            // UPDATE THE ACTUAL CLICKED BUTTON TO SAVED STATE
+            if (clickedButton) {
+                clickedButton.className = 'save-candidate-btn w-6 h-6 bg-yellow-500 hover:bg-yellow-600 text-white rounded-full flex items-center justify-center transition-colors shadow-sm';
+                clickedButton.title = 'Remove from saved';
+                const icon = clickedButton.querySelector('i');
+                if (icon) {
+                    icon.className = 'fas fa-bookmark text-xs';
+                }
+            }
         } else {
             if (result.message === 'Candidate already saved') {
                 showWarning('This candidate is already in your saved list');
