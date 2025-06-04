@@ -8896,9 +8896,22 @@ function showSingleCandidateView(data) {
     
     // Get final score for animation
     const finalScore = parseInt(data.candidateScore) || 75;
+
+    // DEBUG: Check what elements exist - ADD THIS HERE
+    console.log('=== SCORE DEBUG ===');
+    console.log('candidate-score element:', document.getElementById('candidate-score'));
+    console.log('score-value element:', document.querySelector('.score-value'));
+    console.log('score-circle element:', document.querySelector('.score-circle'));
+    console.log('score-badge element:', document.getElementById('score-badge'));
+    console.log('finalScore:', finalScore);
+    console.log('=== END DEBUG ===');
     
     // 📊 ANIMATED SCORE: Count up effect (2 seconds max)
     setTimeout(() => {
+        // Find the correct score element
+        const scoreElement = document.querySelector('#candidate-score, .score-value');
+        const scoreCircle = document.querySelector('.score-circle');
+        
         if (scoreElement && scoreCircle) {
             scoreElement.style.opacity = '1';
             scoreElement.style.transition = 'opacity 0.3s ease';
@@ -8915,6 +8928,7 @@ function showSingleCandidateView(data) {
                     
                     // 🎯 SCORE BADGE: Show dynamic badge after score animation
                     setTimeout(() => {
+                        const scoreBadge = document.querySelector('#score-badge, .score-badge');
                         updateScoreBadge(finalScore, scoreBadge);
                     }, 300);
                 }
@@ -8922,6 +8936,11 @@ function showSingleCandidateView(data) {
                 scoreElement.textContent = Math.round(currentScore);
                 scoreCircle.style.setProperty('--score-percent', `${currentScore}%`);
             }, intervalTime);
+        } else {
+            console.log('Score elements not found:', {
+                scoreElement: !!scoreElement,
+                scoreCircle: !!scoreCircle
+            });
         }
     }, 800); // Start score animation after 0.8s
     
@@ -8974,7 +8993,7 @@ function showSingleCandidateView(data) {
     // 🚀 ACTION ENCOURAGEMENT: Show after everything loads
     setTimeout(() => {
         showActionEncouragement();
-    }, 4000); // Show after score animation completes
+    }, 3000); // Reduced from 4000 to 3000ms
 }
 
 // 🎯 SCORE BADGE: Dynamic badge function
@@ -9013,14 +9032,18 @@ function updateScoreBadge(score, badgeElement) {
 function showActionEncouragement() {
     const encouragementMessages = [
         "Ready to find more talent like this?",
-        "Upload another resume to compare candidates",
+        "Upload another resume to compare candidates", 
         "Save this candidate and analyze more",
         "Want to build your dream team? Keep analyzing!"
     ];
     
     const randomMessage = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
     
+    // Use the existing showSuccess function which should show notifications
     showSuccess(`🚀 ${randomMessage}`);
+    
+    // Debug log to see if this function is being called
+    console.log('Action encouragement triggered:', randomMessage);
 }
 
 function updateUserTierBadge(analysisType = null) {
