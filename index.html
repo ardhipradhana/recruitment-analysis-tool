@@ -2787,7 +2787,7 @@
                 
                 <!-- Compact score section -->
                 <div class="text-center relative ml-6">
-                    <button class="save-candidate-btn absolute -top-2 -right-2 w-7 h-7 bg-transparent hover:bg-gray-100 text-gray-400 hover:text-gray-600 rounded-full flex items-center justify-center transition-colors z-10 border border-gray-300" 
+                    <button class="save-candidate-btn absolute -top-2 -left-2 w-7 h-7 bg-transparent hover:bg-gray-100 text-gray-400 hover:text-gray-600 rounded-full flex items-center justify-center transition-colors z-10 border border-gray-300" 
                             data-candidate-index="0"
                             onclick="toggleSaveCandidate(0, event)" 
                             title="Save candidate">
@@ -5102,14 +5102,14 @@ function updateSaveButtonStates() {
             
             if (isAlreadySaved) {
                 // SAVED STATE: Filled gold ribbon
-                singleButton.className = 'save-candidate-btn absolute -top-2 -right-2 w-7 h-7 bg-yellow-500 hover:bg-yellow-600 text-white rounded-full flex items-center justify-center transition-colors z-10 shadow-sm';
+                singleButton.className = 'save-candidate-btn absolute -top-2 -left-2 w-7 h-7 bg-yellow-500 hover:bg-yellow-600 text-white rounded-full flex items-center justify-center transition-colors z-10 shadow-sm';
                 singleButton.title = 'Remove from saved';
                 if (icon) {
                     icon.className = 'fas fa-bookmark text-xs';
                 }
             } else {
                 // UNSAVED STATE: Empty ribbon, no background
-                singleButton.className = 'save-candidate-btn absolute -top-2 -right-2 w-7 h-7 bg-transparent hover:bg-gray-100 text-gray-400 hover:text-gray-600 rounded-full flex items-center justify-center transition-colors z-10 border border-gray-300';
+                singleButton.className = 'save-candidate-btn absolute -top-2 -left-2 w-7 h-7 bg-transparent hover:bg-gray-100 text-gray-400 hover:text-gray-600 rounded-full flex items-center justify-center transition-colors z-10 border border-gray-300';
                 singleButton.title = 'Save candidate';
                 if (icon) {
                     icon.className = 'far fa-bookmark text-xs';
