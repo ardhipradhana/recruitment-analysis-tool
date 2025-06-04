@@ -4981,12 +4981,8 @@ function toggleSaveCandidate(candidateIndex, event) {
             if (result.success) {
                 showSuccess('Candidate removed from saved list');
                 updateSavedCounter();
-                // Direct button update for removal
-                const clickedButton = event.target.closest('.save-candidate-btn');
-                if (clickedButton) {
-                    clickedButton.className = 'save-candidate-btn w-6 h-6 bg-yellow-500 hover:bg-yellow-600 text-white rounded-full flex items-center justify-center transition-colors shadow-sm';
-                    clickedButton.title = 'Save candidate';
-                }
+                // Update specific button using the new function
+                updateSpecificSaveButton(candidateIndex, false);
             } else {
                 showError(result.message);
             }
@@ -5001,12 +4997,8 @@ function toggleSaveCandidate(candidateIndex, event) {
         if (result.success) {
             showSuccess('Candidate saved successfully!');
             updateSavedCounter();
-            // Direct button update instead of updateSaveButtonStates
-            const clickedButton = event.target.closest('.save-candidate-btn');
-            if (clickedButton) {
-                clickedButton.className = 'save-candidate-btn w-6 h-6 bg-green-500 hover:bg-green-600 text-white rounded-full flex items-center justify-center transition-colors shadow-sm';
-                clickedButton.title = 'Remove from saved';
-            }
+            // Update specific button using the new function
+            updateSpecificSaveButton(candidateIndex, true);
         } else {
             if (result.message === 'Candidate already saved') {
                 showWarning('This candidate is already in your saved list');
@@ -5044,11 +5036,19 @@ function updateSpecificSaveButton(candidateIndex, isSaved) {
         const icon = targetButton.querySelector('i');
         
         if (isSaved) {
-            targetButton.className = 'save-candidate-btn w-6 h-6 bg-green-500 hover:bg-green-600 text-white rounded-full flex items-center justify-center transition-colors shadow-sm';
-            targetButton.title = 'Remove from saved';
-        } else {
+            // SAVED STATE: Filled gold ribbon
             targetButton.className = 'save-candidate-btn w-6 h-6 bg-yellow-500 hover:bg-yellow-600 text-white rounded-full flex items-center justify-center transition-colors shadow-sm';
+            targetButton.title = 'Remove from saved';
+            if (icon) {
+                icon.className = 'fas fa-bookmark text-xs';
+            }
+        } else {
+            // UNSAVED STATE: Empty ribbon, no background
+            targetButton.className = 'save-candidate-btn w-6 h-6 bg-transparent hover:bg-gray-100 text-gray-400 hover:text-gray-600 rounded-full flex items-center justify-center transition-colors border border-gray-300';
             targetButton.title = 'Save candidate';
+            if (icon) {
+                icon.className = 'far fa-bookmark text-xs';
+            }
         }
     } else {
         console.error(`Could not find save button for candidate ${candidateIndex}`);
@@ -5077,13 +5077,22 @@ function updateSaveButtonStates() {
     for (let i = 0; i < candidatesData.length; i++) {
         if (saveButtons[i] && candidatesData[i]) {
             const isAlreadySaved = savedCandidatesManager.isCandidateSaved(candidatesData[i]);
+            const icon = saveButtons[i].querySelector('i');
             
             if (isAlreadySaved) {
-                saveButtons[i].className = 'save-candidate-btn w-6 h-6 bg-green-500 hover:bg-green-600 text-white rounded-full flex items-center justify-center transition-colors shadow-sm';
-                saveButtons[i].title = 'Remove from saved';
-            } else {
+                // SAVED STATE: Filled gold ribbon
                 saveButtons[i].className = 'save-candidate-btn w-6 h-6 bg-yellow-500 hover:bg-yellow-600 text-white rounded-full flex items-center justify-center transition-colors shadow-sm';
+                saveButtons[i].title = 'Remove from saved';
+                if (icon) {
+                    icon.className = 'fas fa-bookmark text-xs';
+                }
+            } else {
+                // UNSAVED STATE: Empty ribbon, no background
+                saveButtons[i].className = 'save-candidate-btn w-6 h-6 bg-transparent hover:bg-gray-100 text-gray-400 hover:text-gray-600 rounded-full flex items-center justify-center transition-colors border border-gray-300';
                 saveButtons[i].title = 'Save candidate';
+                if (icon) {
+                    icon.className = 'far fa-bookmark text-xs';
+                }
             }
         }
     }
@@ -8439,11 +8448,11 @@ function createCandidateCard(candidate, index) {
                     <p>${sanitizeText(title)}</p>
                 </div>
                 <div class="flex items-start gap-1">
-                    <button class="save-candidate-btn w-6 h-6 bg-yellow-500 hover:bg-yellow-600 text-white rounded-full flex items-center justify-center transition-colors shadow-sm" 
+                    <button class="save-candidate-btn w-6 h-6 bg-transparent hover:bg-gray-100 text-gray-400 hover:text-gray-600 rounded-full flex items-center justify-center transition-colors border border-gray-300" 
                             data-candidate-index="${index}"
                             onclick="event.stopPropagation(); toggleSaveCandidate(${index}, event)"
                             title="Save candidate">
-                        <i class="fas fa-bookmark text-xs"></i>
+                        <i class="far fa-bookmark text-xs"></i>
                     </button>
                     <div class="mini-score-ring" style="--score: ${score}%;">
                         <span class="mini-score-text">${score}</span>
