@@ -3516,7 +3516,7 @@ class AnalysisHistory {
             }
             
             localStorage.setItem(this.storageKey, JSON.stringify(history));
-            // console.log('Analysis saved to history:', historyItem.id);
+            console.log('Analysis saved to history:', historyItem.id);
             return historyItem.id;
             
         } catch (error) {
@@ -3745,7 +3745,7 @@ class CreditManager {
                     })
                     .eq('id', this.currentUser.id);
             }
-            // console.log('Analysis used. Remaining:', this.getRemainingAnalyses());
+            console.log('Analysis used. Remaining:', this.getRemainingAnalyses());
         } catch (error) {
             console.error('Error using analysis:', error);
             throw error;
@@ -3780,7 +3780,7 @@ class CreditManager {
                 });
 
             this.userTier = 'PROFESSIONAL';
-            // console.log(`Added ${amount} PRO credits. New balance: ${this.proCredits}`);
+            console.log(`Added ${amount} PRO credits. New balance: ${this.proCredits}`);
             return true;
         } catch (error) {
             console.error('Error adding PRO credits:', error);
@@ -3815,7 +3815,7 @@ class CreditManager {
                 });
 
             this.userTier = 'ULTRA';
-            // console.log(`Added ${amount} ULTRA credits. New balance: ${this.ultraCredits}`);
+            console.log(`Added ${amount} ULTRA credits. New balance: ${this.ultraCredits}`);
             return true;
         } catch (error) {
             console.error('Error adding ULTRA credits:', error);
@@ -3936,7 +3936,7 @@ class PaymentHandler {
 
     async createPayment(amount, credits, userEmail, creditType) {
         try {
-            // console.log('Creating payment request...');
+            console.log('Creating payment request...');
             
             // Create payment request to your n8n backend
             const response = await fetch(this.serverUrl, {
@@ -3953,9 +3953,9 @@ class PaymentHandler {
                 })
             });
 
-            // console.log('Backend response status:', response.status);
+            console.log('Backend response status:', response.status);
             const data = await response.json();
-            // console.log('Backend response data:', data);
+            console.log('Backend response data:', data);
             
             if (data.success && data.token) {
                 // Open Midtrans popup
@@ -3970,24 +3970,24 @@ class PaymentHandler {
     }
 
     openPaymentPopup(snapToken, credits) {
-        // console.log('Opening Midtrans popup with token:', snapToken);
+        console.log('Opening Midtrans popup with token:', snapToken);
         
         window.snap.pay(snapToken, {
             onSuccess: async (result) => {
-                // console.log('Payment success:', result);
+                console.log('Payment success:', result);
                 showSuccess('Payment Successful!');
                 await this.handlePaymentSuccess(credits);
             },
             onPending: (result) => {
-                // console.log('Payment pending:', result);
+                console.log('Payment pending:', result);
                 showWarning('Payment is being processed. Credits will be added after confirmation.');
             },
             onError: (result) => {
-                // console.log('Payment error:', result);
+                console.log('Payment error:', result);
                 showError('Payment Failed. Please Try Again.');
             },
             onClose: () => {
-                // console.log('Payment popup closed by user');
+                console.log('Payment popup closed by user');
                 showWarning('Payment Cancelled.');
             }
         });
@@ -4147,7 +4147,7 @@ class SavedCandidatesManager {
             }
 
             localStorage.setItem(this.storageKey, JSON.stringify(savedCandidates));
-            // console.log('Candidate saved:', savedItem.id);
+            console.log('Candidate saved:', savedItem.id);
             return { success: true, message: 'Candidate saved successfully', id: savedItem.id };
 
         } catch (error) {
@@ -4221,7 +4221,7 @@ class DataRetentionManager {
 
     // Run cleanup on app startup
     performStartupCleanup() {
-        // console.log('Running data retention cleanup...');
+        console.log('Running data retention cleanup...');
         
         const cleanupResults = {
             savedCandidatesRemoved: 0,
@@ -4233,9 +4233,9 @@ class DataRetentionManager {
 
         // Log results
         if (cleanupResults.savedCandidatesRemoved > 0) {
-            // console.log(`Cleanup completed: ${cleanupResults.savedCandidatesRemoved} old saved candidates removed`);
+            console.log(`Cleanup completed: ${cleanupResults.savedCandidatesRemoved} old saved candidates removed`);
         } else {
-            // console.log('Cleanup completed: No old data to remove');
+            console.log('Cleanup completed: No old data to remove');
         }
 
         return cleanupResults;
@@ -4320,7 +4320,7 @@ class MemoryManager {
         try {
             // Clear candidate data
             if (window.candidatesData) {
-                // console.log('Clearing sensitive candidate data from memory');
+                console.log('Clearing sensitive candidate data from memory');
                 candidatesData = [];
                 selectedCandidateIndex = 0;
                 
@@ -4338,7 +4338,7 @@ class MemoryManager {
                 // Clear session storage backup
                 sessionStorage.removeItem('analysisResults');
                 
-                // console.log('Memory cleared successfully');
+                console.log('Memory cleared successfully');
             }
         } catch (error) {
             console.error('Error clearing sensitive data:', error);
@@ -4347,7 +4347,7 @@ class MemoryManager {
 
     // Schedule memory clearing with delay
     scheduleDelayedClear(reason = 'navigation') {
-        // console.log(`Scheduling memory clear in ${this.navigationDelay/1000}s due to: ${reason}`);
+        console.log(`Scheduling memory clear in ${this.navigationDelay/1000}s due to: ${reason}`);
         
         // Clear any existing timer
         if (this.clearDelayTimer) {
@@ -4364,7 +4364,7 @@ class MemoryManager {
     // Cancel scheduled clearing (if user comes back quickly)
     cancelScheduledClear() {
         if (this.clearDelayTimer) {
-            // console.log('Canceling scheduled memory clear');
+            console.log('Canceling scheduled memory clear');
             clearTimeout(this.clearDelayTimer);
             this.clearDelayTimer = null;
         }
@@ -4382,7 +4382,7 @@ class MemoryManager {
             
             // Set new inactivity timer
             this.inactivityTimer = setTimeout(() => {
-                // console.log('30 minutes of inactivity - clearing sensitive data');
+                console.log('30 minutes of inactivity - clearing sensitive data');
                 this.clearSensitiveData();
                 showSuccess('Data cleared due to inactivity for security');
             }, this.inactivityDelay);
@@ -4399,7 +4399,7 @@ class MemoryManager {
 
     // Force immediate clear (for logout, etc.)
     forceClear(reason = 'manual') {
-        // console.log(`Force clearing memory due to: ${reason}`);
+        console.log(`Force clearing memory due to: ${reason}`);
         
         // Cancel any scheduled clearing
         this.cancelScheduledClear();
@@ -5050,7 +5050,7 @@ function updateSpecificSaveButton(candidateIndex, isSaved) {
         targetButton = document.querySelector(`[data-candidate-index="${candidateIndex}"]`);
     }
     
-    // console.log(`Updating button for candidate ${candidateIndex}, found:`, !!targetButton);
+    console.log(`Updating button for candidate ${candidateIndex}, found:`, !!targetButton);
     
     if (targetButton) {
         const icon = targetButton.querySelector('i');
@@ -5144,7 +5144,7 @@ function updateSaveButtonStates() {
 }
 
 function showSavedCandidatesView() {
-    // console.log('Opening saved candidates view...');
+    console.log('Opening saved candidates view...');
     
     // Hide all other pages/content
     hideAllPages();
@@ -5574,7 +5574,7 @@ function showComparisonView() {
         return;
     }
     
-    // console.log('Opening comparison view for:', selectedCandidates.map(item => item.candidate.candidateName));
+    console.log('Opening comparison view for:', selectedCandidates.map(item => item.candidate.candidateName));
     
     // Hide all other pages
     hideAllPages();
@@ -5742,7 +5742,7 @@ function extractRadarChartData(selectedCandidates) {
 function getComparisonColorHex(index) {
     const colors = ['#3B82F6', '#10B981', '#8B5CF6']; // Blue, Green, Purple
     const color = colors[index % colors.length];
-    // console.log(`Candidate ${index} getting color:`, color); // Debug log
+    console.log(`Candidate ${index} getting color:`, color); // Debug log
     return color;
 }
 
@@ -6225,7 +6225,7 @@ function updateUsageDisplay() {
     const upgradeBtn = document.getElementById('upgrade-btn');
     
     if (!usageElement) {
-        // console.log('Usage display element not found yet');
+        console.log('Usage display element not found yet');
         return;
     }
     
@@ -6332,7 +6332,7 @@ function updateJobDescriptionAccess() {
         
 // Pricing Page Navigation Functions
 function showPricingPage() {
-    // console.log('Showing pricing page...');
+    console.log('Showing pricing page...');
     hideAllPages(); // Use the new unified function
     
     const pricingPage = document.getElementById('pricing-page');
@@ -6340,7 +6340,7 @@ function showPricingPage() {
         pricingPage.style.display = 'block';
         pricingPage.style.position = 'relative'; // Ensure proper positioning
         pricingPage.style.zIndex = '1';
-        // console.log('Pricing page shown');
+        console.log('Pricing page shown');
     }
     
     // Update button text based on current tier
@@ -6365,19 +6365,19 @@ function hidePricingPage() {
 // Support Pages Navigation Functions
 // Support Pages Navigation Functions (with debug)
 function showSupportPage() {
-    // console.log('Showing support page...');
+    console.log('Showing support page...');
     hideAllPages();
     const supportPage = document.getElementById('support-page');
     if (supportPage) {
         supportPage.style.display = 'block';
-        // console.log('Support page shown');
+        console.log('Support page shown');
     } else {
         console.error('Support page element not found!');
     }
 }
 
 function showFAQPage() {
-    // console.log('Showing FAQ page...');
+    console.log('Showing FAQ page...');
     hideAllPages();
     
     const faqPage = document.getElementById('faq-page');
@@ -6385,12 +6385,12 @@ function showFAQPage() {
         faqPage.style.display = 'block';
         
         // Enhanced debugging
-        // console.log('FAQ page element:', faqPage);
-        // console.log('FAQ page display:', faqPage.style.display);
-        // console.log('FAQ page computed style:', window.getComputedStyle(faqPage).display);
-        // console.log('FAQ page visibility:', window.getComputedStyle(faqPage).visibility);
-        // console.log('FAQ page height:', faqPage.offsetHeight);
-        // console.log('FAQ page width:', faqPage.offsetWidth);
+        console.log('FAQ page element:', faqPage);
+        console.log('FAQ page display:', faqPage.style.display);
+        console.log('FAQ page computed style:', window.getComputedStyle(faqPage).display);
+        console.log('FAQ page visibility:', window.getComputedStyle(faqPage).visibility);
+        console.log('FAQ page height:', faqPage.offsetHeight);
+        console.log('FAQ page width:', faqPage.offsetWidth);
         
         // Force positioning
         faqPage.style.position = 'relative';
@@ -6398,31 +6398,31 @@ function showFAQPage() {
         faqPage.style.backgroundColor = 'white';
         faqPage.style.minHeight = '100vh';
         
-        // console.log('FAQ page shown with forced styles');
+        console.log('FAQ page shown with forced styles');
     } else {
         console.error('FAQ page element not found!');
     }
 }
 
 function showTermsPage() {
-    // console.log('Showing terms page...');
+    console.log('Showing terms page...');
     hideAllPages();
     const termsPage = document.getElementById('terms-page');
     if (termsPage) {
         termsPage.style.display = 'block';
-        // console.log('Terms page shown');
+        console.log('Terms page shown');
     } else {
         console.error('Terms page element not found!');
     }
 }
 
 function showPrivacyPage() {
-    // console.log('Showing privacy page...');
+    console.log('Showing privacy page...');
     hideAllPages();
     const privacyPage = document.getElementById('privacy-page');
     if (privacyPage) {
         privacyPage.style.display = 'block';
-        // console.log('Privacy page shown');
+        console.log('Privacy page shown');
     } else {
         console.error('Privacy page element not found!');
     }
@@ -6461,14 +6461,14 @@ function hideAllPages() {
 }
 
 function hideAllSupportPages() {
-    // console.log('Hiding all support pages...');
+    console.log('Hiding all support pages...');
     hideAllPages();
     
     // Show main app
     const mainApp = document.getElementById('main-app');
     if (mainApp) {
         mainApp.style.display = 'block';
-        // console.log('Main app restored');
+        console.log('Main app restored');
     }
     
     // Show appropriate content
@@ -6477,11 +6477,11 @@ function hideAllSupportPages() {
     
     if (analysisResults && !analysisResults.classList.contains('hidden')) {
         // Keep showing results if they exist
-        // console.log('Showing analysis results');
+        console.log('Showing analysis results');
     } else if (uploadInterface) {
         // Show upload interface if no results
         uploadInterface.classList.remove('hidden');
-        // console.log('Showing upload interface');
+        console.log('Showing upload interface');
     }
 }
 
@@ -6635,10 +6635,10 @@ async function showMainApp() {
     setTimeout(() => {
         const sampleResumeBtn = document.getElementById("sample-resume-btn");
         if (sampleResumeBtn) {
-            // console.log('Sample resume button found, attaching handler');
+            console.log('Sample resume button found, attaching handler');
             sampleResumeBtn.onclick = loadSampleResume;
         } else {
-            // console.log('Sample resume button not found!');
+            console.log('Sample resume button not found!');
         }
     }, 100);
 }
@@ -7089,7 +7089,7 @@ function showAnalysisLoading() {
     const bufferTime = Math.min(15000, fileCount * 5000); // Extra buffer time
     const totalTimeWithBuffer = totalEstimatedTime + bufferTime;
     
-    // console.log(`Loading animation for ${fileCount} files - estimated ${totalEstimatedTime/1000}s + ${bufferTime/1000}s buffer`);
+    console.log(`Loading animation for ${fileCount} files - estimated ${totalEstimatedTime/1000}s + ${bufferTime/1000}s buffer`);
     
     // Dynamic steps based on file count
     const baseSteps = [
@@ -7233,19 +7233,19 @@ function showAnalysisResults(data) {
     // Cancel any scheduled memory clearing since we're showing new results
     memoryManager.cancelScheduledClear();
     // 🔍 TEMPORARY DEBUG - Remove after we understand the data structure
-    // console.log('=== FULL BACKEND DATA DEBUG ===');
-    // console.log('Complete data structure:', data);
+    console.log('=== FULL BACKEND DATA DEBUG ===');
+    console.log('Complete data structure:', data);
     
     if (Array.isArray(data) && data.length > 0) {
-        // console.log('First candidate full data:', data[0]);
-        // console.log('Available keys in first candidate:', Object.keys(data[0]));
+        console.log('First candidate full data:', data[0]);
+        console.log('Available keys in first candidate:', Object.keys(data[0]));
         
         // Log each property to see what's available
         Object.keys(data[0]).forEach(key => {
-            // console.log(`${key}:`, data[0][key]);
+            console.log(`${key}:`, data[0][key]);
         });
     }
-    // console.log('=== END DEBUG ===');
+    console.log('=== END DEBUG ===');
     
     // Use the new multiple candidates handler
     showMultipleCandidatesResults(data);
@@ -7296,7 +7296,7 @@ function setDynamicAnalysisTime() {
 
 function showAnalysisResultsFromHistory(data) {
     // Same as showAnalysisResults but WITHOUT useAnalysisCredit() call
-    // console.log('=== showAnalysisResultsFromHistory called ===');
+    console.log('=== showAnalysisResultsFromHistory called ===');
     
     hideAnalysisLoading();
     document.getElementById('analysis-results').classList.remove('hidden');
@@ -7326,23 +7326,23 @@ async function useAnalysisCredit() {
         const jobDescription = document.getElementById('job-description').value.trim();
         const hasJobDescription = jobDescription.length > 0;
         
-        // console.log(`Using credits for ${numberOfResumes} resumes, job matching: ${hasJobDescription}`);
+        console.log(`Using credits for ${numberOfResumes} resumes, job matching: ${hasJobDescription}`);
         
         // Use appropriate credit type for each resume
         for (let i = 0; i < numberOfResumes; i++) {
             if (hasJobDescription) {
                 // Use ULTRA credit for job matching
                 await creditManager.useUltraCredit();
-                // console.log(`Used ULTRA credit ${i + 1}/${numberOfResumes}`);
+                console.log(`Used ULTRA credit ${i + 1}/${numberOfResumes}`);
             } else if (creditManager.userTier === 'FREE') {
                 await creditManager.useAnalysis();
-                // console.log(`Used free analysis ${i + 1}/${numberOfResumes}`);
+                console.log(`Used free analysis ${i + 1}/${numberOfResumes}`);
             } else if (creditManager.proCredits > 0) {
                 await creditManager.useProCredit();
-                // console.log(`Used PRO credit ${i + 1}/${numberOfResumes}`);
+                console.log(`Used PRO credit ${i + 1}/${numberOfResumes}`);
             } else if (creditManager.ultraCredits > 0) {
                 await creditManager.useUltraCredit();
-                // console.log(`Used ULTRA credit (no PRO available) ${i + 1}/${numberOfResumes}`);
+                console.log(`Used ULTRA credit (no PRO available) ${i + 1}/${numberOfResumes}`);
             }
         }
         
@@ -7926,13 +7926,13 @@ function emailResults_() {
             selectedCandidate: candidateDisplayName // For better email subject/content
         };
         
-        // console.log('Sending email for candidate:', candidateDisplayName);
-        // console.log('Email data:', emailData);
+        console.log('Sending email for candidate:', candidateDisplayName);
+        console.log('Email data:', emailData);
         
         // Send to your backend
         sendEmailViaBackend(emailData)
             .then((result) => {
-                // console.log('Email sent successfully:', result);
+                console.log('Email sent successfully:', result);
                 emailBtn.innerHTML = '<i class="fas fa-check text-purple-600 mr-3"></i>Sent!';
                 showSuccess(`Analysis for ${candidateDisplayName} sent to ${userEmail}!`);
                 
@@ -8007,14 +8007,14 @@ async function sendEmailViaBackend(emailData) {
             body: JSON.stringify(emailData)
         });
         
-        // console.log('Response status:', response.status);
+        console.log('Response status:', response.status);
         
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         
         const result = await response.json();
-        // console.log('Response data:', result);
+        console.log('Response data:', result);
         
         // Check if the backend indicates success
         if (result.success === false) {
@@ -8311,8 +8311,8 @@ function debounce(func, wait) {
 }
         
 function showMultipleCandidatesResults(data) {
-    // console.log('=== showMultipleCandidatesResults called ===');
-    // console.log('Data received:', data);
+    console.log('=== showMultipleCandidatesResults called ===');
+    console.log('Data received:', data);
     
     hideAnalysisLoading();
     document.getElementById('analysis-results').classList.remove('hidden');
@@ -8321,31 +8321,31 @@ function showMultipleCandidatesResults(data) {
     let candidatesArray = null;
     
     if (Array.isArray(data)) {
-        // console.log('Data is already an array');
+        console.log('Data is already an array');
         candidatesArray = data;
     } else if (data && Array.isArray(data.candidates)) {
-        // console.log('Found candidates array in data.candidates');
+        console.log('Found candidates array in data.candidates');
         // Extract the JSON objects from the candidates array
         candidatesArray = data.candidates.map(item => item.json || item);
 
         // TEMPORARY DEBUG - check extraction
-        // console.log('=== AFTER EXTRACTION DEBUG ===');
-        // console.log('candidatesArray:', candidatesArray);
+        console.log('=== AFTER EXTRACTION DEBUG ===');
+        console.log('candidatesArray:', candidatesArray);
         if (candidatesArray[0]) {
-            // console.log('First extracted candidate:', candidatesArray[0]);
-            // console.log('Has roleAlignment?', candidatesArray[0].roleAlignment);
-            // console.log('Has educationCertifications?', candidatesArray[0].educationCertifications);
+            console.log('First extracted candidate:', candidatesArray[0]);
+            console.log('Has roleAlignment?', candidatesArray[0].roleAlignment);
+            console.log('Has educationCertifications?', candidatesArray[0].educationCertifications);
         }
-        // console.log('=== END EXTRACTION DEBUG ===');
+        console.log('=== END EXTRACTION DEBUG ===');
         
     } else if (data && Array.isArray(data.data)) {
-        // console.log('Found candidates array in data.data');
+        console.log('Found candidates array in data.data');
         candidatesArray = data.data;
     } else if (data && typeof data === 'object') {
         // Check if data has any property that is an array
         for (let key in data) {
             if (Array.isArray(data[key]) && data[key].length > 0) {
-                // console.log(`Found candidates array in data.${key}`);
+                console.log(`Found candidates array in data.${key}`);
                 // Check if items have nested json property
                 candidatesArray = data[key].map(item => item.json || item);
                 break;
@@ -8354,17 +8354,17 @@ function showMultipleCandidatesResults(data) {
     }
     
     if (candidatesArray && candidatesArray.length > 1) {
-        // console.log('MULTIPLE CANDIDATES DETECTED - Array with', candidatesArray.length, 'items');
-        // console.log('First candidate structure:', candidatesArray[0]);
-        // console.log('Keys in first candidate:', Object.keys(candidatesArray[0]));
+        console.log('MULTIPLE CANDIDATES DETECTED - Array with', candidatesArray.length, 'items');
+        console.log('First candidate structure:', candidatesArray[0]);
+        console.log('Keys in first candidate:', Object.keys(candidatesArray[0]));
         candidatesData = candidatesArray;
         showMultipleCandidatesView();
     } else if (candidatesArray && candidatesArray.length === 1) {
-        // console.log('SINGLE CANDIDATE IN ARRAY - Using single view');
+        console.log('SINGLE CANDIDATE IN ARRAY - Using single view');
         candidatesData = candidatesArray;
         showSingleCandidateView(candidatesArray[0]);
     } else {
-        // console.log('SINGLE CANDIDATE OBJECT - Using single view');
+        console.log('SINGLE CANDIDATE OBJECT - Using single view');
         candidatesData = [data];
         showSingleCandidateView(data);
     }
@@ -8712,16 +8712,16 @@ function generateCandidateDetailHTML(candidate, index) {
     const title = extractTitleFromSummary(candidate) || 'Professional';
 
     // ADD THIS DEBUG:
-    // console.log('=== BADGE DEBUG ===');
-    // console.log('Candidate:', name);
-    // console.log('Has roleAlignment?', !!candidate.roleAlignment);
-    // console.log('Has educationCertifications?', !!candidate.educationCertifications);
-    // console.log('Has communication?', !!candidate.communication);
-    // console.log('Has redFlags?', !!candidate.redFlags);
-    // console.log('Has strategicRecommendations?', !!candidate.strategicRecommendations);
-    // console.log('Has candidateScorecard?', !!candidate.candidateScorecard);
-    // console.log('Should be ULTRA?', !!(candidate.roleAlignment || candidate.educationCertifications || candidate.communication || candidate.redFlags || candidate.strategicRecommendations || candidate.candidateScorecard));
-    // console.log('=== END BADGE DEBUG ===');
+    console.log('=== BADGE DEBUG ===');
+    console.log('Candidate:', name);
+    console.log('Has roleAlignment?', !!candidate.roleAlignment);
+    console.log('Has educationCertifications?', !!candidate.educationCertifications);
+    console.log('Has communication?', !!candidate.communication);
+    console.log('Has redFlags?', !!candidate.redFlags);
+    console.log('Has strategicRecommendations?', !!candidate.strategicRecommendations);
+    console.log('Has candidateScorecard?', !!candidate.candidateScorecard);
+    console.log('Should be ULTRA?', !!(candidate.roleAlignment || candidate.educationCertifications || candidate.communication || candidate.redFlags || candidate.strategicRecommendations || candidate.candidateScorecard));
+    console.log('=== END BADGE DEBUG ===');
     
     // Base HTML structure
     let detailHTML = `
@@ -8823,21 +8823,21 @@ function generateCandidateDetailHTML(candidate, index) {
 }
 
 function getAnalysisTypeBadge(candidate) {
-    // console.log('=== getAnalysisTypeBadge CALLED ===');
+    console.log('=== getAnalysisTypeBadge CALLED ===');
     
     const jobDescriptionElement = document.getElementById('job-description');
     if (!jobDescriptionElement) {
-        // console.log('ERROR: job-description element not found!');
+        console.log('ERROR: job-description element not found!');
         return '<span class="ml-2 px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded">ERROR</span>';
     }
     
     const jobDescription = jobDescriptionElement.value.trim();
     const hasJobDescription = jobDescription.length > 0;
     
-    // console.log('Job description text:', `"${jobDescription}"`);
-    // console.log('Job description length:', jobDescription.length);
-    // console.log('hasJobDescription:', hasJobDescription);
-    // console.log('=== END getAnalysisTypeBadge ===');
+    console.log('Job description text:', `"${jobDescription}"`);
+    console.log('Job description length:', jobDescription.length);
+    console.log('hasJobDescription:', hasJobDescription);
+    console.log('=== END getAnalysisTypeBadge ===');
     
     if (hasJobDescription) {
         return '<span class="ml-2 px-2 py-1 bg-gradient-to-r from-purple-500 to-pink-600 text-white text-xs font-medium rounded shadow-sm"><i class="fas fa-crown mr-1"></i>ULTRA Analysis</span>';
@@ -9101,20 +9101,20 @@ function showSingleCandidateView(data) {
     const finalScore = parseInt(data.candidateScore) || 75;
 
     // DEBUG: Check what elements exist - ADD THIS HERE
-    // console.log('=== SCORE DEBUG ===');
-    // console.log('candidate-score element:', document.getElementById('candidate-score'));
-    // console.log('score-value element:', document.querySelector('.score-value'));
-    // console.log('score-circle element:', document.querySelector('.score-circle'));
-    // console.log('score-badge element:', document.getElementById('score-badge'));
-    // console.log('finalScore:', finalScore);
-    // console.log('=== END DEBUG ===');
+    console.log('=== SCORE DEBUG ===');
+    console.log('candidate-score element:', document.getElementById('candidate-score'));
+    console.log('score-value element:', document.querySelector('.score-value'));
+    console.log('score-circle element:', document.querySelector('.score-circle'));
+    console.log('score-badge element:', document.getElementById('score-badge'));
+    console.log('finalScore:', finalScore);
+    console.log('=== END DEBUG ===');
 
     // DEBUG: Find the actual score circle element
-    // console.log('=== CIRCLE DEBUG ===');
-    // console.log('All elements with "score" in class:', document.querySelectorAll('[class*="score"]'));
-    // console.log('All elements with "circle" in class:', document.querySelectorAll('[class*="circle"]'));
-    // console.log('All elements with "--score" style:', document.querySelectorAll('[style*="--score"]'));
-    // console.log('=== END CIRCLE DEBUG ===');
+    console.log('=== CIRCLE DEBUG ===');
+    console.log('All elements with "score" in class:', document.querySelectorAll('[class*="score"]'));
+    console.log('All elements with "circle" in class:', document.querySelectorAll('[class*="circle"]'));
+    console.log('All elements with "--score" style:', document.querySelectorAll('[style*="--score"]'));
+    console.log('=== END CIRCLE DEBUG ===');
     
     // 📊 ANIMATED SCORE: Count up effect (2 seconds max)
     setTimeout(() => {
@@ -9157,7 +9157,7 @@ function showSingleCandidateView(data) {
                 }
             }, intervalTime);
         } else {
-            // console.log('Score elements not found:', {
+            console.log('Score elements not found:', {
                 scoreElement: !!scoreElement,
                 scoreCircle: !!scoreCircle
             });
@@ -9263,24 +9263,24 @@ function showActionEncouragement() {
     showSuccess(`🚀 ${randomMessage}`);
     
     // Debug log to see if this function is being called
-    // console.log('Action encouragement triggered:', randomMessage);
+    console.log('Action encouragement triggered:', randomMessage);
 }
 
 function updateUserTierBadge(analysisType = null) {
     const userStatus = creditManager.getStatus();
     const badgeElement = document.getElementById('user-tier-badge');
 
-    // console.log('=== updateUserTierBadge DEBUG ===');
-    // console.log('analysisType parameter:', analysisType);
-    // console.log('userStatus.isFreeTier:', userStatus.isFreeTier);
-    // console.log('userStatus.isUltraTier:', userStatus.isUltraTier);
+    console.log('=== updateUserTierBadge DEBUG ===');
+    console.log('analysisType parameter:', analysisType);
+    console.log('userStatus.isFreeTier:', userStatus.isFreeTier);
+    console.log('userStatus.isUltraTier:', userStatus.isUltraTier);
     
     if (badgeElement) {
         // Use analysis type if provided, otherwise use user tier
         const displayType = analysisType || (userStatus.isFreeTier ? 'FREE' : userStatus.isUltraTier ? 'ULTRA' : 'PRO');
 
-        // console.log('Final displayType:', displayType);
-        // console.log('=== END updateUserTierBadge DEBUG ===');
+        console.log('Final displayType:', displayType);
+        console.log('=== END updateUserTierBadge DEBUG ===');
         
         if (displayType === 'FREE') {
             badgeElement.className = 'ml-2 px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded';
