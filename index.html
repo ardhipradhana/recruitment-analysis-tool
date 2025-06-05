@@ -10045,6 +10045,35 @@ function loadAnalysisFromHistory(analysisId) {
             savedCandidatesPage.classList.add('support-page-hidden');
         }
     }, 100);
+
+    // Force browser re-render
+    setTimeout(() => {
+        const savedCandidatesPage = document.getElementById('saved-candidates-page');
+        if (savedCandidatesPage) {
+            savedCandidatesPage.style.display = 'none';
+            savedCandidatesPage.classList.add('support-page-hidden');
+        }
+        
+        // Force re-render by triggering a layout recalculation
+        document.body.style.transform = 'translateZ(0)';
+        requestAnimationFrame(() => {
+            document.body.style.transform = '';
+            
+            // Ensure analysis results are visible
+            const analysisResults = document.getElementById('analysis-results');
+            const mainApp = document.getElementById('main-app');
+            
+            if (analysisResults && mainApp) {
+                analysisResults.style.display = 'block';
+                mainApp.style.display = 'block';
+                
+                // Force one more re-render
+                requestAnimationFrame(() => {
+                    console.log('Forced browser re-render completed');
+                });
+            }
+        });
+    }, 200);
 }
 
 // Initialize Top Filters for Saved Candidates
