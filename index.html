@@ -5680,12 +5680,11 @@ function clearSavedFilters() {
     savedCandidatesFilter.clearAllFilters();
     
     // Reset UI elements
-    document.getElementById('saved-keywords-filter').value = '';
-    document.getElementById('saved-score-range').value = 0;
-    document.getElementById('saved-score-display').textContent = 0;
-    document.getElementById('saved-date-filter').value = 'all';
-    document.getElementById('has-premium-analysis').checked = false;
-    
+    document.getElementById('saved-keywords-filter-top').value = '';
+    document.getElementById('saved-score-range-top').value = 0;
+    document.getElementById('saved-score-display-top').textContent = 0;
+    document.getElementById('saved-date-filter-top').value = 'all';
+
     updateSavedCandidatesDisplayTop();
     showSuccess('All filters cleared!');
 }
