@@ -5307,8 +5307,10 @@ function loadSavedCandidatesData() {
         // Generate saved candidate cards
         generateSavedCandidateCards(savedCandidates);
         
-        // Setup filters
-        setupSavedCandidatesFilters();
+        // NEW: Setup top filters with delay to ensure DOM is ready
+        setTimeout(() => {
+            setupSavedCandidatesTopFilters();
+        }, 100);
 
         // NEW: Setup top filters
         setupSavedCandidatesTopFilters();
