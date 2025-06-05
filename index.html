@@ -5631,22 +5631,22 @@ function setupSavedCandidatesFilters() {
 
 function handleSavedKeywordsFilter(query) {
     savedCandidatesFilter.applyKeywordsFilter(query);
-    updateSavedCandidatesDisplay();
+    updateSavedCandidatesDisplayTop();
 }
 
 function handleSavedScoreFilter(minScore) {
     savedCandidatesFilter.applyScoreFilter(minScore);
-    updateSavedCandidatesDisplay();
+    updateSavedCandidatesDisplayTop();
 }
 
 function handleSavedDateFilter(dateRange) {
     savedCandidatesFilter.applyDateFilter(dateRange);
-    updateSavedCandidatesDisplay();
+    updateSavedCandidatesDisplayTop();
 }
 
 function handleSavedPremiumFilter(hasPremium) {
     savedCandidatesFilter.applyPremiumAnalysisFilter(hasPremium);
-    updateSavedCandidatesDisplay();
+    updateSavedCandidatesDisplayTop();
 }
 
 function clearSavedFilters() {
@@ -5659,7 +5659,7 @@ function clearSavedFilters() {
     document.getElementById('saved-date-filter').value = 'all';
     document.getElementById('has-premium-analysis').checked = false;
     
-    updateSavedCandidatesDisplay();
+    updateSavedCandidatesDisplayTop();
     showSuccess('All filters cleared!');
 }
 
