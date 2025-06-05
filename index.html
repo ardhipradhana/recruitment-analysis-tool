@@ -9992,15 +9992,8 @@ function setupHistoryItemHandlers() {
 }
 
 function loadAnalysisFromHistory(analysisId) {
-
     // Immediately hide the modal and saved candidates page
     document.getElementById('history-modal').classList.add('hidden');
-    
-    const savedCandidatesPage = document.getElementById('saved-candidates-page');
-    if (savedCandidatesPage) {
-        savedCandidatesPage.style.display = 'none';
-        savedCandidatesPage.classList.add('support-page-hidden');
-    }
     
     const analysis = historyManager.getAnalysisById(analysisId);
     
@@ -10014,18 +10007,18 @@ function loadAnalysisFromHistory(analysisId) {
         return;
     }
 
-    // FIX: Properly clear existing results before loading new ones
+    // STEP 1: Clear everything and hide all pages
+    hideAllPages();
+    
+    // STEP 2: Clear existing analysis content
     const analysisResults = document.getElementById('analysis-results');
     if (analysisResults) {
-        // Clear all dynamic content inside analysis-results
         const singleView = document.getElementById('single-candidate-view');
         const multipleView = document.getElementById('multiple-candidates-view');
         
         if (singleView) {
-            // Clear any dynamically added sections (PRO/ULTRA sections)
             const dynamicSections = singleView.querySelectorAll('.bg-white.rounded-xl.shadow-sm');
             dynamicSections.forEach((section, index) => {
-                // Keep only the first 3 sections (overview, executive summary, core competencies)
                 if (index > 2) {
                     section.remove();
                 }
@@ -10033,7 +10026,6 @@ function loadAnalysisFromHistory(analysisId) {
         }
         
         if (multipleView) {
-            // Clear candidate cards and details
             const candidateCards = document.getElementById('candidate-cards');
             const candidateDetail = document.getElementById('selected-candidate-detail');
             if (candidateCards) candidateCards.innerHTML = '';
@@ -10041,67 +10033,41 @@ function loadAnalysisFromHistory(analysisId) {
         }
     }
     
-    // Hide upload interface and show results
-    document.getElementById('upload-interface').classList.add('hidden');
-    
-    // Load the analysis data
+    // STEP 3: Load the analysis data
     candidatesData = analysis.candidates;
     selectedCandidateIndex = analysis.metadata?.selectedCandidateIndex || 0;
     
-    // Show results WITHOUT calling useAnalysisCredit (since this is from history)
+    // STEP 4: Show main app and analysis results
+    document.getElementById('main-app').style.display = 'block';
+    document.getElementById('upload-interface').classList.add('hidden');
+    
+    // STEP 5: Show results and force proper display
     showAnalysisResultsFromHistory(analysis.candidates);
     
-    // Re-setup export functionality for loaded analysis
-    setupDownloadPDF();
-    setupExportOptions();
-    
-    // Update save button states for loaded candidates
+    // STEP 6: Force immediate visibility and re-render
     setTimeout(() => {
-        updateSaveButtonStates();
-    }, 200);
-    
-    // Close the modal
-    document.getElementById('history-modal').classList.add('hidden');
-    
-    showSuccess('Analysis loaded from history!');
-
-    // Ensure saved candidates page stays hidden
-    setTimeout(() => {
-        const savedCandidatesPage = document.getElementById('saved-candidates-page');
-        if (savedCandidatesPage) {
-            savedCandidatesPage.style.display = 'none';
-            savedCandidatesPage.classList.add('support-page-hidden');
-        }
-    }, 100);
-
-    // Force browser re-render
-    setTimeout(() => {
-        const savedCandidatesPage = document.getElementById('saved-candidates-page');
-        if (savedCandidatesPage) {
-            savedCandidatesPage.style.display = 'none';
-            savedCandidatesPage.classList.add('support-page-hidden');
-        }
+        const mainApp = document.getElementById('main-app');
+        const analysisResults = document.getElementById('analysis-results');
         
-        // Force re-render by triggering a layout recalculation
-        document.body.style.transform = 'translateZ(0)';
-        requestAnimationFrame(() => {
-            document.body.style.transform = '';
+        if (mainApp && analysisResults) {
+            mainApp.style.display = 'block';
+            analysisResults.style.display = 'block';
+            analysisResults.classList.remove('hidden');
             
-            // Ensure analysis results are visible
-            const analysisResults = document.getElementById('analysis-results');
-            const mainApp = document.getElementById('main-app');
+            // Force layout recalculation
+            mainApp.offsetHeight;
+            analysisResults.offsetHeight;
             
-            if (analysisResults && mainApp) {
-                analysisResults.style.display = 'block';
-                mainApp.style.display = 'block';
-                
-                // Force one more re-render
-                requestAnimationFrame(() => {
-                    console.log('Forced browser re-render completed');
-                });
-            }
-        });
-    }, 200);
+            // Re-setup export functionality
+            setupDownloadPDF();
+            setupExportOptions();
+            
+            // Update save button states
+            updateSaveButtonStates();
+            
+            showSuccess('Analysis loaded from history!');
+        }
+    }, 50);
 }
 
 // Initialize Top Filters for Saved Candidates
