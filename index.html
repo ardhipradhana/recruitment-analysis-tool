@@ -6448,6 +6448,7 @@ let typeNames;
 let typeIcons;
 let candidateFilter = new CandidateFilter();
 let paymentHandler = new PaymentHandler();
+let analysisCreditsUsed = false;
 
 // XSS Protection - HTML Sanitization
 function sanitizeText(text) {
@@ -7097,6 +7098,9 @@ function removeFile(index) {
 
 // Analysis functions
 async function startAnalysis() {
+
+    analysisCreditsUsed = false;
+    
     if (files.length === 0) {
         showError('Please upload at least one file before starting analysis.');
         return;
@@ -7592,7 +7596,14 @@ function showAnalysisResultsFromHistory(data) {
 
 // ADD this new function right after showAnalysisResults
 async function useAnalysisCredit() {
+
+    if (analysisCreditsUsed) {
+        console.log('Credits already used for this analysis session');
+        return;
+    }
+    
     try {
+        analysisCreditsUsed = true; // Set flag immediately
         const numberOfResumes = files.length;
         const jobDescription = document.getElementById('job-description').value.trim();
         const hasJobDescription = jobDescription.length > 0;
@@ -8649,6 +8660,7 @@ function showMultipleCandidatesResults(data) {
         candidatesData = [data];
         showSingleCandidateView(data);
     }
+    useAnalysisCredit();
 }
 
 function showMultipleCandidatesView() {
