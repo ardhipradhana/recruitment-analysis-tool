@@ -10320,6 +10320,12 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('back-from-comparison').addEventListener('click', () => {
         hideAllPages();
         showSavedCandidatesView();
+        
+        // Update checkboxes and compare button after returning
+        setTimeout(() => {
+            candidateComparison.updateCheckboxes();
+            candidateComparison.updateCompareButton();
+        }, 100);
     });
 
     // REPLACE your existing upgrade button listener with this:
