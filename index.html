@@ -3122,30 +3122,6 @@
     const notification = document.createElement('div');
     notification.className = `montpro-notification ${type} text-white p-4`;
 
-    // Add this new method after showNotification
-    cleanupOrphanedNotifications() {
-        // Remove any notifications that might be stuck in the DOM
-        const orphanedNotifications = document.querySelectorAll('.montpro-notification');
-        orphanedNotifications.forEach(notification => {
-            if (!this.activeNotifications.has(notification)) {
-                try {
-                    notification.remove();
-                } catch (e) {
-                    if (notification.parentNode) {
-                        notification.parentNode.removeChild(notification);
-                    }
-                }
-            }
-        });
-        
-        // Clean up the tracking set of any notifications no longer in DOM
-        this.activeNotifications.forEach(notification => {
-            if (!document.body.contains(notification)) {
-                this.activeNotifications.delete(notification);
-            }
-        });
-    }
-    
     const icons = {
         success: 'success-checkmark',
         error: 'fa-exclamation-circle',
@@ -3170,7 +3146,6 @@
     `;
     
     document.body.appendChild(notification);
-
     this.activeNotifications.add(notification);
     
     // Trigger entrance animation
@@ -3205,10 +3180,33 @@
                             this.activeNotifications.delete(notification);
                         }
                     }
-                }, 350); // Increased from 300 to 350ms
+                }, 350);
             }
         }, duration);
     }
+}
+
+cleanupOrphanedNotifications() {
+    // Remove any notifications that might be stuck in the DOM
+    const orphanedNotifications = document.querySelectorAll('.montpro-notification');
+    orphanedNotifications.forEach(notification => {
+        if (!this.activeNotifications.has(notification)) {
+            try {
+                notification.remove();
+            } catch (e) {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }
+        }
+    });
+    
+    // Clean up the tracking set of any notifications no longer in DOM
+    this.activeNotifications.forEach(notification => {
+        if (!document.body.contains(notification)) {
+            this.activeNotifications.delete(notification);
+        }
+    });
 }
 
 // Add this method to the MontProFeedback class
