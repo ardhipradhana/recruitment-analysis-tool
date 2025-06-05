@@ -5279,6 +5279,8 @@ function updateSaveButtonStates() {
 
 function showSavedCandidatesView() {
     console.log('Opening saved candidates view...');
+
+    candidateComparison.clearSelections();
     
     // Hide all other pages/content
     hideAllPages();
