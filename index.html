@@ -2954,49 +2954,56 @@
                </div>
            </div>
            
-           <!-- Right Side: Sorting and Actions -->
-           <div class="lg:w-80 lg:border-l lg:pl-6">
-               <div class="flex items-center mb-4">
-                   <i class="fas fa-sort text-purple-500 mr-2"></i>
-                   <h3 class="text-lg font-semibold text-gray-800">Sort & Compare</h3>
-               </div>
-               
-               <!-- Sort Options -->
-               <div class="space-y-3 mb-4">
-                   <div class="flex gap-2">
-                       <button id="saved-sort-score-top" 
-                               class="sort-btn-top active flex-1 px-3 py-2 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200 transition-colors text-sm font-medium">
-                           <i class="fas fa-chart-line mr-1"></i>Score ↓
-                       </button>
-                       <button id="saved-sort-name-top" 
-                               class="sort-btn-top flex-1 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium">
-                           <i class="fas fa-user mr-1"></i>Name
-                       </button>
-                       <button id="saved-sort-date-top" 
-                               class="sort-btn-top flex-1 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium">
-                           <i class="fas fa-calendar mr-1"></i>Date
-                       </button>
-                   </div>
-               </div>
-               
-               <!-- Compare Section -->
-               <div class="bg-purple-50 rounded-lg p-4">
-                   <button id="compare-selected-btn-top" 
-                           class="w-full py-3 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed font-medium" 
-                           disabled>
-                       <i class="fas fa-balance-scale mr-2"></i>
-                       <span id="compare-btn-text-top">Compare Selected (0)</span>
-                   </button>
-                   <div class="text-xs text-center text-purple-700 mt-2">
-                       Select 2-3 candidates to unlock side-by-side comparison
-                   </div>
-               </div>
-               
-               <!-- Results Counter -->
-               <div id="saved-filter-results-top" class="text-center text-sm text-gray-500 mt-4 p-2 bg-gray-50 rounded-lg">
-                   Showing all candidates
-               </div>
-           </div>
+           <!-- Enhanced Sort & Compare Section -->
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-6 border border-gray-100">
+                <div class="flex items-center mb-4">
+                    <div class="w-10 h-10 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-sort text-white"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-800">Organize & Compare</h3>
+                </div>
+                
+                <div class="space-y-6">
+                    <!-- Sort Options -->
+                    <div>
+                        <label class="text-sm font-medium text-gray-700 mb-3 block">Sort by</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button id="saved-sort-score-top" 
+                                    class="sort-btn-top active px-3 py-2 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200 transition-colors text-sm font-medium border border-blue-200">
+                                <i class="fas fa-chart-line mr-1"></i>
+                                <span class="block">Score</span>
+                                <span class="text-xs opacity-75">↓</span>
+                            </button>
+                            <button id="saved-sort-name-top" 
+                                    class="sort-btn-top px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium border border-gray-200">
+                                <i class="fas fa-user mr-1"></i>
+                                <span class="block">Name</span>
+                            </button>
+                            <button id="saved-sort-date-top" 
+                                    class="sort-btn-top px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium border border-gray-200">
+                                <i class="fas fa-calendar mr-1"></i>
+                                <span class="block">Date</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Compare Section -->
+                    <div>
+                        <label class="text-sm font-medium text-gray-700 mb-3 block">Compare Candidates</label>
+                        <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-4 border border-purple-200">
+                            <button id="compare-selected-btn-top" 
+                                    class="w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white rounded-lg transition-all disabled:bg-gray-400 disabled:cursor-not-allowed font-medium shadow-sm" 
+                                    disabled>
+                                <i class="fas fa-balance-scale mr-2"></i>
+                                <span id="compare-btn-text-top">Compare Selected (0)</span>
+                            </button>
+                            <div class="text-xs text-center text-purple-700 mt-2 opacity-75">
+                                Select 2-3 candidates to unlock comparison
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
        </div>
    </div>
 
