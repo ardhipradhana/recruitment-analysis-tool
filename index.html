@@ -9918,7 +9918,7 @@ function renderHistoryList(history) {
     const historyList = document.getElementById('history-list');
     
     historyList.innerHTML = history.map((item, index) => `
-        <div class="bg-gray-50 rounded-lg p-4 mb-3 hover:bg-gray-100 transition-colors cursor-pointer" onclick="loadAnalysisFromHistory('${item.id}')">
+        <div class="bg-gray-50 rounded-lg p-4 mb-3 hover:bg-gray-100 transition-colors cursor-pointer" data-analysis-id="${item.id}">
             <div class="flex justify-between items-start">
                 <div class="flex-1">
                     <h4 class="font-medium text-gray-800 mb-1">
@@ -9943,9 +9943,37 @@ function renderHistoryList(history) {
             </div>
         </div>
     `).join('');
+
+    setupHistoryItemHandlers();
+}
+
+// Add proper event handlers for history items
+function setupHistoryItemHandlers() {
+    document.querySelectorAll('#history-list [data-analysis-id]').forEach(historyItem => {
+        historyItem.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            
+            const analysisId = this.getAttribute('data-analysis-id');
+            if (analysisId) {
+                loadAnalysisFromHistory(analysisId);
+            }
+        });
+    });
 }
 
 function loadAnalysisFromHistory(analysisId) {
+
+    // Immediately hide the modal and saved candidates page
+    document.getElementById('history-modal').classList.add('hidden');
+    
+    const savedCandidatesPage = document.getElementById('saved-candidates-page');
+    if (savedCandidatesPage) {
+        savedCandidatesPage.style.display = 'none';
+        savedCandidatesPage.classList.add('support-page-hidden');
+    }
+    
     const analysis = historyManager.getAnalysisById(analysisId);
     
     if (!analysis) {
@@ -10008,6 +10036,15 @@ function loadAnalysisFromHistory(analysisId) {
     document.getElementById('history-modal').classList.add('hidden');
     
     showSuccess('Analysis loaded from history!');
+
+    // Ensure saved candidates page stays hidden
+    setTimeout(() => {
+        const savedCandidatesPage = document.getElementById('saved-candidates-page');
+        if (savedCandidatesPage) {
+            savedCandidatesPage.style.display = 'none';
+            savedCandidatesPage.classList.add('support-page-hidden');
+        }
+    }, 100);
 }
 
 // Initialize Top Filters for Saved Candidates
