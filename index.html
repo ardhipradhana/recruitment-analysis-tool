@@ -566,7 +566,7 @@
     }
     /* Enhanced Error Handling Styles */
     .montpro-notification {
-        position: fixed;
+        position: fixed !important;
         top: 70px;
         right: 20px;
         z-index: 9999;
@@ -576,6 +576,10 @@
         box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
         border-radius: 12px;
         overflow: hidden;
+        /* Prevent bottom-left positioning glitches */
+        left: auto !important;
+        bottom: auto !important;
+        margin: 0 !important;
     }
 
     .montpro-notification.show { 
@@ -3110,12 +3114,37 @@
     constructor() {
         this.retryAttempts = new Map();
         this.maxRetries = 3;
+        this.activeNotifications = new Set();
         this.setupConnectionMonitoring();
     }
     
     showNotification(message, type = 'info', duration = 5000) {
     const notification = document.createElement('div');
     notification.className = `montpro-notification ${type} text-white p-4`;
+
+    // Add this new method after showNotification
+    cleanupOrphanedNotifications() {
+        // Remove any notifications that might be stuck in the DOM
+        const orphanedNotifications = document.querySelectorAll('.montpro-notification');
+        orphanedNotifications.forEach(notification => {
+            if (!this.activeNotifications.has(notification)) {
+                try {
+                    notification.remove();
+                } catch (e) {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }
+            }
+        });
+        
+        // Clean up the tracking set of any notifications no longer in DOM
+        this.activeNotifications.forEach(notification => {
+            if (!document.body.contains(notification)) {
+                this.activeNotifications.delete(notification);
+            }
+        });
+    }
     
     const icons = {
         success: 'success-checkmark',
@@ -3141,6 +3170,8 @@
     `;
     
     document.body.appendChild(notification);
+
+    this.activeNotifications.add(notification);
     
     // Trigger entrance animation
     requestAnimationFrame(() => {
@@ -3154,8 +3185,28 @@
     
     if (duration > 0) {
         setTimeout(() => {
-            notification.style.animation = 'slideOut 0.3s ease-in-out forwards';
-            setTimeout(() => notification.remove(), 300);
+            // Check if notification still exists and has a parent
+            if (notification && notification.parentNode && document.body.contains(notification)) {
+                notification.style.animation = 'slideOut 0.3s ease-in-out forwards';
+                
+                // Longer timeout to ensure animation completes
+                setTimeout(() => {
+                    // Double-check before removal
+                    if (notification && notification.parentNode && document.body.contains(notification)) {
+                        try {
+                            notification.remove();
+                            this.activeNotifications.delete(notification);
+                        } catch (e) {
+                            // Fallback: force removal if normal removal fails
+                            notification.style.display = 'none';
+                            if (notification.parentNode) {
+                                notification.parentNode.removeChild(notification);
+                            }
+                            this.activeNotifications.delete(notification);
+                        }
+                    }
+                }, 350); // Increased from 300 to 350ms
+            }
         }, duration);
     }
 }
@@ -3357,6 +3408,22 @@ categorizeError(error) {
     
     // Initial status
     this.updateConnectionStatus(navigator.onLine);
+
+    // Clean up on page events (much more efficient)
+    window.addEventListener('beforeunload', () => this.cleanupOrphanedNotifications());
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            this.cleanupOrphanedNotifications();
+        }
+    });
+    
+    // Clean up when showing new notifications (only when needed)
+    document.addEventListener('DOMNodeInserted', (e) => {
+        if (e.target && e.target.classList && e.target.classList.contains('montpro-notification')) {
+            // Clean up any orphans when a new notification is added
+            setTimeout(() => this.cleanupOrphanedNotifications(), 100);
+        }
+    });
 }
 
 updateConnectionStatus(isOnline) {
