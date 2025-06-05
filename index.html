@@ -5265,6 +5265,11 @@ function showSavedCandidatesView() {
     
     // Load and display saved candidates
     loadSavedCandidatesData();
+
+    // Setup top filters with delay to ensure DOM is ready
+    setTimeout(() => {
+        setupSavedCandidatesTopFilters();
+    }, 200);
 }
 
 function loadSavedCandidatesData() {
