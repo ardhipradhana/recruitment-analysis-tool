@@ -7356,6 +7356,16 @@ function showRetryButton() {
 function showAnalysisLoading() {
     document.getElementById('upload-interface').classList.add('hidden');
     document.getElementById('analysis-loading').classList.remove('hidden');
+
+    const loadingTitle = document.querySelector('#analysis-loading h2');
+    if (loadingTitle) {
+        loadingTitle.textContent = '🔍 Uncovering Hidden Talent...';
+    }
+    
+    const loadingDescription = document.querySelector('#analysis-loading p');
+    if (loadingDescription) {
+        loadingDescription.textContent = 'Our AI is reading between the lines to find what others miss';
+    }
     
     // Calculate realistic timing based on file count
     const fileCount = files.length;
