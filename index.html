@@ -5270,6 +5270,20 @@ function showSavedCandidatesView() {
     setTimeout(() => {
         setupSavedCandidatesTopFilters();
     }, 200);
+
+    // Update usage display for saved candidates page
+    const status = creditManager.getStatus();
+    const usageElement = document.getElementById('usage-text-saved');
+    
+    if (usageElement && status) {
+        if (status.isFreeTier) {
+            usageElement.textContent = `${status.remaining}/3 Free Left`;
+        } else if (status.isUltraTier) {
+            usageElement.textContent = `${status.ultraCredits} ULTRA • ${status.proCredits} PRO`;
+        } else {
+            usageElement.textContent = `${status.proCredits} PRO credits`;
+        }
+    }
 }
 
 function loadSavedCandidatesData() {
