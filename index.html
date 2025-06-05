@@ -5649,6 +5649,31 @@ function clearSavedFilters() {
     showSuccess('All filters cleared!');
 }
 
+function sortSavedCandidates(sortType) {
+    console.log('Sorting by:', sortType);
+    
+    const savedCandidates = savedCandidatesManager.getSavedCandidates();
+    let sortedCandidates;
+    
+    if (sortType === 'score') {
+        sortedCandidates = savedCandidates.sort((a, b) => 
+            (parseInt(b.candidate.candidateScore) || 0) - (parseInt(a.candidate.candidateScore) || 0)
+        );
+    } else if (sortType === 'name') {
+        sortedCandidates = savedCandidates.sort((a, b) => 
+            (a.candidate.candidateName || '').localeCompare(b.candidate.candidateName || '')
+        );
+    } else if (sortType === 'date') {
+        sortedCandidates = savedCandidates.sort((a, b) => 
+            new Date(b.timestamp) - new Date(a.timestamp)
+        );
+    }
+    
+    // Update the filter with sorted candidates and refresh display
+    savedCandidatesFilter.setCandidates(sortedCandidates);
+    updateSavedCandidatesDisplayTop();
+}
+
 function updateSavedCandidatesDisplay() {
     const filteredCandidates = savedCandidatesFilter.getFilteredCandidates();
     const stats = savedCandidatesFilter.getFilterStats();
