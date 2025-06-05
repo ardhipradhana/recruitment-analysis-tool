@@ -4094,16 +4094,20 @@ class CreditManager {
         }
     
         this.proCredits--;
+        this.creditBalance = this.proCredits + this.ultraCredits; // Update total
         await this.updateCreditsInDatabase();
+        console.log(`PRO credit used. Remaining: ${this.proCredits}`);
     }
-
+    
     async useUltraCredit() {
         if (this.ultraCredits <= 0) {
             throw new Error('No ULTRA credits remaining');
         }
     
         this.ultraCredits--;
+        this.creditBalance = this.proCredits + this.ultraCredits; // Update total
         await this.updateCreditsInDatabase();
+        console.log(`ULTRA credit used. Remaining: ${this.ultraCredits}`);
     }
 
     async updateCreditsInDatabase() {
