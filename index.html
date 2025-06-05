@@ -7597,30 +7597,40 @@ async function useAnalysisCredit() {
         
         // Use appropriate credit type for each resume
         for (let i = 0; i < numberOfResumes; i++) {
-            if (hasJobDescription) {
+            if (hasJobDescription && creditManager.ultraCredits > 0) {
                 // Use ULTRA credit for job matching
                 await creditManager.useUltraCredit();
                 console.log(`Used ULTRA credit ${i + 1}/${numberOfResumes}`);
             } else if (creditManager.userTier === 'FREE') {
+                // Use free analysis
                 await creditManager.useAnalysis();
                 console.log(`Used free analysis ${i + 1}/${numberOfResumes}`);
             } else if (creditManager.proCredits > 0) {
+                // Use PRO credit
                 await creditManager.useProCredit();
                 console.log(`Used PRO credit ${i + 1}/${numberOfResumes}`);
             } else if (creditManager.ultraCredits > 0) {
+                // Fallback to ULTRA credit if no PRO available
                 await creditManager.useUltraCredit();
-                console.log(`Used ULTRA credit (no PRO available) ${i + 1}/${numberOfResumes}`);
+                console.log(`Used ULTRA credit (fallback) ${i + 1}/${numberOfResumes}`);
+            } else {
+                throw new Error('No credits available');
             }
         }
         
+        // Update the display and show success
         updateUsageDisplay();
         
-        const creditType = hasJobDescription ? 'ULTRA' : 'PRO';
+        const creditType = hasJobDescription ? 'ULTRA' : (creditManager.userTier === 'FREE' ? 'Free' : 'PRO');
         showSuccess(`Successfully analyzed ${numberOfResumes} resume(s) using ${creditType} credits!`);
         
     } catch (error) {
         console.error('Error using credits:', error);
         showError('Error using credits: ' + error.message);
+        
+        // Rollback: Don't show results if credit deduction failed
+        hideAnalysisLoading();
+        document.getElementById('upload-interface').classList.remove('hidden');
     }
 }
         
