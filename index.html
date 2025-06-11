@@ -7707,7 +7707,10 @@ async function useAnalysisCredit() {
 }
         
 function setupDownloadPDF() {
+    console.log('=== setupDownloadPDF called ===');
     const downloadBtn = document.querySelector('#download-pdf-btn');
+    console.log('Download button found:', downloadBtn);
+    
     if (downloadBtn) {
         // Remove existing listeners by cloning the element
         const newDownloadBtn = downloadBtn.cloneNode(true);
@@ -7975,6 +7978,7 @@ function generatePDF(data) {
 
 // Export functionality
 function setupExportOptions() {
+    console.log('=== setupExportOptions called ===');
     const exportBtn = document.getElementById('export-btn');
     const exportDropdown = document.getElementById('export-dropdown');
     
