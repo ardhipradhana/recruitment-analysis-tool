@@ -8775,6 +8775,9 @@ function showMultipleCandidatesView() {
 
     saveCurrentAnalysisToHistory();
 
+    setupDownloadPDF();
+    setupExportOptions();
+
     // Set up sorting
     document.getElementById('sort-score').onclick = () => sortCandidates('score');
     document.getElementById('sort-name').onclick = () => sortCandidates('name');
@@ -9577,6 +9580,8 @@ function showSingleCandidateView(data) {
     }
 
     saveCurrentAnalysisToHistory();
+    setupDownloadPDF();
+    setupExportOptions();
     
     // Set dynamic analysis time
     setDynamicAnalysisTime();
