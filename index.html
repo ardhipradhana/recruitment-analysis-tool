@@ -7590,12 +7590,10 @@ function showAnalysisResults(data) {
     // Show the results footer
     document.getElementById('results-footer').classList.remove('hidden');
 
-    setupDownloadPDF();
-    setupExportOptions();
-
     // Set up PDF download after showing results - with cleanup
     setTimeout(() => {
-        saveCurrentAnalysisToHistory();
+        setupDownloadPDF();
+        setupExportOptions();
     }, 100);
 
     setDynamicAnalysisTime();
