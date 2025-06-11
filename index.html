@@ -7580,9 +7580,6 @@ function showAnalysisResults(data) {
         });
     }
     console.log('=== END DEBUG ===');
-
-    // ADD THIS LINE - Set candidatesData from the received data
-    candidatesData = Array.isArray(data) ? data : (data.candidates || [data]);
     
     // Use the new multiple candidates handler
     showMultipleCandidatesResults(data);
@@ -8720,7 +8717,6 @@ function showMultipleCandidatesResults(data) {
         candidatesData = [data];
         showSingleCandidateView(data);
     }
-    useAnalysisCredit();
 }
 
 function showMultipleCandidatesView() {
