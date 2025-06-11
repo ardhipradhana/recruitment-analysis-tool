@@ -9569,6 +9569,8 @@ function showSingleCandidateView(data) {
         analysisDateElement.textContent = today.toLocaleDateString();
     }
 
+    saveCurrentAnalysisToHistory();
+    
     // Set dynamic analysis time
     setDynamicAnalysisTime();
 
