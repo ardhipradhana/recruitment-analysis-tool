@@ -7597,10 +7597,8 @@ function showAnalysisResults(data) {
     setTimeout(() => {
         setupDownloadPDF();
         setupExportOptions();
+        saveCurrentAnalysisToHistory();
     }, 100);
-
-    // ✨ NEW: Auto-save to history
-    saveCurrentAnalysisToHistory();
 
     setDynamicAnalysisTime();
 
