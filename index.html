@@ -9941,6 +9941,9 @@ function extractAndFormatSkills(competencies) {
 
 // History Management Functions
 function saveCurrentAnalysisToHistory() {
+    console.log('=== saveCurrentAnalysisToHistory called ==='); 
+    console.log('candidatesData:', candidatesData); 
+    
     if (candidatesData && candidatesData.length > 0) {
         const analysisId = historyManager.saveAnalysis(candidatesData, {
             analysisType: candidatesData.length > 1 ? 'multiple' : 'single',
