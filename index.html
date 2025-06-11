@@ -8768,6 +8768,8 @@ function showMultipleCandidatesView() {
     // Show first candidate by default
     showCandidateDetail(0);
 
+    saveCurrentAnalysisToHistory();
+
     // Set up sorting
     document.getElementById('sort-score').onclick = () => sortCandidates('score');
     document.getElementById('sort-name').onclick = () => sortCandidates('name');
