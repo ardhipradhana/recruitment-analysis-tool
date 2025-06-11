@@ -3755,6 +3755,55 @@ class AnalysisHistory {
             totalCandidates: history.reduce((sum, item) => sum + item.totalCandidates, 0)
         };
     }
+
+    calculateAverageScore(candidates) {
+        const scores = candidates.map(c => parseInt(c.candidateScore) || 0);
+        return scores.length ? Math.round(scores.reduce((a, b) => a + b) / scores.length) : 0;
+    }
+
+    extractTopSkills(candidates) {
+        const skillFrequency = {};
+    
+        candidates.forEach(candidate => {
+            const skills = this.extractSkillsFromCandidate(candidate);
+            skills.forEach(skill => {
+                skillFrequency[skill] = (skillFrequency[skill] || 0) + 1;
+            });
+        });
+    
+        return Object.entries(skillFrequency)
+            .sort(([,a], [,b]) => b - a)
+            .slice(0, 5)
+            .map(([skill]) => skill);
+    }
+
+    extractSkillsFromCandidate(candidate) {
+        if (!candidate.coreCompetencies) return [];
+    
+        if (Array.isArray(candidate.coreCompetencies)) {
+            return candidate.coreCompetencies;
+        }
+    
+        // Extract from string format
+        return candidate.coreCompetencies
+            .split(/[,\n•-]/)
+            .map(skill => skill.trim())
+            .filter(skill => skill.length > 0)
+            .slice(0, 10); // Limit per candidate
+    }
+
+    searchHistory(query) {
+        const history = this.getHistory();
+        const searchTerm = query.toLowerCase();
+    
+        return history.filter(analysis => 
+            analysis.candidates.some(candidate => 
+                (candidate.candidateName || '').toLowerCase().includes(searchTerm) ||
+                (candidate.executiveSummary || '').toLowerCase().includes(searchTerm) ||
+                (candidate.coreCompetencies || '').toString().toLowerCase().includes(searchTerm)
+            )
+        );
+    }
 }
 
 // Credit Management System
