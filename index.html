@@ -4221,14 +4221,14 @@ class PaymentHandler {
         }
     }
 
-    openPaymentPopup(snapToken, credits) {
+    openPaymentPopup(snapToken, credits, creditType) {
         console.log('Opening Midtrans popup with token:', snapToken);
-        
+
         window.snap.pay(snapToken, {
             onSuccess: async (result) => {
                 console.log('Payment success:', result);
                 showSuccess('Payment Successful!');
-                await this.handlePaymentSuccess(credits);
+                await this.handlePaymentSuccess(credits, creditType);
             },
             onPending: (result) => {
                 console.log('Payment pending:', result);
