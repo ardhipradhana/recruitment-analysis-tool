@@ -5302,7 +5302,6 @@ function updateSpecificSaveButton(candidateIndex, isSaved) {
         targetButton = document.querySelector(`[data-candidate-index="${candidateIndex}"]`);
     }
     
-    console.log(`Updating button for candidate ${candidateIndex}, found:`, !!targetButton);
     
     if (targetButton) {
         const icon = targetButton.querySelector('i');
@@ -5396,7 +5395,6 @@ function updateSaveButtonStates() {
 }
 
 function showSavedCandidatesView() {
-    console.log('Opening saved candidates view...');
 
     candidateComparison.clearSelections();
     
@@ -5810,7 +5808,6 @@ function clearSavedFilters() {
 }
 
 function sortSavedCandidates(sortType) {
-    console.log('Sorting by:', sortType);
     
     const savedCandidates = savedCandidatesManager.getSavedCandidates();
     let sortedCandidates;
@@ -5890,7 +5887,6 @@ function showComparisonView() {
         return;
     }
     
-    console.log('Opening comparison view for:', selectedCandidates.map(item => item.candidate.candidateName));
     
     // Hide all other pages
     hideAllPages();
@@ -6058,7 +6054,6 @@ function extractRadarChartData(selectedCandidates) {
 function getComparisonColorHex(index) {
     const colors = ['#3B82F6', '#10B981', '#8B5CF6']; // Blue, Green, Purple
     const color = colors[index % colors.length];
-    console.log(`Candidate ${index} getting color:`, color); // Debug log
     return color;
 }
 
@@ -6543,7 +6538,6 @@ function updateUsageDisplay() {
     const upgradeBtn = document.getElementById('upgrade-btn');
     
     if (!usageElement) {
-        console.log('Usage display element not found yet');
         return;
     }
     
@@ -6650,7 +6644,6 @@ function updateJobDescriptionAccess() {
         
 // Pricing Page Navigation Functions
 function showPricingPage() {
-    console.log('Showing pricing page...');
     hideAllPages(); // Use the new unified function
     
     const pricingPage = document.getElementById('pricing-page');
@@ -6658,7 +6651,6 @@ function showPricingPage() {
         pricingPage.style.display = 'block';
         pricingPage.style.position = 'relative'; // Ensure proper positioning
         pricingPage.style.zIndex = '1';
-        console.log('Pricing page shown');
     }
     
     // Update button text based on current tier
@@ -6683,19 +6675,16 @@ function hidePricingPage() {
 // Support Pages Navigation Functions
 // Support Pages Navigation Functions (with debug)
 function showSupportPage() {
-    console.log('Showing support page...');
     hideAllPages();
     const supportPage = document.getElementById('support-page');
     if (supportPage) {
         supportPage.style.display = 'block';
-        console.log('Support page shown');
     } else {
         console.error('Support page element not found!');
     }
 }
 
 function showFAQPage() {
-    console.log('Showing FAQ page...');
     hideAllPages();
     
     const faqPage = document.getElementById('faq-page');
@@ -6703,12 +6692,6 @@ function showFAQPage() {
         faqPage.style.display = 'block';
         
         // Enhanced debugging
-        console.log('FAQ page element:', faqPage);
-        console.log('FAQ page display:', faqPage.style.display);
-        console.log('FAQ page computed style:', window.getComputedStyle(faqPage).display);
-        console.log('FAQ page visibility:', window.getComputedStyle(faqPage).visibility);
-        console.log('FAQ page height:', faqPage.offsetHeight);
-        console.log('FAQ page width:', faqPage.offsetWidth);
         
         // Force positioning
         faqPage.style.position = 'relative';
@@ -6716,31 +6699,26 @@ function showFAQPage() {
         faqPage.style.backgroundColor = 'white';
         faqPage.style.minHeight = '100vh';
         
-        console.log('FAQ page shown with forced styles');
     } else {
         console.error('FAQ page element not found!');
     }
 }
 
 function showTermsPage() {
-    console.log('Showing terms page...');
     hideAllPages();
     const termsPage = document.getElementById('terms-page');
     if (termsPage) {
         termsPage.style.display = 'block';
-        console.log('Terms page shown');
     } else {
         console.error('Terms page element not found!');
     }
 }
 
 function showPrivacyPage() {
-    console.log('Showing privacy page...');
     hideAllPages();
     const privacyPage = document.getElementById('privacy-page');
     if (privacyPage) {
         privacyPage.style.display = 'block';
-        console.log('Privacy page shown');
     } else {
         console.error('Privacy page element not found!');
     }
@@ -6779,14 +6757,12 @@ function hideAllPages() {
 }
 
 function hideAllSupportPages() {
-    console.log('Hiding all support pages...');
     hideAllPages();
     
     // Show main app
     const mainApp = document.getElementById('main-app');
     if (mainApp) {
         mainApp.style.display = 'block';
-        console.log('Main app restored');
     }
     
     // Show appropriate content
@@ -6795,11 +6771,9 @@ function hideAllSupportPages() {
     
     if (analysisResults && !analysisResults.classList.contains('hidden')) {
         // Keep showing results if they exist
-        console.log('Showing analysis results');
     } else if (uploadInterface) {
         // Show upload interface if no results
         uploadInterface.classList.remove('hidden');
-        console.log('Showing upload interface');
     }
 }
 
@@ -6953,10 +6927,8 @@ async function showMainApp() {
     setTimeout(() => {
         const sampleResumeBtn = document.getElementById("sample-resume-btn");
         if (sampleResumeBtn) {
-            console.log('Sample resume button found, attaching handler');
             sampleResumeBtn.onclick = loadSampleResume;
         } else {
-            console.log('Sample resume button not found!');
         }
     }, 100);
 }
@@ -7423,7 +7395,6 @@ function showAnalysisLoading() {
     const bufferTime = Math.min(15000, fileCount * 5000); // Extra buffer time
     const totalTimeWithBuffer = totalEstimatedTime + bufferTime;
     
-    console.log(`Loading animation for ${fileCount} files - estimated ${totalEstimatedTime/1000}s + ${bufferTime/1000}s buffer`);
     
     // Dynamic steps based on file count
     const baseSteps = [
@@ -7567,19 +7538,6 @@ function showAnalysisResults(data) {
     // Cancel any scheduled memory clearing since we're showing new results
     memoryManager.cancelScheduledClear();
     // 🔍 TEMPORARY DEBUG - Remove after we understand the data structure
-    console.log('=== FULL BACKEND DATA DEBUG ===');
-    console.log('Complete data structure:', data);
-    
-    if (Array.isArray(data) && data.length > 0) {
-        console.log('First candidate full data:', data[0]);
-        console.log('Available keys in first candidate:', Object.keys(data[0]));
-        
-        // Log each property to see what's available
-        Object.keys(data[0]).forEach(key => {
-            console.log(`${key}:`, data[0][key]);
-        });
-    }
-    console.log('=== END DEBUG ===');
     
     // Use the new multiple candidates handler
     showMultipleCandidatesResults(data);
@@ -7627,7 +7585,6 @@ function setDynamicAnalysisTime() {
 
 function showAnalysisResultsFromHistory(data) {
     // Same as showAnalysisResults but WITHOUT useAnalysisCredit() call
-    console.log('=== showAnalysisResultsFromHistory called ===');
     
     hideAnalysisLoading();
     document.getElementById('analysis-results').classList.remove('hidden');
@@ -7706,9 +7663,7 @@ async function useAnalysisCredit() {
 }
         
 function setupDownloadPDF() {
-    console.log('=== setupDownloadPDF called ===');
     const downloadBtn = document.querySelector('#download-pdf-btn');
-    console.log('Download button found:', downloadBtn);
     
     if (downloadBtn) {
         // Remove existing listeners by cloning the element
@@ -7977,7 +7932,6 @@ function generatePDF(data) {
 
 // Export functionality
 function setupExportOptions() {
-    console.log('=== setupExportOptions called ===');
     const exportBtn = document.getElementById('export-btn');
     const exportDropdown = document.getElementById('export-dropdown');
     
@@ -8279,7 +8233,6 @@ function emailResults_() {
         };
         
         console.log('Sending email for candidate:', candidateDisplayName);
-        console.log('Email data:', emailData);
         
         // Send to your backend
         sendEmailViaBackend(emailData)
@@ -8359,14 +8312,12 @@ async function sendEmailViaBackend(emailData) {
             body: JSON.stringify(emailData)
         });
         
-        console.log('Response status:', response.status);
         
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         
         const result = await response.json();
-        console.log('Response data:', result);
         
         // Check if the backend indicates success
         if (result.success === false) {
@@ -8663,8 +8614,6 @@ function debounce(func, wait) {
 }
         
 function showMultipleCandidatesResults(data) {
-    console.log('=== showMultipleCandidatesResults called ===');
-    console.log('Data received:', data);
     
     hideAnalysisLoading();
     document.getElementById('analysis-results').classList.remove('hidden');
@@ -8673,31 +8622,19 @@ function showMultipleCandidatesResults(data) {
     let candidatesArray = null;
     
     if (Array.isArray(data)) {
-        console.log('Data is already an array');
         candidatesArray = data;
     } else if (data && Array.isArray(data.candidates)) {
-        console.log('Found candidates array in data.candidates');
         // Extract the JSON objects from the candidates array
         candidatesArray = data.candidates.map(item => item.json || item);
 
         // TEMPORARY DEBUG - check extraction
-        console.log('=== AFTER EXTRACTION DEBUG ===');
-        console.log('candidatesArray:', candidatesArray);
-        if (candidatesArray[0]) {
-            console.log('First extracted candidate:', candidatesArray[0]);
-            console.log('Has roleAlignment?', candidatesArray[0].roleAlignment);
-            console.log('Has educationCertifications?', candidatesArray[0].educationCertifications);
-        }
-        console.log('=== END EXTRACTION DEBUG ===');
         
     } else if (data && Array.isArray(data.data)) {
-        console.log('Found candidates array in data.data');
         candidatesArray = data.data;
     } else if (data && typeof data === 'object') {
         // Check if data has any property that is an array
         for (let key in data) {
             if (Array.isArray(data[key]) && data[key].length > 0) {
-                console.log(`Found candidates array in data.${key}`);
                 // Check if items have nested json property
                 candidatesArray = data[key].map(item => item.json || item);
                 break;
@@ -8706,17 +8643,12 @@ function showMultipleCandidatesResults(data) {
     }
     
     if (candidatesArray && candidatesArray.length > 1) {
-        console.log('MULTIPLE CANDIDATES DETECTED - Array with', candidatesArray.length, 'items');
-        console.log('First candidate structure:', candidatesArray[0]);
-        console.log('Keys in first candidate:', Object.keys(candidatesArray[0]));
         candidatesData = candidatesArray;
         showMultipleCandidatesView();
     } else if (candidatesArray && candidatesArray.length === 1) {
-        console.log('SINGLE CANDIDATE IN ARRAY - Using single view');
         candidatesData = candidatesArray;
         showSingleCandidateView(candidatesArray[0]);
     } else {
-        console.log('SINGLE CANDIDATE OBJECT - Using single view');
         candidatesData = [data];
         showSingleCandidateView(data);
     }
@@ -9079,16 +9011,6 @@ function generateCandidateDetailHTML(candidate, index) {
     const title = extractTitleFromSummary(candidate) || 'Professional';
 
     // ADD THIS DEBUG:
-    console.log('=== BADGE DEBUG ===');
-    console.log('Candidate:', name);
-    console.log('Has roleAlignment?', !!candidate.roleAlignment);
-    console.log('Has educationCertifications?', !!candidate.educationCertifications);
-    console.log('Has communication?', !!candidate.communication);
-    console.log('Has redFlags?', !!candidate.redFlags);
-    console.log('Has strategicRecommendations?', !!candidate.strategicRecommendations);
-    console.log('Has candidateScorecard?', !!candidate.candidateScorecard);
-    console.log('Should be ULTRA?', !!(candidate.roleAlignment || candidate.educationCertifications || candidate.communication || candidate.redFlags || candidate.strategicRecommendations || candidate.candidateScorecard));
-    console.log('=== END BADGE DEBUG ===');
     
     // Base HTML structure
     let detailHTML = `
@@ -9190,7 +9112,6 @@ function generateCandidateDetailHTML(candidate, index) {
 }
 
 function getAnalysisTypeBadge(candidate) {
-    console.log('=== getAnalysisTypeBadge CALLED ===');
     
     const jobDescriptionElement = document.getElementById('job-description');
     if (!jobDescriptionElement) {
@@ -9201,10 +9122,6 @@ function getAnalysisTypeBadge(candidate) {
     const jobDescription = jobDescriptionElement.value.trim();
     const hasJobDescription = jobDescription.length > 0;
     
-    console.log('Job description text:', `"${jobDescription}"`);
-    console.log('Job description length:', jobDescription.length);
-    console.log('hasJobDescription:', hasJobDescription);
-    console.log('=== END getAnalysisTypeBadge ===');
     
     if (hasJobDescription) {
         return '<span class="ml-2 px-2 py-1 bg-gradient-to-r from-purple-500 to-pink-600 text-white text-xs font-medium rounded shadow-sm"><i class="fas fa-crown mr-1"></i>ULTRA Analysis</span>';
@@ -9474,20 +9391,6 @@ function showSingleCandidateView(data) {
     const finalScore = parseInt(data.candidateScore) || 75;
 
     // DEBUG: Check what elements exist - ADD THIS HERE
-    console.log('=== SCORE DEBUG ===');
-    console.log('candidate-score element:', document.getElementById('candidate-score'));
-    console.log('score-value element:', document.querySelector('.score-value'));
-    console.log('score-circle element:', document.querySelector('.score-circle'));
-    console.log('score-badge element:', document.getElementById('score-badge'));
-    console.log('finalScore:', finalScore);
-    console.log('=== END DEBUG ===');
-
-    // DEBUG: Find the actual score circle element
-    console.log('=== CIRCLE DEBUG ===');
-    console.log('All elements with "score" in class:', document.querySelectorAll('[class*="score"]'));
-    console.log('All elements with "circle" in class:', document.querySelectorAll('[class*="circle"]'));
-    console.log('All elements with "--score" style:', document.querySelectorAll('[style*="--score"]'));
-    console.log('=== END CIRCLE DEBUG ===');
     
     // 📊 ANIMATED SCORE: Count up effect (2 seconds max)
     setTimeout(() => {
@@ -9640,24 +9543,12 @@ function showActionEncouragement() {
     showSuccess(`🚀 ${randomMessage}`);
     
     // Debug log to see if this function is being called
-    console.log('Action encouragement triggered:', randomMessage);
 }
 
 function updateUserTierBadge(analysisType = null) {
     const userStatus = creditManager.getStatus();
     const badgeElement = document.getElementById('user-tier-badge');
 
-    console.log('=== updateUserTierBadge DEBUG ===');
-    console.log('analysisType parameter:', analysisType);
-    console.log('userStatus.isFreeTier:', userStatus.isFreeTier);
-    console.log('userStatus.isUltraTier:', userStatus.isUltraTier);
-    
-    if (badgeElement) {
-        // Use analysis type if provided, otherwise use user tier
-        const displayType = analysisType || (userStatus.isFreeTier ? 'FREE' : userStatus.isUltraTier ? 'ULTRA' : 'PRO');
-
-        console.log('Final displayType:', displayType);
-        console.log('=== END updateUserTierBadge DEBUG ===');
         
         if (displayType === 'FREE') {
             badgeElement.className = 'ml-2 px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded';
@@ -9951,8 +9842,6 @@ function extractAndFormatSkills(competencies) {
 
 // History Management Functions
 function saveCurrentAnalysisToHistory() {
-    console.log('=== saveCurrentAnalysisToHistory called ==='); 
-    console.log('candidatesData:', candidatesData); 
     
     if (candidatesData && candidatesData.length > 0) {
         const analysisId = historyManager.saveAnalysis(candidatesData, {
