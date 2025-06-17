@@ -7751,28 +7751,16 @@ function extractTitleFromSummary(candidate) {
         const titlePatterns = [
             /is (?:an?|the) ([^.]+?) with/i,
             /(?:seasoned|experienced|accomplished) ([^.]+?) with/i,
-            /(?:as|is) (?:an?|the) ([^.]+?)\./i,
-            /expertise in ([^.]+?)\./i,
-            /leader in ([^.]+?)\./i,
-            /specialist in ([^.]+?)\./i,
-            /background in ([^.]+?)\./i
+            /(?:as|is) (?:an?|the) ([^.]+?)(?:\.|,)/i,
+            /professional ([^.]+?) who/i,
+            /([^.]+?) professional/i
         ];
         
         for (let pattern of titlePatterns) {
             const match = summaryText.match(pattern);
             if (match && match[1]) {
                 title = match[1].trim();
-                // Clean up and format
-                title = title.replace(/\b(leader|professional|expert|individual|and)\b/gi, '')
-                            .replace(/\s+/g, ' ')
-                            .trim();
-                if (title.length > 0 && title.length < 60) {
-                    // Capitalize properly
-                    title = title.split(' ')
-                        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-                        .join(' ');
-                    break;
-                }
+                break;
             }
         }
     }
