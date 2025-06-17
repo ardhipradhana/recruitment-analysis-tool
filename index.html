@@ -9536,18 +9536,30 @@ function showActionEncouragement() {
 function updateUserTierBadge(analysisType = null) {
     const userStatus = creditManager.getStatus();
     const badgeElement = document.getElementById('user-tier-badge');
-
-        
-        if (displayType === 'FREE') {
-            badgeElement.className = 'ml-2 px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded';
-            badgeElement.innerHTML = 'Free Plan';
-        } else if (displayType === 'PRO') {
-            badgeElement.className = 'ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded';
-            badgeElement.innerHTML = '<i class="fas fa-star mr-1"></i>PRO Analysis';
-        } else if (displayType === 'ULTRA') {
-            badgeElement.className = 'ml-2 px-2 py-1 bg-gradient-to-r from-purple-500 to-pink-600 text-white text-xs font-medium rounded shadow-sm';
-            badgeElement.innerHTML = '<i class="fas fa-crown mr-1"></i>ULTRA Analysis';
-        }
+    
+    if (!badgeElement) return;
+    
+    // Determine display type based on analysis or user status
+    let displayType;
+    if (analysisType) {
+        displayType = analysisType;
+    } else if (userStatus.isUltraTier) {
+        displayType = 'ULTRA';
+    } else if (userStatus.isFreeTier) {
+        displayType = 'FREE';
+    } else {
+        displayType = 'PRO';
+    }
+    
+    if (displayType === 'FREE') {
+        badgeElement.className = 'ml-2 px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded';
+        badgeElement.innerHTML = 'Free Plan';
+    } else if (displayType === 'PRO') {
+        badgeElement.className = 'ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded';
+        badgeElement.innerHTML = '<i class="fas fa-star mr-1"></i>PRO Analysis';
+    } else if (displayType === 'ULTRA') {
+        badgeElement.className = 'ml-2 px-2 py-1 bg-gradient-to-r from-purple-500 to-pink-600 text-white text-xs font-medium rounded shadow-sm';
+        badgeElement.innerHTML = '<i class="fas fa-crown mr-1"></i>ULTRA Analysis';
     }
 }
 
